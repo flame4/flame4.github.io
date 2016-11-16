@@ -1,0 +1,750 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Paper,Disk," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="API Implementation for Dymatic Partition Table based on HBase and ESlast Modified: 2016-07-04
+
+
+
+慢慢来，现在还理不清整体的逻辑，先把理解的部分写好
+
+Notice: 重要的部分, 后续可能修改的部分。
+1. 倒排索引倒排索引在搜索引擎中经常使用，用于建立快速查找关键词的机制。
+原理很简单，假设有多个d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LSM Tree">
+<meta property="og:url" content="http://flame4.github.io/2016/07/10/LSM-Tree/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="API Implementation for Dymatic Partition Table based on HBase and ESlast Modified: 2016-07-04
+
+
+
+慢慢来，现在还理不清整体的逻辑，先把理解的部分写好
+
+Notice: 重要的部分, 后续可能修改的部分。
+1. 倒排索引倒排索引在搜索引擎中经常使用，用于建立快速查找关键词的机制。
+原理很简单，假设有多个d">
+<meta property="og:image" content="http://images.51cto.com/files/uploadimg/20110518/233501799.jpg">
+<meta property="og:image" content="http://images.cnitblog.com/blog/319578/201408/281219493293115.png">
+<meta property="og:image" content="http://img.blog.csdn.net/20130508221106201">
+<meta property="og:image" content="http://www.ibm.com/developerworks/cn/analytics/library/ba-1604-hbase-develop-practice/img03.jpg">
+<meta property="og:updated_time" content="2016-09-06T17:19:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LSM Tree">
+<meta name="twitter:description" content="API Implementation for Dymatic Partition Table based on HBase and ESlast Modified: 2016-07-04
+
+
+
+慢慢来，现在还理不清整体的逻辑，先把理解的部分写好
+
+Notice: 重要的部分, 后续可能修改的部分。
+1. 倒排索引倒排索引在搜索引擎中经常使用，用于建立快速查找关键词的机制。
+原理很简单，假设有多个d">
+<meta name="twitter:image" content="http://images.51cto.com/files/uploadimg/20110518/233501799.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/07/10/LSM-Tree/"/>
+
+  <title> LSM Tree | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                LSM Tree
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-10T23:26:19+08:00" content="2016-07-10">
+              2016-07-10
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Database/" itemprop="url" rel="index">
+                    <span itemprop="name">Database</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/10/LSM-Tree/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/10/LSM-Tree/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="API-Implementation-for-Dymatic-Partition-Table-based-on-HBase-and-ES"><a href="#API-Implementation-for-Dymatic-Partition-Table-based-on-HBase-and-ES" class="headerlink" title="API Implementation for Dymatic Partition Table based on HBase and ES"></a>API Implementation for Dymatic Partition Table based on HBase and ES</h1><p style="text-align:right">last Modified: 2016-07-04</p>
+
+
+
+<font color="green">慢慢来，现在还理不清整体的逻辑，先把理解的部分写好</font>
+
+<p><strong>Notice</strong>: <font color="red">重要的部分</font>, <font color="green">后续可能修改的部分</font>。</p>
+<h3 id="1-倒排索引"><a href="#1-倒排索引" class="headerlink" title="1. 倒排索引"></a>1. 倒排索引</h3><p>倒排索引在搜索引擎中经常使用，用于建立快速查找关键词的机制。</p>
+<p>原理很简单，假设有多个doc， 每个doc有很多的单词。对于一个word a, 把所有a出现过的doc放在a的后面形成一个倒排列表，并对所有的word执行该操作，最后的结果组合成为一个倒排索引表。在给定单词的情况下，可以快速知道有哪些文档中含有该关键词。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">一般倒排索引都比原文件大，所以为了存储大量信息，经常把word划分并存到不同的机器上。</div></pre></td></tr></table></figure>
+<blockquote>
+<p>补充：正排索引</p>
+<p>倒排索引是针对一个word建立一个单元，而正排列表是针对一个文件进行排列,可以方便倒排索引的建立。包含下列4个字段：</p>
+<ol>
+<li>文件Id： 从1自增</li>
+<li>word字段：表示一个单词</li>
+<li>Nhits字段：表示该单词出现的次数</li>
+<li>HitList：单词出现的位置，以偏移量表示</li>
+</ol>
+<p>例子如图：<br><img src="http://images.51cto.com/files/uploadimg/20110518/233501799.jpg" alt=""></p>
+</blockquote>
+<h3 id="2-B-Tree"><a href="#2-B-Tree" class="headerlink" title="2. B+-Tree"></a>2. B<sup>+</sup>-Tree</h3><p>B<sup>+</sup>-Tree树是B-Tree的一种变种，两者都是外存索引。</p>
+<p>B-Tree在一般情况下，非叶子节点可以有n个值和n个指针。在索引查询时对n个值进行二分查找，如果失败进入对应的下一层，叶子节点都是不含有效信息的空指针。 B<sup>+</sup>-Tree的非叶子节点存了n-1个key和n个指针，key用来划分搜索空间，根据key进入下一级节点。叶子节点存放了所有的真实数据列表。 B<sup>+</sup>-Tree可以保证平衡，一个M叉的 B<sup>+</sup>-Tree维护自己的每一个节点有<strong>M/2-M个</strong>指针，否则采用合并或者拆分的手段，这部分如果需要具体实现再补充，否则就不深入了。</p>
+<blockquote>
+<p>B<sup>+</sup>-Tree比B-Tree更适合用于文件索引和数据库索引:</p>
+<ol>
+<li>B+-tree的内部结点并没有指向关键字具体信息的指针。因此其内部结点相对B 树更小。如果把所有同一内部结点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读入内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。</li>
+<li>由于非终结点并不是最终指向文件内容的结点，而只是叶子结点中关键字的索引。所以任何关键字的查找必须走一条从根结点到叶子结点的路。所有关键字查询的路径长度相同，导致每一个数据的查询效率相当。</li>
+<li>数据库索引采用B+树的主要原因是 B树在提高了磁盘IO性能的同时并没有解决元素遍历的效率低下的问题。正是为了解决这个问题，B+树应运而生。B+树只要遍历叶子节点就可以实现整棵树的遍历。而且在数据库中基于范围的查询是非常频繁的，而B树不支持这样的操作（或者说效率太低）。</li>
+</ol>
+</blockquote>
+<h3 id="3-LSM-Tree"><a href="#3-LSM-Tree" class="headerlink" title="3. LSM-Tree"></a>3. LSM-Tree</h3><p> B<sup>+</sup>-Tree可以用来实现在数据库上的index. 这里认为对于数据库来说，记录是一条一条存储的，BTree的index是用key来做的。 使用B<sup>+</sup>-Tree作为存储，则随着信息的增多，叶子节点会逐渐分裂。当叶子节点的总容量过大写入内存时，逻辑上连续的叶子节点可能会被写入物理上不相同的地方(因为页表的映射不是顺序的，而是贪心的)。在写入的性能上会有很大折扣，因为可能产生很多随机IO。</p>
+<p> 为了解决这个问题而引入的就是LSM-Tree， LSM可以做到B<sup>+</sup>-Tree做到的一切，也支持增删查改，其<font color="red">牺牲了部分读性能，大幅度提高写性能</font>。</p>
+<p>总的来看，LSM使用一个batch算法来把对于index的写入存在内存中，并等待时机。当内存中插入的index很大的时候，其采用一种类似于归并排序的方法把这些index的修改批量写入磁盘中。(当然写到这里其实啥也看没明白，往下看)</p>
+<p>首先了解一下基本的LSM-Tree，如下图所示。<br><img src="http://images.cnitblog.com/blog/319578/201408/281219493293115.png" alt=""></p>
+<p>一个LSM由在内存的C0-Tree和在磁盘的C1-Tree构成。信息的插入初始为存在C0中，当C0到达一定的size后从C0上拿下一些子树来<strong>merge</strong>到C1中去。也就是下面的这个图。C1中的每一个节点是一个single-page，每一层的节点会被组成一个Multi-pages来实现。Merge结束后的树被放回到原来的C1中。</p>
+<p>那么问题来了：照这种理解，按原论文中的图来看，C1中第二层最左边的节点应该要改写自己的指针才可以定位到新的块，那么难道要写一次磁盘吗？这其实是不可接受的。如果改一下磁盘指针还好说，如果引起了split或者是merge，那么整个磁盘块都要重新调整，这就很尴尬了。</p>
+<p>其实具体的LSM-Tree的实现和图上看到的有一个根本上的区别，那就是LSM-Tree中所有的写操作都是写内存，而对于叶子节点的插入和非叶子节点的插入都是一样的。<font color="green">具体的细节理解待我完全理清逻辑后补充上来，目前可以理解的是LSM-Tree可以针对key在内存中写操作，并把结果批量写入内存，在读取时从每个写的buffer中去查找，并且在内存做结果的merge，所以写性能快了很多，而读性能慢了很多，可以看levelDB这个项目。</font></p>
+<h3 id="4-HBASE和ElasticSearch-ES-简介"><a href="#4-HBASE和ElasticSearch-ES-简介" class="headerlink" title="4. HBASE和ElasticSearch(ES)简介"></a>4. HBASE和ElasticSearch(ES)简介</h3><p>HBASE是非关系型分布式数据库，需要运行在HDFS上，一般存储的都是稀疏数据，并提供内存操作，压缩以及每一列的布隆过滤器。HBASE是<font color="red">基于列存储的</font>,并可以通过JAVA API执行查询操作，并且<font color="green">一定会将其转化为Mapreduce</font>, 很多项目提供了类SQL的查询接口，并在内部编译为可以执行的Mapreduce程序，比如HIVE, PIG等。</p>
+<p>ElasticSearch 是一个搜索引擎的实现，提供分布式，<a href="http://baike.baidu.com/link?url=uno3skPbmlAxHTcC_MyTuBl-vFmXbl61UIIhP4cMrCUPxaRyimjRFVzIaelt5cu-_UftHstPb7gupdI1qO8PHK" target="_blank" rel="external">多租户</a>的全文搜索引擎服务。可以理解为单机全文搜索引擎的分布式实现，所以其工作场景上首先应该有大量的数据和文件，其次有需求是需要在这些大量文件中提供查询服务。</p>
+<h3 id="5-基于LSM-Tree的HBASE实现思路"><a href="#5-基于LSM-Tree的HBASE实现思路" class="headerlink" title="5. 基于LSM-Tree的HBASE实现思路"></a>5. 基于LSM-Tree的HBASE实现思路</h3><p>Hbase按照行健，列族，列限定符和时间戳四维坐标系来组织。<strong>无模式</strong>，只需要提前定义列族，不需要定义特定的列限定符，也就是说每一列族的每一条记录都可以自己定义列的个数。<strong>无类型</strong>， 所有数据都是以二进制字节存储。</p>
+<p><img src="http://img.blog.csdn.net/20130508221106201" alt=""><br>Hbase整体架构如上所示。对于Hbase中的一张表，首先由HMaster根据行健进行分区，每个子表为一个HRegion.每个HRegion对于每个列族有一个Store，<font color="green">每个store有一个MemStore的内存缓存机制</font>，并且有许多的StoreFile对象，每个StoreFile对象对应一个HFile对象，一个HFile就是一个实际的存储文件。 在这里就可以看出，实际上的HBase实现基于的就是LSM-Tree的思想。在一般的根据行健查询的用户场景下，首先根据行健确定是在哪个HRegion中，然后再根据MemStore和HFile来进行文件的读取。</p>
+<blockquote>
+<p><strong>.META</strong>: HMaster中用于存放HRegion索引信息的， 该文件也可能过大被分割为多个Region.</p><p><br><strong>-ROOT-</strong>: 存放.META信息.</p>
+</blockquote>
+<p>针对基于行健的查询上，流程如下图所示。<br><img src="http://www.ibm.com/developerworks/cn/analytics/library/ba-1604-hbase-develop-practice/img03.jpg" alt=""></p>
+<p>首先花费三次固定时间查找到正确的Region,然后在固定的Region内，先在Memstore内查找，如果存在于此，可以花费log(e)的时间查询得到。否则需要先花费log(b)在HFile上找到具体的列族位置，然后在进行顺序扫描进内存(因为同一列族基本都会存放在一起)之后进行查询。</p>
+<h5 id="Q1-在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？"><a href="#Q1-在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？" class="headerlink" title="Q1. 在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？"></a>Q1. 在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？</h5><p>我觉得是用序列号什么的？</p>
+<h5 id="Q2-时间戳的作用是什么？什么时候以什么手段修改的？"><a href="#Q2-时间戳的作用是什么？什么时候以什么手段修改的？" class="headerlink" title="Q2. 时间戳的作用是什么？什么时候以什么手段修改的？"></a>Q2. 时间戳的作用是什么？什么时候以什么手段修改的？</h5><p>我觉得这个是用于处理并发性的，作用类似与raft中的Item号。可能在弱一致性的要求下，只需要在最终有些什么merge之类的操作？</p>
+<h3 id="6-基于倒排索引的ElasticSearch实现"><a href="#6-基于倒排索引的ElasticSearch实现" class="headerlink" title="6. 基于倒排索引的ElasticSearch实现"></a>6. 基于倒排索引的ElasticSearch实现</h3><p>基于倒排索引的搜索引擎的查询和建立都已经很熟悉，主要考虑ElasticSearch的倒排索引的分布式实现的一些细节。</p>
+<p>当索引过于巨大，需要引入分片的概念。分片也就是将一个索引进行分割，每一个分片本身也是一个完整的索引结构并可以执行查询。分片可以分为<strong>主分片</strong>和<strong>复制分片</strong>， 主分片就是分割过的索引，而复制分片是主分片的冗余备份，其同时可以提供查询服务的带宽需求。</p>
+<p>对于一个查询来说，首先可以根据查询来确定信息在哪个分片上，这一步就是基于hash来做的。<br>具体的ES介绍放到下一篇中进行。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Paper/" rel="tag">#Paper</a>
+          
+            <a href="/tags/Disk/" rel="tag">#Disk</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/05/Shell-base/" rel="next" title="shell 用法简记">
+                <i class="fa fa-chevron-left"></i> shell 用法简记
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/14/Python-Senior/" rel="prev" title="Python 高级特性">
+                Python 高级特性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/10/LSM-Tree/"
+           data-title="LSM Tree" data-url="http://flame4.github.io/2016/07/10/LSM-Tree/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Implementation-for-Dymatic-Partition-Table-based-on-HBase-and-ES"><span class="nav-text">API Implementation for Dymatic Partition Table based on HBase and ES</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-倒排索引"><span class="nav-text">1. 倒排索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-B-Tree"><span class="nav-text">2. B+-Tree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-LSM-Tree"><span class="nav-text">3. LSM-Tree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-HBASE和ElasticSearch-ES-简介"><span class="nav-text">4. HBASE和ElasticSearch(ES)简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-基于LSM-Tree的HBASE实现思路"><span class="nav-text">5. 基于LSM-Tree的HBASE实现思路</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Q1-在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？"><span class="nav-text">Q1. 在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Q2-时间戳的作用是什么？什么时候以什么手段修改的？"><span class="nav-text">Q2. 时间戳的作用是什么？什么时候以什么手段修改的？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-基于倒排索引的ElasticSearch实现"><span class="nav-text">6. 基于倒排索引的ElasticSearch实现</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

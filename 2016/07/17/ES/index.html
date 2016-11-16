@@ -1,0 +1,752 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="一致性算法,数据存储,分布式协议," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="ElasticSearch 简介last Modified: 2016-07-24
+
+
+
+1. 介绍Elasticsearch是一个基于Apache Lucene(TM)的开源搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进、性能最好的、功能最全的搜索引擎库。
+但是，Lucene只是一个库。想要使用它，你必须使用Java来作为开发语言并将其直接集成到你的应用中，更糟糕的是，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch 简介">
+<meta property="og:url" content="http://flame4.github.io/2016/07/17/ES/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="ElasticSearch 简介last Modified: 2016-07-24
+
+
+
+1. 介绍Elasticsearch是一个基于Apache Lucene(TM)的开源搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进、性能最好的、功能最全的搜索引擎库。
+但是，Lucene只是一个库。想要使用它，你必须使用Java来作为开发语言并将其直接集成到你的应用中，更糟糕的是，">
+<meta property="og:image" content="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0203.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0205.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0206.png">
+<meta property="og:updated_time" content="2016-11-16T05:38:33.673Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ElasticSearch 简介">
+<meta name="twitter:description" content="ElasticSearch 简介last Modified: 2016-07-24
+
+
+
+1. 介绍Elasticsearch是一个基于Apache Lucene(TM)的开源搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进、性能最好的、功能最全的搜索引擎库。
+但是，Lucene只是一个库。想要使用它，你必须使用Java来作为开发语言并将其直接集成到你的应用中，更糟糕的是，">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0203.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/07/17/ES/"/>
+
+  <title> ElasticSearch 简介 | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ElasticSearch 简介
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-17T23:26:19+08:00" content="2016-07-17">
+              2016-07-17
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Distributed-System/" itemprop="url" rel="index">
+                    <span itemprop="name">Distributed System</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/17/ES/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/17/ES/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="ElasticSearch-简介"><a href="#ElasticSearch-简介" class="headerlink" title="ElasticSearch 简介"></a>ElasticSearch 简介</h1><p style="text-align:right">last Modified: 2016-07-24</p>
+
+
+
+<h3 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h3><p>Elasticsearch是一个基于Apache Lucene(TM)的开源搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进、性能最好的、功能最全的搜索引擎库。</p>
+<p>但是，Lucene只是一个库。想要使用它，你必须使用Java来作为开发语言并将其直接集成到你的应用中，更糟糕的是，Lucene非常复杂，你需要深入了解检索的相关知识来理解它是如何工作的。</p>
+<p>Elasticsearch也使用Java开发并使用Lucene作为其核心来实现所有索引和搜索的功能，但是它的目的是通过简单的RESTful API来隐藏Lucene的复杂性，从而让全文搜索变得简单。</p>
+<p>不过，Elasticsearch不仅仅是Lucene和全文搜索，我们还能这样去描述它：</p>
+<pre><code>分布式的实时文件存储，每个字段都被索引并可被搜索
+分布式的实时分析搜索引擎
+可以扩展到上百台服务器，处理PB级结构化或非结构化数据
+</code></pre><p>而且，所有的这些功能被集成到一个服务里面，你的应用可以通过简单的RESTful API、各种语言的客户端甚至命令行与之交互。</p>
+<p>总结来说，其提供了分布式的存储和查询服务，并且基于Lucene提供了分词等功能，所以其可以作为分布式存储的底层存储实现。在我所了解的大数据生态中，上层提供的Hive等SQL查询都会被转化为基本的查询和插入，然后交给底层来实现。所以底层只需要提供几个简单的操作接口，就可与上层的计算引擎去耦合，而ES就可以做到这点。</p>
+<h3 id="2-基本概念"><a href="#2-基本概念" class="headerlink" title="2. 基本概念"></a>2. 基本概念</h3><h4 id="组织逻辑"><a href="#组织逻辑" class="headerlink" title="组织逻辑"></a>组织逻辑</h4><p>ES中的信息组织方式与传统数据库类似，类比来看如下：</p>
+<blockquote>
+<p><strong>Index(索引)</strong> ： 数据库　  　</p>
+<p><strong>Type(类型)</strong> ：　表</p>
+<p><strong>Document(文档)</strong>　：　行</p>
+<p><strong>Fields(列)</strong>　：　字段</p>
+</blockquote>
+<p>所以逻辑为，Elasticsearch集群可以包含多个索引(indices)（数据库），每一个索引可以包含多个类型(types)（表），每一个类型包含多个文档(documents)（行），然后每个文档包含多个字段(Fields)（列）。</p>
+<p>下面是一个文档的典型结构：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">"email"</span>:      <span class="string">"john@smith.com"</span>,</div><div class="line">    <span class="attr">"first_name"</span>: <span class="string">"John"</span>,</div><div class="line">    <span class="attr">"last_name"</span>:  <span class="string">"Smith"</span>,</div><div class="line">    <span class="attr">"info"</span>: &#123;</div><div class="line">        <span class="attr">"bio"</span>:         <span class="string">"Eco-warrior and defender of the weak"</span>,</div><div class="line">        <span class="attr">"age"</span>:         <span class="number">25</span>,</div><div class="line">        <span class="attr">"interests"</span>: [ <span class="string">"dolphins"</span>, <span class="string">"whales"</span> ]</div><div class="line">    &#125;,</div><div class="line">    <span class="attr">"join_date"</span>: <span class="string">"2014/05/01"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出，其实文档就是典型的半结构化组织。</p>
+<h4 id="架构逻辑"><a href="#架构逻辑" class="headerlink" title="架构逻辑"></a>架构逻辑</h4><p>ES是一个分布式的系统，所以在架构上也必然包含很多组件。　</p>
+<blockquote>
+<p><strong>Cluster(集群)</strong>：一个集群就是很多电脑构成的集合，用来协调工作存储等。类似于HDFS</p>
+<p><strong>Node(节点)</strong>： 一个节点就是一个ES逻辑单元，一个集群就由很多节点组成。集群中存在一个主节点进行管理节点，主节点不参与文档级别事务而只是管理集群，不成为性能瓶颈。可以理解一个节点就是一台机器。</p>
+<p><strong>Shard(分片)</strong>：一个分片(shard)是一个最小级别“工作单元(worker unit)”,它只是保存了索引中所有数据的一部分。文档存储在分片中，并且在分片中被索引，但是应用程序不会直接与它们通信，取而代之的是，直接与索引通信。</p>
+</blockquote>
+<p><strong>分片</strong>： 分片是比较重要的一个概念。分片可以分为主分片和复制分片。主分片表示的就是一部分文档，而复制分片是只是主分片的索引。<font color="red">复制分片的作用为冗余备份和提高读性能。</font> 一个节点可以有多个分片，在节点扩展或者是故障时，可以自动调节分片使得ES负载均衡。但过多的复制节点会导致流量都流向一台机器(因为这台机器上啥都有)，反而降低性能。</p>
+<h3 id="3-基本操作"><a href="#3-基本操作" class="headerlink" title="3. 基本操作"></a>3. 基本操作</h3><h4 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h4><p>文档由经典的Json嵌套组成。每个嵌套的key是字符串，值可以是字符串，数字，或者一个Json对象。一个文档必须有以下的元数据：<br><strong>_index</strong>,<br><strong>_type</strong>,<br><strong>_id</strong>. 三者确定一个文档。</p>
+<p>ES提供经典curl的rest方法，可以调用内部的API，格式如下<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -X&lt;VERB&gt; 'http://&lt;HOST&gt;:9200/&lt;PATH&gt;/[&lt;API&gt;]/[?&lt;PARAMETERS&gt;]' [-d '&#123;&lt;BODY&gt;&#125;']</div></pre></td></tr></table></figure></p>
+<p>verb为操作方式；path查询表，通常为/index/type；api可选，指定使用的api，一般会带_开头； parameters表示带的细化参数； 后面表示请求体，PUT方法有用。</p>
+<h4 id="新建文档"><a href="#新建文档" class="headerlink" title="新建文档"></a>新建文档</h4><p>PUT和POST方法，PUT用于自定义id，POST用于ES自动生成id，如下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">curl -XPOST 'localhost:9200/website/blog/1?pretty' -d '</div><div class="line">&#123;</div><div class="line">  "title": "My second blog entry",</div><div class="line">  "text":  "Still trying this out...",</div><div class="line">  "date":  "2014/01/01"</div><div class="line">&#125;'</div></pre></td></tr></table></figure></p>
+<h4 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h4><p>GET方法，可以自定义想要查询的熟悉。<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XGET 'localhost:9200/website/blog/1?pretty</div></pre></td></tr></table></figure></p>
+<p>查询的API为_search，如果查询一个es的type中所有文档，可以如下<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XGET localhost:9200/website/blog/_search?pretty</div></pre></td></tr></table></figure></p>
+<h4 id="Cluster级别API"><a href="#Cluster级别API" class="headerlink" title="Cluster级别API"></a>Cluster级别API</h4><p><strong>/_cat</strong>:  curl -XGET localhost:9200/_cat 可以查看_cat的API调用功能，包括index级别，shard级别等等。</p>
+<p><strong>创建index/type</strong>: 使用XPUT直接进行创建，比如在空的集群上 使用 curl -XPUT localhost:9200/aaa 来创建一个aaa的索引。</p>
+<h3 id="4-集群算法"><a href="#4-集群算法" class="headerlink" title="4. 集群算法"></a>4. 集群算法</h3><p>这部分针对分片，路由，故障等方面介绍ES使用的主要算法，以帮助理解细节。</p>
+<h4 id="故障处理"><a href="#故障处理" class="headerlink" title="故障处理"></a>故障处理</h4><p>为了防止故障丢失数据，ES一般建议产生复制分片，并且复制分片会自动分配到不同的节点上去，相同的分片不会放在同一节点上，因为这样没有任何好处。</p>
+<p>集群在ES中的可用度和稳定性用<strong>健康程度</strong>表示，分为绿色，黄色和红色。Green代表所有的主分片和复制分片可用，Yellow代表主分片可用，复制分片不全部可用，Red代表主分片不全部可用。</p>
+<p>一个绿色的情况如下图所示：<br><img src="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0203.png" alt=""><br>有三个主分片，每个主分片设置一个复制分片，并且主分片和复制分片分布在不同的节点上且全部可用。如果有三个节点，则可以扩展为下面的情况：<br><img src="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0205.png" alt=""><br>在遇到节点挂掉的情况下，集群会在瞬间把一个复制节点转为主节点。比如下图是上面挂掉节点1的情况：<br><img src="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0206.png" alt=""><br>此时，因为不是每个主分片都有两个复制分片(一开始就是这么设定的),所以集群为黄色，但是可以正常运作。在之后，ES会试图新增加复制节点以使得集群恢复为绿色。但因为涉及到大量数据迁移等操作，恢复绿色的过程可能不是那么快。</p>
+<h4 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h4><p>如何知道一个具体的文档在哪一个分片中？ES中就采用了最简单的HASH方法，默认情况下对于一个文档，使用 “_id”属性来产生hash码，再除以分片得到余数来决定。所以分片的个数必须在创建表的时候就确定。用户可以通过定义<strong>routing</strong>来实现自定义路由。</p>
+<h4 id="新建、索引、删除文档"><a href="#新建、索引、删除文档" class="headerlink" title="新建、索引、删除文档"></a>新建、索引、删除文档</h4><p>新建、索引和删除请求都是写(write)操作，它们必须在主分片上成功完成才能复制到相关的复制分片上。</p>
+<p>下面我们罗列在主分片和复制分片上成功新建、索引或删除一个文档必要的顺序步骤：</p>
+<pre><code>1.客户端给Master节点发送新建、索引或删除请求。
+2.Master节点使用文档的_id确定文档属于哪个分片。它转发请求到主分片存在的节点上。
+3.在主分片上执行请求，如果成功，它转发请求到相应的复制分片存在的节点上。当所有的复制节点报告成功，主分片的节点报告成功到请求的节点，请求的节点再报告给客户端。
+</code></pre><p>客户端接收到成功响应的时候，文档的修改已经被应用于主分片和所有的复制分片，修改就生效了。此外，还有如下几个参数可调：</p>
+<p><strong>Replication</strong>: 默认为所有复制节点完成后响应客户端，可以设置为主分片结束任务即反馈。<br><strong>Consistency</strong>: 主分片需要规定过半数的复制分片可用，以防止写入错误信息到错误分区。<br><strong>timeout</strong>: 当复制分片不够时，设置时间来等待更多复制分片出现。</p>
+<h4 id="检索文档"><a href="#检索文档" class="headerlink" title="检索文档"></a>检索文档</h4><p>下面罗列在主分片或复制分片上检索一个文档必要的顺序步骤：</p>
+<pre><code>1.客户端给Node 1发送get请求。
+2.节点使用文档的_id确定文档属于分片0。分片0对应的复制分片在三个节点上都有。此时，它转发请求到Node 2。
+3. Node 2返回endangered给Node 1然后返回给客户端。
+</code></pre><p>对于读请求，为了平衡负载，请求节点会为每个请求选择不同的分片——它会循环所有分片副本。</p>
+<p>可能的情况是，一个被索引的文档已经存在于主分片上却还没来得及同步到复制分片上。这时复制分片会报告文档未找到，主分片会成功返回文档。一旦索引请求成功返回给用户，文档则在主分片和复制分片都是可用的。</p>
+<h4 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h4><h3 id="5-拓展"><a href="#5-拓展" class="headerlink" title="5. 拓展"></a>5. 拓展</h3><h3 id="6-具体安装和配置"><a href="#6-具体安装和配置" class="headerlink" title="6. 具体安装和配置"></a>6. 具体安装和配置</h3><p>需要以下几个路径：</p>
+<ol>
+<li>配置文件路径: /etc/elasticsearch/conf</li>
+<li>日志路径: /var/log/elasticsearch</li>
+<li>进程文件路径: /var/run/elasticsearch</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/一致性算法/" rel="tag">#一致性算法</a>
+          
+            <a href="/tags/数据存储/" rel="tag">#数据存储</a>
+          
+            <a href="/tags/分布式协议/" rel="tag">#分布式协议</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/14/Python-Senior/" rel="next" title="Python 高级特性">
+                <i class="fa fa-chevron-left"></i> Python 高级特性
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/22/Lucene/" rel="prev" title="Lucene 学习笔记">
+                Lucene 学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/17/ES/"
+           data-title="ElasticSearch 简介" data-url="http://flame4.github.io/2016/07/17/ES/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ElasticSearch-简介"><span class="nav-text">ElasticSearch 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-介绍"><span class="nav-text">1. 介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-基本概念"><span class="nav-text">2. 基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#组织逻辑"><span class="nav-text">组织逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#架构逻辑"><span class="nav-text">架构逻辑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-基本操作"><span class="nav-text">3. 基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#文档"><span class="nav-text">文档</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#新建文档"><span class="nav-text">新建文档</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查询"><span class="nav-text">查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cluster级别API"><span class="nav-text">Cluster级别API</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-集群算法"><span class="nav-text">4. 集群算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#故障处理"><span class="nav-text">故障处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#路由"><span class="nav-text">路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#新建、索引、删除文档"><span class="nav-text">新建、索引、删除文档</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#检索文档"><span class="nav-text">检索文档</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Update"><span class="nav-text">Update</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-拓展"><span class="nav-text">5. 拓展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-具体安装和配置"><span class="nav-text">6. 具体安装和配置</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

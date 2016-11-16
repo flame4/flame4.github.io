@@ -1,0 +1,719 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="环境搭建," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Vagrant 使用简介last Modified: 2016-11-12
+
+之前找工作Blog断了快俩月,现在都尘埃落定了,Blog也可以重开了. 最近在公司玩了一把vagrant, 把写的wiki放上来. Vagrant生成的开发镜像有1.2G, 没法直接上传到github, 于是把vagrant的安装文件放在了上面,可以基于别人的centos来运行安装脚本,把php环境搭建好. 顺便一提,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vagrant使用方式">
+<meta property="og:url" content="http://flame4.github.io/2016/11/12/vagrant/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="Vagrant 使用简介last Modified: 2016-11-12
+
+之前找工作Blog断了快俩月,现在都尘埃落定了,Blog也可以重开了. 最近在公司玩了一把vagrant, 把写的wiki放上来. Vagrant生成的开发镜像有1.2G, 没法直接上传到github, 于是把vagrant的安装文件放在了上面,可以基于别人的centos来运行安装脚本,把php环境搭建好. 顺便一提,">
+<meta property="og:updated_time" content="2016-11-16T05:38:33.674Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vagrant使用方式">
+<meta name="twitter:description" content="Vagrant 使用简介last Modified: 2016-11-12
+
+之前找工作Blog断了快俩月,现在都尘埃落定了,Blog也可以重开了. 最近在公司玩了一把vagrant, 把写的wiki放上来. Vagrant生成的开发镜像有1.2G, 没法直接上传到github, 于是把vagrant的安装文件放在了上面,可以基于别人的centos来运行安装脚本,把php环境搭建好. 顺便一提,">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/11/12/vagrant/"/>
+
+  <title> Vagrant使用方式 | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Vagrant使用方式
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-12T23:26:19+08:00" content="2016-11-12">
+              2016-11-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/DevOps/" itemprop="url" rel="index">
+                    <span itemprop="name">DevOps</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/12/vagrant/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/12/vagrant/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Vagrant-使用简介"><a href="#Vagrant-使用简介" class="headerlink" title="Vagrant 使用简介"></a>Vagrant 使用简介</h1><p style="text-align:right">last Modified: 2016-11-12</p>
+
+<p>之前找工作Blog断了快俩月,现在都尘埃落定了,Blog也可以重开了. 最近在公司玩了一把vagrant, 把写的wiki放上来. Vagrant生成的开发镜像有1.2G, 没法直接上传到github, 于是把vagrant的安装文件放在了上面,可以基于别人的centos来运行安装脚本,把php环境搭建好. 顺便一提, php安装的坑真的是多…</p>
+<h2 id="vagrant-快速搭建标准构建环境"><a href="#vagrant-快速搭建标准构建环境" class="headerlink" title="vagrant 快速搭建标准构建环境"></a>vagrant 快速搭建标准构建环境</h2><p>vagrant 是一个可以方便快速的构建标准开发环境镜像的工具, 使用vagrant可以帮助团队以尽量少的代价一次性构建标准镜像, 而在后面的开发环境中只需要使用这个镜像即可, 无需每台机器上进行安装. 在某种意义上,其与docker的思想相同,但是vagrant底层是基于虚拟机的,而vagrant本身只提供了上层的抽象命令来调用虚拟机接口. 与docker相比, vagrant的使用近乎零门槛, 可以在几分钟内让开发人员快速搭建一套可用的环境, 直接进行调试和开发, 避免很多无用的编译安装排错时间(安装过的人都知道里面坑多的让人想自杀).</p>
+<p>我在github中放了一套测试可用的镜像软件安装脚本,供看到的人使用.也欢迎再补充新的镜像,少让后人吃几坨屎.</p>
+<p>使用vagrant只需要以下几步:</p>
+<ol>
+<li>下载安装vagrant.</li>
+<li>下载安装virtualbox作为vagrant底层虚拟机支持.<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">cd /etc/yum.repos.d/</div><div class="line">wget http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo</div><div class="line"># 清空dnf中的缓存，让新的repo生效</div><div class="line">dnf clean all</div><div class="line"># 加速下载</div><div class="line">yum makecache</div><div class="line">dnf install VirtualBox-5.1</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>如果使用的是vmware或Hyper-v的环境,请参考<a href="https://www.vagrantup.com/docs/vmware/" target="_blank" rel="external">该部分官方文档</a>结合下方的配置文件进行对应的修改.</p>
+<ol>
+<li><p>首先将提供的镜像文件和配置模版(st.box, Vagrantfile-template)下载到自己指定的目录下,该目录即是一个vagrant项目的根目录. 此处以 /home/work/vgrt 为例. 然后执行下面操作:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">cd /home/work/vgrt</div><div class="line"># 添加模版镜像到本地镜像库</div><div class="line">vagrant box add stmkr st.box</div><div class="line"># 如果以前是已经init过的目录需要清除,否则可以跳过</div><div class="line">vagrant destroy &amp;&amp; rm -f Vagrantfile</div><div class="line"># 根据制作的镜像初始化目录,vagrant会在目录下生成Vagrant配置文件,根据文件来进行镜像生成</div><div class="line">vagrant init stmkr</div><div class="line"># 替换自动生成的模版,详细介绍可以参考下面的解析</div><div class="line">cp Vagrantfile-template Vagrantfile</div><div class="line"># 根据镜像启动虚拟机</div><div class="line">vagrant up --provider=virtualbox</div></pre></td></tr></table></figure>
+<p>等待命令执行完成后,你已经成功的构建了一个在虚拟机中的标准开发环境, 你可以在浏览器中执行127.0.0.1:4567来查看服务是否生效(4567是配置默认端口映射,你可以自己修改,具体请看后面的配置说明). vagrant提供共享目录功能,将本地的文件夹和虚拟机中的文件夹进行实时共享.你只需要在Vagrantfile配置文件中将本地的共享目录设置为自己的项目根目录,并在虚拟机中把nginx等配置中的项目读取路径指定为虚拟机里的共享目录, 即可实现在本地编辑修改,虚拟机实时测试的效果. 为了方便管理,请使用不同的vagrant的虚拟机目录和vagrant的共享目录.</p>
+</li>
+<li><p>配置自定义的配置文件. 以nginx.conf为例子,首先将自己配置的nginx.conf文件复制到共享目录下, <strong>请注意替换nginx配置文件中的项目目录为虚拟机中的目录,而不再是本机的目录</strong>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"># 用ssh方式登陆到虚拟机中</div><div class="line">vagrant ssh</div><div class="line"># 标准的安装环境推荐使用work用户,可以在这里设置密码.初始登陆的用户为vagrant, 密码也是vagrant</div><div class="line">sudo passwd work</div><div class="line">su work</div><div class="line"># 用自定义的配置文件替换默认配置, 请注意替换项目目录为虚拟机中的目录</div><div class="line">sudo  cp /share/nginx.conf /srv/nginx/conf/</div><div class="line"># 平滑替换配置文件</div><div class="line">sudo nginx -t</div><div class="line">sudo nginx -s reload</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>默认的nginx和php的安装目录为/srv/nginx和/srv/php, 可以直接将自己的配置文件替换掉原来的文件.</p>
+<ol>
+<li>当使用结束后,在Vagrantfile目录下执行 vagrant halt 将虚拟机关闭并且持久化, 在下次使用时只需要再次在目录下执行vagrant up即可.</li>
+</ol>
+<h2 id="Vagrantfile文件主要配置说明"><a href="#Vagrantfile文件主要配置说明" class="headerlink" title="Vagrantfile文件主要配置说明"></a>Vagrantfile文件主要配置说明</h2><p>下面对st.box实例镜像的vagrantfile文件进行简单解释, vagrantfile文件用于vagrant构建虚拟机时进行配置,对其中的一些东西的简单了解有助于帮助开发人员快速配置自己的项目目录, 网络端口, 系统资源分配等信息.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"># -*- mode: ruby -*-</div><div class="line"># vi: set ft=ruby :</div><div class="line"></div><div class="line"># 将主机的环境变量传递给虚拟机</div><div class="line"># ENV[&quot;JAVA_HOME&quot;] = &quot;/usr/local&quot;</div><div class="line"></div><div class="line">Vagrant.configure(&quot;2&quot;) do |config|</div><div class="line">  # 配置box的镜像源</div><div class="line">  config.vm.box = &quot;stmkr&quot;</div><div class="line">  # 配置端口映射, guest为虚拟机, host为本机</div><div class="line">  config.vm.network &quot;forwarded_port&quot;, guest: 80, host: 4567</div><div class="line">  # 配置共享目录,第一个为本机目录,第二个为虚拟机目录</div><div class="line">  config.vm.synced_folder &quot;/home/work/liteFramework&quot;, &quot;/share&quot;</div><div class="line">  # 设置虚拟机的资源分配</div><div class="line">  config.vm.provider &quot;virtualbox&quot; do |vb|</div><div class="line">      vb.memory = &quot;1024&quot;</div><div class="line">      vb.cpus = 2</div><div class="line">  end</div><div class="line">end</div></pre></td></tr></table></figure>
+<h2 id="vagrant-常用命令列表"><a href="#vagrant-常用命令列表" class="headerlink" title="vagrant 常用命令列表"></a>vagrant 常用命令列表</h2><p>vagrant init  把一个目录初始化为vagrant目录的根目录地址</p>
+<p>vagrant box add [boxname]  添加一个官方的镜像成为使用的环境，这条命令在init的目录下运行即可.</p>
+<p>vagrant up [–provider=vmware_fusion/virtualbox/parallels/aws] 启动一个虚拟机,执行后在后台执行，但没有连接</p>
+<p>vagrant ssh 使用ssh方式登录到执行的虚拟机内部交互  </p>
+<p>vagrant destroy 删除创建的实例,无法恢复.</p>
+<p>vagrant box remove [boxname] 删除添加的镜像文件</p>
+<p>touch+文件  可以把虚拟机里面的实例copy到本机的环境中实现交互</p>
+<p>vagrant reload –provision 快速重载vagrantfile文件重启虚拟机实例</p>
+<p>vagrant package 自己打包生成镜像的生产环境</p>
+<p>vagrant suspend 悬挂停机,内容没有被持久化,但是不会占用系统资源.</p>
+<p>vagrant halt 停机,此时会被持久画到磁盘,可以下次继续启用</p>
+<h2 id="vagrant自己加工镜像"><a href="#vagrant自己加工镜像" class="headerlink" title="vagrant自己加工镜像"></a>vagrant自己加工镜像</h2><p>当你希望自己加工环境并给周边小伙伴做到二次利用,那么vagrant package功能可以简单的满足.执行下面命令即可:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vagrant pacakge --output yourname.box</div></pre></td></tr></table></figure></p>
+<p>将生成的.box文件共享给他人并且按照上面的步骤即可快速搭建相同的环境.</p>
+<h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h2><h6 id="box-add的镜像下载在了哪里？"><a href="#box-add的镜像下载在了哪里？" class="headerlink" title="box add的镜像下载在了哪里？"></a>box add的镜像下载在了哪里？</h6><p>默认在用户目录下的 .vagrant.d/boxes 目录下，在具体项目执行时候在Vagrantfile里面通过config.vm.box指定使用哪个镜像。</p>
+<h6 id="使用完的虚拟机修改会保存吗？"><a href="#使用完的虚拟机修改会保存吗？" class="headerlink" title="使用完的虚拟机修改会保存吗？"></a>使用完的虚拟机修改会保存吗？</h6><p>使用halt后会持久化存储，如果是destroy的话就不会再存储了.在初始化镜像的时候根据vagrantfile中的shell脚本可以快速部署环境。但是如果环境很复杂，要下载很多东西，也要等很久。推荐的做法是在虚拟机中配置好环境好再生成自己的镜像给别人使用, 请参考自己生成镜像的部分。</p>
+<h6 id="同步的官方文档只有从内向外的，没有从外向内的，何解？"><a href="#同步的官方文档只有从内向外的，没有从外向内的，何解？" class="headerlink" title="同步的官方文档只有从内向外的，没有从外向内的，何解？"></a>同步的官方文档只有从内向外的，没有从外向内的，何解？</h6><p>内部的文档使用tech命令可以放到外部，但是更推荐在配置文件中设置共享文件夹，两端在操作时是实时同步的。</p>
+<h6 id="如何在一台机器上启动多个不同的虚拟机实例？"><a href="#如何在一台机器上启动多个不同的虚拟机实例？" class="headerlink" title="如何在一台机器上启动多个不同的虚拟机实例？"></a>如何在一台机器上启动多个不同的虚拟机实例？</h6><p>在一个Vagrantfile中通过声明多个实例，给予不同的名字即可，在运行时也可以指定去up哪个文件，配置多个实例之间的通讯。具体的部分参看<a href="https://www.vagrantup.com/docs/multi-machine/" target="_blank" rel="external">该部分官方文档</a>.</p>
+<h6 id="官网中的-vagrant共享目录到底在哪里？"><a href="#官网中的-vagrant共享目录到底在哪里？" class="headerlink" title="官网中的/vagrant共享目录到底在哪里？"></a>官网中的/vagrant共享目录到底在哪里？</h6><p>在启动日志中可以看到，如果不指定synced_folder, 实际上的/vagrant目录就被映射成为Vagrantfile所在的目录. 推荐在vagrantfile里面指定共享目录, 在本地目录修改的程序在虚拟机中是实时可见的.</p>
+<h6 id="vagrant是否可以分布式交互？"><a href="#vagrant是否可以分布式交互？" class="headerlink" title="vagrant是否可以分布式交互？"></a>vagrant是否可以分布式交互？</h6><p>目前看来是不可以的，它提供了一套方案，可以基于虚拟机来做，而虚拟机做分布式的方案本身就没太有。但其可以在一台机器上配置部署多个虚拟机, 并通过配置多个虚拟机之间的通信来搭建集群.</p>
+<h6 id="config-vm-box和config-vm-provider之间的关系"><a href="#config-vm-box和config-vm-provider之间的关系" class="headerlink" title="config.vm.box和config.vm.provider之间的关系?"></a>config.vm.box和config.vm.provider之间的关系?</h6><p>box是操作系统的镜像, 而provider是虚拟机的底层实现. 两者在配置层次上是不同的.对于一种provider一般提供一种配置, 不同的box可以选择不同的provider.</p>
+<h2 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h2><h6 id="virtualbox-安装问题"><a href="#virtualbox-安装问题" class="headerlink" title="virtualbox 安装问题"></a>virtualbox 安装问题</h6><p>在执行时候会遇到提示kernel-core-devel没有安装的问题，名字提示有问题，实际需要下载的就是kernel-devel, 命令如下：</p>
+<p>virtualbox通过官网下载的rpm在fedora上运行会有各种问题，推荐下面方式来下载安装virtualbox：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">cd /etc/yum.repos.d/</div><div class="line">wget http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo</div><div class="line"># 清空dnf中的缓存，让新的repo生效</div><div class="line">dnf clean all</div><div class="line"># 加速下载</div><div class="line">yum makecache</div><div class="line">dnf install VirtualBox-5.1</div></pre></td></tr></table></figure></p>
+<h6 id="vagrant-up连接超时"><a href="#vagrant-up连接超时" class="headerlink" title="vagrant up连接超时"></a>vagrant up连接超时</h6><p>经过查找是虚拟化没有开启，需要在bios-&gt;virtualization里面设置，然后就可以正常运行了。在vagrant里面没有提示。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/环境搭建/" rel="tag">#环境搭建</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/01/Lucene源码1/" rel="next" title="Lucene 源码记录1">
+                <i class="fa fa-chevron-left"></i> Lucene 源码记录1
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/11/12/vagrant/"
+           data-title="Vagrant使用方式" data-url="http://flame4.github.io/2016/11/12/vagrant/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Vagrant-使用简介"><span class="nav-text">Vagrant 使用简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#vagrant-快速搭建标准构建环境"><span class="nav-text">vagrant 快速搭建标准构建环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vagrantfile文件主要配置说明"><span class="nav-text">Vagrantfile文件主要配置说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vagrant-常用命令列表"><span class="nav-text">vagrant 常用命令列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vagrant自己加工镜像"><span class="nav-text">vagrant自己加工镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q-amp-A"><span class="nav-text">Q&A</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#box-add的镜像下载在了哪里？"><span class="nav-text">box add的镜像下载在了哪里？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#使用完的虚拟机修改会保存吗？"><span class="nav-text">使用完的虚拟机修改会保存吗？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#同步的官方文档只有从内向外的，没有从外向内的，何解？"><span class="nav-text">同步的官方文档只有从内向外的，没有从外向内的，何解？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#如何在一台机器上启动多个不同的虚拟机实例？"><span class="nav-text">如何在一台机器上启动多个不同的虚拟机实例？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#官网中的-vagrant共享目录到底在哪里？"><span class="nav-text">官网中的/vagrant共享目录到底在哪里？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#vagrant是否可以分布式交互？"><span class="nav-text">vagrant是否可以分布式交互？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#config-vm-box和config-vm-provider之间的关系"><span class="nav-text">config.vm.box和config.vm.provider之间的关系?</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#踩过的坑"><span class="nav-text">踩过的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#virtualbox-安装问题"><span class="nav-text">virtualbox 安装问题</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#vagrant-up连接超时"><span class="nav-text">vagrant up连接超时</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

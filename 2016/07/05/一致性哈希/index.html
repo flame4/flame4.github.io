@@ -1,0 +1,702 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="一致性算法," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="一致性哈希last Modified: 2016-09-05
+
+
+一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。
+1.基本概念和场景一致性哈希运用在分布式系统中的消息分发场景。
+无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一致性哈希">
+<meta property="og:url" content="http://flame4.github.io/2016/07/05/一致性哈希/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="一致性哈希last Modified: 2016-09-05
+
+
+一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。
+1.基本概念和场景一致性哈希运用在分布式系统中的消息分发场景。
+无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单">
+<meta property="og:image" content="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2016-09-06T17:18:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一致性哈希">
+<meta name="twitter:description" content="一致性哈希last Modified: 2016-09-05
+
+
+一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。
+1.基本概念和场景一致性哈希运用在分布式系统中的消息分发场景。
+无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/07/05/一致性哈希/"/>
+
+  <title> 一致性哈希 | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                一致性哈希
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-05T23:26:19+08:00" content="2016-07-05">
+              2016-07-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Distributed-System/" itemprop="url" rel="index">
+                    <span itemprop="name">Distributed System</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/05/一致性哈希/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/05/一致性哈希/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><p style="text-align:right">last Modified: 2016-09-05</p>
+
+
+<p>一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。</p>
+<h3 id="1-基本概念和场景"><a href="#1-基本概念和场景" class="headerlink" title="1.基本概念和场景"></a>1.基本概念和场景</h3><p>一致性哈希运用在分布式系统中的消息分发场景。</p>
+<p>无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单的hash函数就可以保证数据分布到不同的机器上，但当集群的机器加入或者离开，hash函数就会失效。此时为了使hash重新生效，只能够进行大量的数据迁移，使得hash可以使用，但这是显然不可以接受的。对于这样的情况，一致性哈希就可以比较好的派上用场。数据不可能在集群迁入和迁出时做到完全不移动，但是一致性哈希可以做到让尽量小的数据移动。</p>
+<h3 id="2-实现原理"><a href="#2-实现原理" class="headerlink" title="2. 实现原理"></a>2. 实现原理</h3><p>一致性哈希的核心思想是将原来节点固定，数据分发到节点上这样的思路改变为将节点也作为一个数据加入分发，并以一个数据环路为分发的载体。如下图所示.</p>
+<p><img src="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>对于数据，使用key作为hash的值，对于节点，使用唯一标识(ip, host等)作为hash值，并在环路上找到自己的位置。对于一条数据，顺时针找到后面一个节点，作为自己的归属。</p>
+<p>当一个新节点加入时，比如本来有Node1和3， 结果加入Node2后，Node1跟Node2之间的数据会从Node3转移到Node2。用这种方式保证了让比较少的数据进行移动。</p>
+<h3 id="3-数据倾斜问题"><a href="#3-数据倾斜问题" class="headerlink" title="3. 数据倾斜问题"></a>3. 数据倾斜问题</h3><p>在上图的实现过程中，可以看到，在节点数量较少的情况下，还是会存在很多数据迁移的情况，比如在三个节点时会移动0.2的数据，对于大数据的情况下，也不是一个可以接受的方案，在这种情况下，可以加入“虚拟节点的概念”，对于三个节点，可以均匀的产生300个节点，每100个实际上属于同一个物理节点，这三百个节点可以均匀分布在环上，数据迁移的时候按照实际的映射关系来进行迁移。</p>
+<p>但是虚拟节点也不是越多越好的。试想假设有10000条数据，有10000个虚拟节点，并且是由四个实际节点模拟的。为了均匀，分布规律为 1-2-3-4-1-2-3-4…… 这样在2失效后，会有1/4的数据需要移动，而且因为只有一条数据，但是这一条数据也要读取一个磁盘块，其实是一种很大的浪费。</p>
+<h3 id="4-数据扎堆问题"><a href="#4-数据扎堆问题" class="headerlink" title="4. 数据扎堆问题"></a>4. 数据扎堆问题</h3><p>假设所有的数据没有key, 而就是一个数字，会发生什么呢？ 我们依旧可以根据这个数字来计算key，但是如果有10000个数字，里面有9900个10，有100个其余数字，这种情况下，数据依旧会压到一个节点上，而这显然也不是我们想要的结果.</p>
+<p>这个问题的解决方案我没有找到比较合适的办法，回头再想想补上。但是这种场景一般不适用在分布式哈希算法的系统中，因为系统要做的事情并不是仅仅维护这么一大串数字，而是要提供必要的映射，从而满足用户的查询，从这个角度考虑，这样的问题事实上是没有考虑的必要的。</p>
+<h3 id="5-一致性哈希与数据一致性"><a href="#5-一致性哈希与数据一致性" class="headerlink" title="5. 一致性哈希与数据一致性"></a>5. 一致性哈希与数据一致性</h3><p>分布式存储在当前的应用，一方面是集群的信息存储，另一方面可以用于云存储。相比于集群存储，云存储更加灵活，可以动态扩容，并且也会提供相应的冗余等服务。除了基于一致性哈希的分布式系统，还有一类是基于元信息的，也就是存在key-&gt;node的元信息，由元信息直接查找得到映射关系。</p>
+<p>在现在的高可用云服务的情景下，一致性哈希存在以下几个缺点：</p>
+<ol>
+<li>在集群脱离时的数据迁移过程会与数据的读取操作冲突。为了保证服务，系统必须将源文件设置为只读，并提供服务，在此时迁移的速率不能过大沾满磁盘。如果这时发生宕机等情况，则使得复杂度会成倍上升，</li>
+<li>对应的副本在对应的机器上绑定本身会对集群不利，因为这样不能最大程度的平衡负载。</li>
+<li>在一致性上，需要对不同节点的数据进行对比，最终确定最新版本，这个事情在系统中的损耗不可接受。</li>
+</ol>
+<p>这两方面元数据的管理有着天然的优势，关于这些详细的优势可以参考<a href="http://blog.csdn.net/huanggang028/article/details/28891315" target="_blank" rel="external">这篇博客</a>.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/一致性算法/" rel="tag">#一致性算法</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/05/raft/" rel="prev" title="raft Protocol">
+                raft Protocol <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/05/一致性哈希/"
+           data-title="一致性哈希" data-url="http://flame4.github.io/2016/07/05/一致性哈希/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一致性哈希"><span class="nav-text">一致性哈希</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-基本概念和场景"><span class="nav-text">1.基本概念和场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-实现原理"><span class="nav-text">2. 实现原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-数据倾斜问题"><span class="nav-text">3. 数据倾斜问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-数据扎堆问题"><span class="nav-text">4. 数据扎堆问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-一致性哈希与数据一致性"><span class="nav-text">5. 一致性哈希与数据一致性</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

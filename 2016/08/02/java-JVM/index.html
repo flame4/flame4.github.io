@@ -1,0 +1,705 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="jvm," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Java Jvmlast Modified: 2016-08-14
+
+在运行程序的过程中,到底是谁在管理内存? java的内存模型中的内存和操作系统的关系究竟是什么?jvm与底层的交互管理是怎样的?这里理顺清楚这些细节的问题.为了理解这些，还是要从头开始。
+1. 内存模型这里从自上向下的概念来介绍关于Java内存的事情,同时也会记录一些关于其他平台的事情.
+内存模型描述了程序中各个变量(实例,变量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM">
+<meta property="og:url" content="http://flame4.github.io/2016/08/02/java-JVM/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="Java Jvmlast Modified: 2016-08-14
+
+在运行程序的过程中,到底是谁在管理内存? java的内存模型中的内存和操作系统的关系究竟是什么?jvm与底层的交互管理是怎样的?这里理顺清楚这些细节的问题.为了理解这些，还是要从头开始。
+1. 内存模型这里从自上向下的概念来介绍关于Java内存的事情,同时也会记录一些关于其他平台的事情.
+内存模型描述了程序中各个变量(实例,变量">
+<meta property="og:image" content="http://images.cnitblog.com/i/475287/201403/091134177063947.jpg">
+<meta property="og:updated_time" content="2016-09-06T17:19:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM">
+<meta name="twitter:description" content="Java Jvmlast Modified: 2016-08-14
+
+在运行程序的过程中,到底是谁在管理内存? java的内存模型中的内存和操作系统的关系究竟是什么?jvm与底层的交互管理是怎样的?这里理顺清楚这些细节的问题.为了理解这些，还是要从头开始。
+1. 内存模型这里从自上向下的概念来介绍关于Java内存的事情,同时也会记录一些关于其他平台的事情.
+内存模型描述了程序中各个变量(实例,变量">
+<meta name="twitter:image" content="http://images.cnitblog.com/i/475287/201403/091134177063947.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/08/02/java-JVM/"/>
+
+  <title> JVM | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                JVM
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-02T23:26:19+08:00" content="2016-08-02">
+              2016-08-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/02/java-JVM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/02/java-JVM/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Java-Jvm"><a href="#Java-Jvm" class="headerlink" title="Java Jvm"></a>Java Jvm</h1><p style="text-align:right">last Modified: 2016-08-14</p>
+
+<p>在运行程序的过程中,到底是谁在管理内存? java的内存模型中的内存和操作系统的关系究竟是什么?jvm与底层的交互管理是怎样的?这里理顺清楚这些细节的问题.为了理解这些，还是要从头开始。</p>
+<h3 id="1-内存模型"><a href="#1-内存模型" class="headerlink" title="1. 内存模型"></a>1. 内存模型</h3><p>这里从自上向下的概念来介绍关于Java内存的事情,同时也会记录一些关于其他平台的事情.</p>
+<p>内存模型描述了程序中各个变量(实例,变量,程序等)之间的关系,以及在实际的系统中变量存储到内存以及内存存储到变量这样子的实际细节。简单来说，内存模型规定了一种内存使用的格式，类似于把一大块内存划分成一个一个的逻辑区域，从而方便管理。对于操作系统来说，我们可以把内存模型理解为一个双层结构，第一层由操作系统维护，第二层由进程自己维护。这里不打算仔细写关于Linux内存模型的对象，因为太多了，什么三级地址，内核段用户段，LDT，GDT，中断，寄存器什么的，以后有时间会详细开一篇。这里简单罗列了一下区域和大体的用处，以便有个直观印象。</p>
+<p>ps: 一般搜Linux内存模型会出现下面两种维度：</p>
+<ol>
+<li>内核代码段 内核数据段 用户代码段 用户数据段 TSS段 LDT段 GDT段等</li>
+<li>全局区 常量区 代码区 堆区 栈区</li>
+</ol>
+<p>两者的关系是，第一个是操作系统层面的段管理，第二个是操作系统在为进程分配空间时候的策略，两者使用的段寄存器是不一样的。这里要明确的一点是，不论进程自己的内存模型是如何的，操作系统在分配进程空间的时候，一定是按照第二种的模型来进行分配和记录的(记录在TSS区).</p>
+<h3 id="2-进程"><a href="#2-进程" class="headerlink" title="2. 进程"></a>2. 进程</h3><p>比较清楚的是，对于操作系统来说，是用进程来抽象任务，从而实现一系列的管理和交互等功能的。以Linux为例子，在系统的运行初期会产生一个0号进程，所有的其他进程都是由其产生的子进程，共同形成一棵进程树。站在操作系统的角度看，一个操作系统(假设是单核)需要做的事情是一些超越进程的逻辑，比如维护用户信息，维护页表信息，以及进程切换的方法等，当然，还有另一部分，使用系统调用来和进程进行交互。拿进程切换来说，如果一个操作系统进入执行进程的逻辑，那么操作系统做的就是在进程列表中找到一个进程的信息，加载其信息(程序入口,寄存器值等)，然后继续执行。之后的逻辑就是进程内部的逻辑，进程并不能感知操作系统的存在，它最多也就是陷入内核中断，然后被切换，再在某一时刻再被唤醒，继续执行。从这里可以理解到的一点是，对于一个用户编写的进程，它做的事情就是发现自己诞生了，自己有执行的代码，有可以访问到的内存地址(一般是使用文件描述符来访问抽象出的文件系统)，有引起中断的方法(但其实进程并不知道自己被中断，被切换，它只是进行了系统调用)，其余的事情一律不知。</p>
+<h3 id="3-C-内存模型"><a href="#3-C-内存模型" class="headerlink" title="3. C++内存模型"></a>3. C++内存模型</h3><p>对于一个C++进程，其把底层都暴露给了程序员，程序员便可以自己操作内存编址等，那么操作系统加载的可执行c++代码，可以理解成就是直接的用户code。这个C++代码被编译后我猜想做的事情就是，声明并记录自己的内存模型指针信息，把代码加载到对应的地点，然后直接进入用户定义的main函数开始执行，在执行过程中的内存访问都直接通过指针的值get到。</p>
+<p>c++中，内存分为五个区域，跟操作系统的分配策略相同。</p>
+<h3 id="4-Java内存模型"><a href="#4-Java内存模型" class="headerlink" title="4. Java内存模型"></a>4. Java内存模型</h3><p>对于Java来说，每次启动一个java进程，都会运行一个jvm进程，然后由jvm来管理程序内存。jvm中会启动很多的线程来执行,比如垃圾回收，监控等。.class文件中的main方法也是作为一个线程启动的，所以才会说其模型天然支持多线程编程。</p>
+<p>既然如此，我们把自己写的java程序对应到C++上就是一件没有意义的事情了，因为一个是直接的裸进程环境，一个是jvm这个进程模拟出来的进程环境,有自己的内存模型逻辑。在这里应该搞清楚的，是两件事情，第一，jvm模拟的进程环境和C++中(或者说，进程级别)内存概念的对应关系，第二，是在jvm下模拟的内存环境对于多个线程的运行逻辑。而现在网上搜出来的很多Blog，其实说的都是第二件事情。</p>
+<h5 id="4-1-jvm简介"><a href="#4-1-jvm简介" class="headerlink" title="4.1 jvm简介"></a>4.1 jvm简介</h5><p>在介绍详细的内存模型之前，有必要先看一下对于虚拟机的整体介绍。Java虚拟机只是一种设计规范，而很多家厂商可能会有各自的设计实现，这一点类似SQL的设计。</p>
+<p>上面提到，在jvm里面所有的东西都是用线程来表示的，jvm中的线程可以分为守护线程和非守护线程，守护线程通常由虚拟机自己产生，比如垃圾回收。而非守护线程一般就自己的进程，如果所有的非守护进程结束，那么jvm虚拟机就会结束。</p>
+<p>Jvm将所有的内存信息保存到了”运行时数据区”中，这个数据区在官方文档中是很抽象的概念，需要实现者具体自己考虑。每个虚拟机实例都会有一个堆和一个方法区，这部分由所有的线程共享。堆属于“运行时数据区”，用于放置所有运行时产生的新对象，方法区放置class文件包含的类型信息等。</p>
+<h5 id="4-2-jvm环境与C-内存对应关系"><a href="#4-2-jvm环境与C-内存对应关系" class="headerlink" title="4.2 jvm环境与C++内存对应关系"></a>4.2 jvm环境与C++内存对应关系</h5><p>TODO.</p>
+<h5 id="4-3-jvm下的内存模型"><a href="#4-3-jvm下的内存模型" class="headerlink" title="4.3 jvm下的内存模型"></a>4.3 jvm下的内存模型</h5><p>Java内存模型的主要目标是定义程序中各个变量的访问规则，即在虚拟机中将变量存储到内存和从内存中取出变量这样底层细节,要保证各个线程之间的访问操作都是合法，安全，明确的。</p>
+<p>Java内存模型中规定了所有的变量都存储在主内存中，每条线程还有自己的工作内存（可以与前面将的处理器的高速缓存类比），线程的工作内存中保存了该线程使用到的变量到主内存副本拷贝，线程对变量的所有操作（读取、赋值）都必须在工作内存中进行，而不能直接读写主内存中的变量。不同线程之间无法直接访问对方工作内存中的变量，线程间变量值的传递均需要在主内存来完成，线程、主内存和工作内存的交互关系如下图所示。<br><img src="http://images.cnitblog.com/i/475287/201403/091134177063947.jpg" alt=""></p>
+<h5 id="4-4-到底谁是上帝之手"><a href="#4-4-到底谁是上帝之手" class="headerlink" title="4.4 到底谁是上帝之手"></a>4.4 到底谁是上帝之手</h5><p>考虑一个传统的进程，在执行编译好的二进制文件时，是启动了一个进程，装载各种变量区和寄存器，初始化各种静态变量等，然后由PC寄存器不断取指令执行的。而在jvm中，字节码操作的是主内存和工作内存之间的概念，那么是谁负责这个内存逻辑到真正的进程上的内存逻辑之间的转换呢？再考虑到垃圾回收线程是一个线程，其为什么可以管理到堆栈的内存逻辑呢?</p>
+<h3 id="5-垃圾回收"><a href="#5-垃圾回收" class="headerlink" title="5. 垃圾回收"></a>5. 垃圾回收</h3><p>jvm中对于垃圾回收的定义可以由具体厂商自行实现，通过上面的分析，很明显这一部分全是针对堆上的内存进行的。垃圾回收要做的一个就是释放掉没有引用的内存，另一个方面是要进行内存的紧致操作，以防止碎片化的产生。</p>
+<h3 id="6-内存碎片"><a href="#6-内存碎片" class="headerlink" title="6. 内存碎片"></a>6. 内存碎片</h3><h3 id="7-堆外内存"><a href="#7-堆外内存" class="headerlink" title="7. 堆外内存"></a>7. 堆外内存</h3>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/jvm/" rel="tag">#jvm</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/31/Java-SE/" rel="next" title="Java-SE">
+                <i class="fa fa-chevron-left"></i> Java-SE
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/08/04/Java-base/" rel="prev" title="Java基础库">
+                Java基础库 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/08/02/java-JVM/"
+           data-title="JVM" data-url="http://flame4.github.io/2016/08/02/java-JVM/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-Jvm"><span class="nav-text">Java Jvm</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-内存模型"><span class="nav-text">1. 内存模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进程"><span class="nav-text">2. 进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-C-内存模型"><span class="nav-text">3. C++内存模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Java内存模型"><span class="nav-text">4. Java内存模型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-jvm简介"><span class="nav-text">4.1 jvm简介</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-jvm环境与C-内存对应关系"><span class="nav-text">4.2 jvm环境与C++内存对应关系</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-3-jvm下的内存模型"><span class="nav-text">4.3 jvm下的内存模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-4-到底谁是上帝之手"><span class="nav-text">4.4 到底谁是上帝之手</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-垃圾回收"><span class="nav-text">5. 垃圾回收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-内存碎片"><span class="nav-text">6. 内存碎片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-堆外内存"><span class="nav-text">7. 堆外内存</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

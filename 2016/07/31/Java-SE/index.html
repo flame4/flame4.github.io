@@ -1,0 +1,727 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="SE," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Java 软件工程知识点last Modified: 2016-09-07
+
+1. 软件架构风格2. 项目构建与管理AntAnt是java的build工具，与C的make类似，通过编写build.xml来实现java文件的编译与发布。C的make脚本是平台相关的，而ant本身是由java编写的平台无关工具，可以用来进行自动化调用程序完成项目的编译，打包，测试等，其通过读取目录下的build.xml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java-SE">
+<meta property="og:url" content="http://flame4.github.io/2016/07/31/Java-SE/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="Java 软件工程知识点last Modified: 2016-09-07
+
+1. 软件架构风格2. 项目构建与管理AntAnt是java的build工具，与C的make类似，通过编写build.xml来实现java文件的编译与发布。C的make脚本是平台相关的，而ant本身是由java编写的平台无关工具，可以用来进行自动化调用程序完成项目的编译，打包，测试等，其通过读取目录下的build.xml">
+<meta property="og:updated_time" content="2016-11-16T07:30:51.461Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java-SE">
+<meta name="twitter:description" content="Java 软件工程知识点last Modified: 2016-09-07
+
+1. 软件架构风格2. 项目构建与管理AntAnt是java的build工具，与C的make类似，通过编写build.xml来实现java文件的编译与发布。C的make脚本是平台相关的，而ant本身是由java编写的平台无关工具，可以用来进行自动化调用程序完成项目的编译，打包，测试等，其通过读取目录下的build.xml">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/07/31/Java-SE/"/>
+
+  <title> Java-SE | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Java-SE
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-31T23:26:19+08:00" content="2016-07-31">
+              2016-07-31
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/31/Java-SE/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/31/Java-SE/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Java-软件工程知识点"><a href="#Java-软件工程知识点" class="headerlink" title="Java 软件工程知识点"></a>Java 软件工程知识点</h1><p style="text-align:right">last Modified: 2016-09-07</p>
+
+<h2 id="1-软件架构风格"><a href="#1-软件架构风格" class="headerlink" title="1. 软件架构风格"></a>1. 软件架构风格</h2><h2 id="2-项目构建与管理"><a href="#2-项目构建与管理" class="headerlink" title="2. 项目构建与管理"></a>2. 项目构建与管理</h2><h3 id="Ant"><a href="#Ant" class="headerlink" title="Ant"></a>Ant</h3><p>Ant是java的build工具，与C的make类似，通过编写build.xml来实现java文件的编译与发布。C的make脚本是平台相关的，而ant本身是由java编写的平台无关工具，可以用来进行自动化调用程序完成项目的编译，打包，测试等，其通过读取目录下的build.xml文件来获取任务计划，相比于makefile，XML文件也更容易维护。</p>
+<p>一个Ant项目的配置文件就是经典的XML树的形式，有以下几个标签是比较重要的。</p>
+<p><strong>Project</strong>: 一个ant配置文件应该至少包含一个或者多个project元素，project是ant文件的根元素。标签属性包括name,default和basedir, 分别代表项目名称，默认执行的target以及任务的根目录。根目录默认情况下使用的是build.xml文件所在目录。 ant+任务名即可执行对应target, ant -f filename指定build.xml为特定文件。ant -projecthelp可以查看当前build.xml定义的所有任务.</p>
+<p><strong>Target</strong>: Ant基本执行单元,它可以包含一个或多个具体的任务。多个target可以存在相互依赖关系。标签属性如下</p>
+<ol>
+<li>name</li>
+<li>depends: 写明target之间的依赖关系,不同target之间由,隔开，可以由拓扑排序等确定执行顺序。</li>
+<li>description: 描述任务</li>
+<li>if/unless： 如果环境中对应属性存在/不存在，则执行该target,否则不执行。</li>
+</ol>
+<p><strong>property</strong>: 该元素可看作参量或者参数的定义，project的属性可以通过property元素来设定，也可在Ant之外设定。若要在外部引入某文件，例如build.properties文件，可以通过如下内容将其引入&lt; property file=” build.properties”/&gt;. 对于内部的property, 通过定义其name和value, 并调用${name}的方式可以取到定义的值。</p>
+<p>关于这三个属性的具体例子可以参考<a href="http://www.cnblogs.com/cyjch/archive/2012/03/28/2420761.html" target="_blank" rel="external">这篇博客</a>，这里写的也是这篇博客总结了一下子。对于每一个target内部，可以描述这个任务具体干什么事情。具体的任务类型也可以这篇博客，写的很详细了。从这里看出的是，ant本身并不只是用于java的编译和发布，其本质上是一个流程定义工具，可以利用内置的任务类型标签干很多事情，比如创建，删除，显示等。ant中也可以用java, javac, jar, war等命令来编译和打包java项目。所有的标签集合可以看<a href="http://ant.apache.org/manual/tasksoverview.html" target="_blank" rel="external">官方列表</a>.</p>
+<h3 id="Maven"><a href="#Maven" class="headerlink" title="Maven"></a>Maven</h3><p>Maven是最近流行的关于项目管理的标配工具。因为Ant的特性，其并没有提供一个依赖维护的功能，那么如果这里面需要引用一些开源的库或者其他人开发的库，就必须手动的把这些jar包添加到项目中(lib文件下)，这其实是很不方便的。在Maven中提供了这样的功能，官方会维护自己的Maven仓库用于存储jar包，maven解析pom.xml文件，将需要的外部库从网上下载(一般是从官方库，很多公司也会维护自己的内部库，经过配置后maven会优先从公司库下载)，放到本地的.m2文件夹下，以便重用。Maven的查找顺序是：本地仓库-&gt;中央仓库(公司)-&gt;默认备用远程仓库(官方)。如果没有查找到，就会报错。</p>
+<p>对于一个Maven项目, 默认会读取一个pom.xml文件，来指定任务的执行。Maven服务器提供了很多模板可以供快速生成一个标准使用的Maven，也可以通过自定义pom.xml自己生成。</p>
+<p><a href="http://www.cnblogs.com/yakov/archive/2011/11/26/maven_pom.html" target="_blank" rel="external">这篇博客</a>中比较详细的列出了pom.xml文件中包含的元素。下面写几个比较重要的。</p>
+<ol>
+<li>project: 根目录，这里与Ant的概念基本类似。</li>
+<li>groupId: 组织名，项目一般会属于某个组织，这个名字其实决定了实际的包名字，如org.apache.</li>
+<li>artifactId: 项目名，在 groupId 下的表示一个单独项目的唯一标识符。这个和目录名字不是一个概念，在本地随意修改也能运行。但是在存Maven仓库时，路径名会用到。</li>
+<li>version: 项目的版本号</li>
+<li>packaging： 打包机制，如pom,jar,maven-plugin,ejb,war,ear,rar,par。在Maven库中用/groupId/artifactId/version/packaging来唯一确定一个依赖。</li>
+<li>dependency: 依赖包，通过上面四个属性来添加依赖。可以通过内部标签设定是否添加依赖的依赖等。</li>
+<li>parent: 如果一个项目是多模块的，那么子模块必须packaging设置为pom，并用parent标签指定parent目录的POM.</li>
+<li>modules: 对应子模块的parent, 父模块应该使用modules来指定子模块, 父模块不需要考虑子模块内部的依赖关系，而且会根据子模块之间的顺序来进行拓扑排序的编译，不需要按顺序排列。</li>
+<li>properties: 定义pom中的常量，以方便在别的地方使用。</li>
+<li>build：构建时期的任务，阶段等定义都在这里。</li>
+<li>configuration:</li>
+</ol>
+<p>其余的标签详细介绍可以看<a href="http://blog.csdn.net/zhuxinhua/article/details/5788546" target="_blank" rel="external">这篇博客</a>。</p>
+<p>此外，所有的 POM 都继承自一个父 POM（无论是否显式定义了这个父 POM）。父 POM 也被称作 Super POM，它包含了一些可以被继承的默认设置。Maven 使用 effective pom（Super pom 加上工程自己的配置）来执行相关的目标，它帮助开发者在 pom.xml 中做尽可能少的配置，当然这些配置可以被方便的重写。查看 Super POM 默认配置的一个简单方法是执行以下命令：mvn help:effective-pom。这样会输出一个推荐配置的POM文件，所以POM一般不需要手动编写，maven提供了很多模板，只需要灵活修改即可。</p>
+<p>Maven中一个比较重要的概念是构建生命周期。构建生命周期是一组阶段的序列（sequence of phases），每个阶段定义了目标被执行的顺序。这里的阶段是生命周期的一部分。举例说明，一个典型的 Maven 构建生命周期是由以下几个阶段的序列组成的：</p>
+<ol>
+<li>prepare-resources：资源拷贝,本阶段可以自定义需要拷贝的资源</li>
+<li>compile:编译,本阶段完成源代码编译</li>
+<li>package:打包,本阶段根据 pom.xml 中描述的打包配置创建 JAR / WAR 包</li>
+<li>install:安装,本阶段在本地/远程仓库中安装工程包</li>
+</ol>
+<p>当需要在某个特定阶段之前或之后执行目标时，可以使用 pre-name和 post-name来定义这个目标。<strong>目标</strong>表示一个特定的、对构建和管理工程有帮助的任务。它可能绑定了 0 个或多个构建阶段。没有绑定任何构建阶段的目标可以在构建生命周期之外被直接调用执行。Maven有三个标准的生命周期:clean, default(build), site. 每种生命周期由几个特定的阶段组成，每个阶段可以绑定一个或者多个目标，一个目标实际上就是一个任务。如果一个阶段没有绑定任务，该阶段就什么都不做。通过这种方式，就可以实现流程化的管理。三种生命周期的具体阶段介绍可以参考<a href="http://blog.csdn.net/wanghantong/article/details/9375013" target="_blank" rel="external">这篇博客</a>。</p>
+<p>通俗的来讲，三个标准生命周期和上面典型的构建生命周期关系是，标准是由官方给的默认配置，而典型的是可以自定义的,一般情况下使用官方给定的周期即可，clean用于清理，build用于构建, site用于发布。以clean为例子，clean的阶段分为pre-clean, clean, post-clean。每个阶段都可以绑定目标来执行(<strong>待考证，一个阶段是只能绑定一个目标还是多个，如果是多个那么怎么确定顺序</strong>)。</p>
+<p>Maven中另一个比较重要的概念是插件。我们已经知道每个阶段都是通过定义目标来完成任务，而Maven的本体是一个插件框架，各种各样的目标定义都是通过插件来实现的。插件中用&lt; goals&gt;标签来定义一个目标，并用&lt; configuration&gt;等插件定义目标内容，用&lt; phase&gt;来定义目标作用的阶段。一个插件往往有多个目标模式，可以作用于不同的阶段。综上，在组织形式上，build.xml采用每个插件定义多个目标，每个目标对应一个阶段的模式，而在执行流程上，maven按照阶段执行，每个阶段执行对应的插件目标。下面放一个比较好看明白的例子<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">"http://maven.apache.org/POM/4.0.0"</span></span></div><div class="line">   <span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span></div><div class="line">   <span class="attr">xsi:schemaLocation</span>=<span class="string">"http://maven.apache.org/POM/4.0.0</span></div><div class="line">   http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;</div><div class="line"><span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.companyname.projectgroup<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>project<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">plugins</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-antrun-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">executions</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">id</span>&gt;</span>id.pre-clean<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">phase</span>&gt;</span>pre-clean<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>run<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">tasks</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">echo</span>&gt;</span>pre-clean phase<span class="tag">&lt;/<span class="name">echo</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">tasks</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">id</span>&gt;</span>id.clean<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">phase</span>&gt;</span>clean<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">goal</span>&gt;</span>run<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">tasks</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">echo</span>&gt;</span>clean phase<span class="tag">&lt;/<span class="name">echo</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">tasks</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">id</span>&gt;</span>id.post-clean<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">phase</span>&gt;</span>post-clean<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>run<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">tasks</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">echo</span>&gt;</span>post-clean phase<span class="tag">&lt;/<span class="name">echo</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">tasks</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<h3 id="Ant-ivy"><a href="#Ant-ivy" class="headerlink" title="Ant-ivy"></a>Ant-ivy</h3><p>ivy是ant的一种插件，在新的版本中ant支持了ivy的调用部分，只需要编译ivy的包放到ant的lib下即可，其从maven2的库中读取包，并使得Ant做到了Maven的包依赖下载的问题。</p>
+<h3 id="Maven-antrun-plugin"><a href="#Maven-antrun-plugin" class="headerlink" title="Maven-antrun-plugin"></a>Maven-antrun-plugin</h3><p>这个插件提供了在maven中运行Ant的能力，甚至可以把Ant的脚本命令直接嵌入到pom中，但是处于不污染pom的考虑，也支持直接调用外面的build.xml文件。</p>
+<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><h2 id="3-各种测试类型"><a href="#3-各种测试类型" class="headerlink" title="3. 各种测试类型"></a>3. 各种测试类型</h2><h2 id="4-JUnit-单元测试框架"><a href="#4-JUnit-单元测试框架" class="headerlink" title="4. JUnit 单元测试框架"></a>4. JUnit 单元测试框架</h2><h2 id="5-Java-设计模式"><a href="#5-Java-设计模式" class="headerlink" title="5. Java 设计模式"></a>5. Java 设计模式</h2><h2 id="6-Java日志库"><a href="#6-Java日志库" class="headerlink" title="6. Java日志库"></a>6. Java日志库</h2><h2 id="几个小疑问"><a href="#几个小疑问" class="headerlink" title="几个小疑问"></a>几个小疑问</h2><h6 id="java的一个项目中，经常会有src-gt-main-gt-java-gt-org-gt-apache…-gt-…java这样的结构，java是怎么知道一个文件夹是不是一个包的？"><a href="#java的一个项目中，经常会有src-gt-main-gt-java-gt-org-gt-apache…-gt-…java这样的结构，java是怎么知道一个文件夹是不是一个包的？" class="headerlink" title="java的一个项目中，经常会有src-&gt;main-&gt;java-&gt;org-&gt;apache….-&gt;…java这样的结构，java是怎么知道一个文件夹是不是一个包的？"></a>java的一个项目中，经常会有src-&gt;main-&gt;java-&gt;org-&gt;apache….-&gt;…java这样的结构，java是怎么知道一个文件夹是不是一个包的？</h6><h2 id="踩过的坑们"><a href="#踩过的坑们" class="headerlink" title="踩过的坑们"></a>踩过的坑们</h2><h6 id="Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到"><a href="#Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到" class="headerlink" title="Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到"></a>Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到</h6><p>经过查证，是在别人电脑上开发后没有add和commit，而我的项目是从远程库中pull下来的，所以找不到别人修改的代码。可怕的是在本机上是没有修改的代码，Ant竟然可以识别已经修改过的程序，害怕(SVN),具体原因不详</p>
+<h6 id="Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA-HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用"><a href="#Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA-HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用" class="headerlink" title="Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA_HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用"></a>Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA_HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用</h6><p>临时的解决方案是在build.xml文件里面的javac 标签里面加入fork=”true”属性<br>在.bashrc和全局的bash.bashrc里面修改都没有用处，这个问题的原因和解答看下方</p>
+<h6 id="在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装"><a href="#在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装" class="headerlink" title="在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装"></a>在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装</h6><p>结合上面的问题，猜想原因是maven独自维护了一套Ant的插件的同时也独自维护了一套Ant在本地库中，其与是不是在本地装载了Ant没有关系。现在还在查找其中原因。</p>
+<h6 id="Intellj有时候open-project会导入不了maven项目源码，而只有配置文件？"><a href="#Intellj有时候open-project会导入不了maven项目源码，而只有配置文件？" class="headerlink" title="Intellj有时候open project会导入不了maven项目源码，而只有配置文件？"></a>Intellj有时候open project会导入不了maven项目源码，而只有配置文件？</h6><p>从 new -&gt; exists project里面走maven</p>
+<h6 id="Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？"><a href="#Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？" class="headerlink" title="Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？"></a>Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？</h6><p>导入方式不对</p>
+<h6 id="Maven在导入本地库一个jar包后，在intellj里面没法引用？"><a href="#Maven在导入本地库一个jar包后，在intellj里面没法引用？" class="headerlink" title="Maven在导入本地库一个jar包后，在intellj里面没法引用？"></a>Maven在导入本地库一个jar包后，在intellj里面没法引用？</h6><ol>
+<li>设置enable auto-import，从而刷新依赖。</li>
+<li>我当时使用的是父子项目类型，把整个项目编译后，在intellj里打开整个项目没法加载。但是分着打开子项目就可以加载了。我怀疑原因是一个项目不会在库中加载自己。但是其中一个核心的组件部分<packing>是jar的形式。</packing></li>
+<li>检查一下是不是intellj在下载本地库的时候卡住了</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SE/" rel="tag">#SE</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/22/Lucene/" rel="next" title="Lucene 学习笔记">
+                <i class="fa fa-chevron-left"></i> Lucene 学习笔记
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/08/02/java-JVM/" rel="prev" title="JVM">
+                JVM <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/31/Java-SE/"
+           data-title="Java-SE" data-url="http://flame4.github.io/2016/07/31/Java-SE/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-软件工程知识点"><span class="nav-text">Java 软件工程知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-软件架构风格"><span class="nav-text">1. 软件架构风格</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-项目构建与管理"><span class="nav-text">2. 项目构建与管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ant"><span class="nav-text">Ant</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Maven"><span class="nav-text">Maven</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ant-ivy"><span class="nav-text">Ant-ivy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Maven-antrun-plugin"><span class="nav-text">Maven-antrun-plugin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gradle"><span class="nav-text">Gradle</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-各种测试类型"><span class="nav-text">3. 各种测试类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-JUnit-单元测试框架"><span class="nav-text">4. JUnit 单元测试框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Java-设计模式"><span class="nav-text">5. Java 设计模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Java日志库"><span class="nav-text">6. Java日志库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#几个小疑问"><span class="nav-text">几个小疑问</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#java的一个项目中，经常会有src-gt-main-gt-java-gt-org-gt-apache…-gt-…java这样的结构，java是怎么知道一个文件夹是不是一个包的？"><span class="nav-text">java的一个项目中，经常会有src->main->java->org->apache….->…java这样的结构，java是怎么知道一个文件夹是不是一个包的？</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#踩过的坑们"><span class="nav-text">踩过的坑们</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到"><span class="nav-text">Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA-HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用"><span class="nav-text">Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA_HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装"><span class="nav-text">在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Intellj有时候open-project会导入不了maven项目源码，而只有配置文件？"><span class="nav-text">Intellj有时候open project会导入不了maven项目源码，而只有配置文件？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？"><span class="nav-text">Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Maven在导入本地库一个jar包后，在intellj里面没法引用？"><span class="nav-text">Maven在导入本地库一个jar包后，在intellj里面没法引用？</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

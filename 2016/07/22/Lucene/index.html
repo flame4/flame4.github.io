@@ -1,0 +1,821 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="倒排索引,全文检索," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Lucene笔记last Modified: 2016-07-27
+
+
+
+本笔记参照forfuture1978的《Lucene3.0原理和代码分析》系列blog所做,原来的文章已经写的非常好，细节也很到位，所以有500页。。。这里主要是对主要的逻辑流程做一个记录，让我能够在大体了解lucene是干什么的基础上，可以快速把逻辑串起来。
+1. 全文检索基础全文检索总体上来说针对的是非结构化的文件做的，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lucene 学习笔记">
+<meta property="og:url" content="http://flame4.github.io/2016/07/22/Lucene/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="Lucene笔记last Modified: 2016-07-27
+
+
+
+本笔记参照forfuture1978的《Lucene3.0原理和代码分析》系列blog所做,原来的文章已经写的非常好，细节也很到位，所以有500页。。。这里主要是对主要的逻辑流程做一个记录，让我能够在大体了解lucene是干什么的基础上，可以快速把逻辑串起来。
+1. 全文检索基础全文检索总体上来说针对的是非结构化的文件做的，">
+<meta property="og:image" content="http://hi.csdn.net/attachment/201002/1/3634917_1265049062fG9p.jpg">
+<meta property="og:image" content="http://hi.csdn.net/attachment/201002/1/3634917_12650490657464.jpg">
+<meta property="og:image" content="http://hi.csdn.net/attachment/201002/1/3634917_1265049315kxOZ.png">
+<meta property="og:image" content="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/termdictionary_thumb.jpg">
+<meta property="og:image" content="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/frq_thumb_1.jpg">
+<meta property="og:image" content="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/prx_thumb_1.jpg">
+<meta property="og:image" content="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene1_F510/searchprocess_thumb6_7fa78a1d-e324-43ad-b53c-95e730377f2a.jpg">
+<meta property="og:updated_time" content="2016-09-06T17:20:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lucene 学习笔记">
+<meta name="twitter:description" content="Lucene笔记last Modified: 2016-07-27
+
+
+
+本笔记参照forfuture1978的《Lucene3.0原理和代码分析》系列blog所做,原来的文章已经写的非常好，细节也很到位，所以有500页。。。这里主要是对主要的逻辑流程做一个记录，让我能够在大体了解lucene是干什么的基础上，可以快速把逻辑串起来。
+1. 全文检索基础全文检索总体上来说针对的是非结构化的文件做的，">
+<meta name="twitter:image" content="http://hi.csdn.net/attachment/201002/1/3634917_1265049062fG9p.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/07/22/Lucene/"/>
+
+  <title> Lucene 学习笔记 | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Lucene 学习笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-22T23:26:19+08:00" content="2016-07-22">
+              2016-07-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/搜索/" itemprop="url" rel="index">
+                    <span itemprop="name">搜索</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/22/Lucene/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/22/Lucene/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Lucene笔记"><a href="#Lucene笔记" class="headerlink" title="Lucene笔记"></a>Lucene笔记</h1><p style="text-align:right">last Modified: 2016-07-27</p>
+
+
+
+<p>本笔记参照forfuture1978的《Lucene3.0原理和代码分析》系列blog所做,原来的文章已经写的非常好，细节也很到位，所以有500页。。。这里主要是对主要的逻辑流程做一个记录，让我能够在大体了解lucene是干什么的基础上，可以快速把逻辑串起来。</p>
+<h2 id="1-全文检索基础"><a href="#1-全文检索基础" class="headerlink" title="1. 全文检索基础"></a>1. 全文检索基础</h2><p>全文检索总体上来说针对的是非结构化的文件做的，如同理解的那样，基本原理做的就是基于倒排索引的查询。总体上来说分两部分：<strong>索引</strong>和<strong>搜索</strong>。</p>
+<h4 id="索引部分"><a href="#索引部分" class="headerlink" title="索引部分"></a>索引部分</h4><p>索引部分要做的事情就是基于已有文档建立倒排索引的过程：</p>
+<ol>
+<li>文件处理：文件通过分词组件分成一个一个的词语，然后进行语言处理，变为一个一个的词素(Term)。词语变为词素，一般在英文里面就是把复数变成单数，过去式变化等变为原始词根的过程。同时还有去除停用词的过程。</li>
+<li>建立词典和反向索引表：把所有得到的词素排序组合后得到反向索引表的词典，词典的key就是词素，value就是一列文档号。</li>
+<li>写入磁盘</li>
+</ol>
+<h4 id="搜索部分"><a href="#搜索部分" class="headerlink" title="搜索部分"></a>搜索部分</h4><p>搜索部分是给出搜索条件，返回结果的过程。</p>
+<ol>
+<li>输入查询，分析后得到查询词素和语法树，语法树是一些简单的列表操作，比如列表的交集，差集等。</li>
+<li>找到对应的倒排list，运算后获得符合要求的文档列表。</li>
+<li>根据相关性排序： TF-IDF算法，但对于一个用户就要计算一次的话就太慢了，一种解决方案是在预处理阶段就算好，但是这样的话增量更新是个问题，<strong>这里属于另一个范畴了，不讨论，如果有时间另开一个blog</strong></li>
+<li>返回结果</li>
+</ol>
+<p>Lucene也就是这样的大致思路，下面对每个部分做一些简单的学习。</p>
+<h2 id="2-总体架构"><a href="#2-总体架构" class="headerlink" title="2. 总体架构"></a>2. 总体架构</h2><p>总体架构图如下：</p>
+<p><img src="http://hi.csdn.net/attachment/201002/1/3634917_1265049062fG9p.jpg" alt=""></p>
+<p>其中IndexWriter和IndexSearcher是两个比较重要的工具类，一个向上读取文件后调用词语分析组织来向下创建所因，一个向上接受用户请求，调用词语分析组织生成语法树后向下查询，再计算排序后返回给用户。</p>
+<p>下图是代码包的关系结构：</p>
+<p><img src="http://hi.csdn.net/attachment/201002/1/3634917_12650490657464.jpg" alt=""></p>
+<pre><code>• Lucene的analysis模块主要负责词法分析及语言处理而形成Term。
+• Lucene的index模块主要负责索引的创建,里面有IndexWriter。
+• Lucene的store模块主要负责索引的读写。
+• Lucene的QueryParser主要负责语法分析。
+• Lucene的search模块主要负责对索引的搜索。
+• Lucene的similarity模块主要负责对相关性打分的实现。
+</code></pre><h2 id="3-索引文件格式"><a href="#3-索引文件格式" class="headerlink" title="3. 索引文件格式"></a>3. 索引文件格式</h2><h4 id="3-1-总览"><a href="#3-1-总览" class="headerlink" title="3.1 总览"></a>3.1 总览</h4><p>在逻辑上，索引的格式是一个词素加很多文档列表，这部分通过源代码分析实际是怎么样的。<br>这里面的实现思路和HBASE的思路基本相同，每次写到新的内存中，并生成新的段，段之间可以merge。</p>
+<p>首先，很多文档会组成一个文档集合，索引就建立在这个文档集合中。Lucene建立的索引包含了<strong>正向信息</strong>和<strong>反向信息</strong>。</p>
+<p>在Lucene中，文档库的构成分索引，段，文档，域，词几个层次。一个索引就是一个文档集合，放在一个文件夹中。一个集合会被分成很多独立的段，每个段有很多文档，每个文档有很多域(想象题目，作者，主体等)，每个域有很多词。</p>
+<p>一个lucene的索引文件如下图所示：</p>
+<p><img src="http://hi.csdn.net/attachment/201002/1/3634917_1265049315kxOZ.png" alt=""></p>
+<p>正向索引部分：</p>
+<ol>
+<li>segment_N 保存了当前索引的段个数，以及每个段的文档数。</li>
+<li>fdx, fdt 保存了此段包含的所有文档,每篇文档包含了多少域,每个域保存了那些信息。</li>
+<li>fnm保存了此段包含了多少个域,每个域的名称及索引方式。</li>
+<li>tvx,tvd,tvf保存了此段包含多少文档,每篇文档包含了多少域,每个域包含了多少词,每个词的字符串,位置等信息。</li>
+</ol>
+<p>反向索引：</p>
+<ol>
+<li>tis,tii保存了词典(Term Dictionary),也即此段包含的所有的词按字典顺序的排序。</li>
+<li>frq保存了倒排表,也即包含每个词的文档ID列表。</li>
+<li>prx保存了倒排表中每个词在包含此词的文档中的位置。</li>
+</ol>
+<font color="red">看到这里应该有所思考，为什么要把正向索引的信息保存下来？要知道正向索引并不能够代表原来文章，也不能给全文检索带来任何的好处。</font>
+
+<p>这样做是因为在Lucene中其实并没有存下原始的文档，而是在Add的初始过程中就以 Doc-&gt;Field-&gt;Term的形式来存储的，后面也只能拿到这样的数据。所以当然要存正向数据，不然后面查谁去 …</p>
+<h4 id="3-2-编码方式"><a href="#3-2-编码方式" class="headerlink" title="3.2 编码方式"></a>3.2 编码方式</h4><p>基本类型：</p>
+<ol>
+<li>Byte: 8bit</li>
+<li>Uint32: 4 Byte</li>
+<li>Uint64: 8 Byte</li>
+<li>VInt: 变长整形数，用多个byte，每个byte中提出最高一位来表示前面还没有，一个Byte有7个有效信息位</li>
+<li>Chars: Ascii的八位编码</li>
+<li>String： 先一个VINT表示char个数，然后跟着这些char</li>
+</ol>
+<p>为了减少内存占用和运算时间，还采用了以下的优化策略：</p>
+<ol>
+<li>Prefix + Suffix: 后一个词用前一个词的前缀offset加自己的独特部分表示</li>
+<li>Delta: 连续数字存储方式，后一个存的是与前一个的差值</li>
+<li>A,B?: 在一些A,B经常连续出现的场景下，把A最后一位空出一个bit来表示后面是否跟了一个B.A的实际值为A/2</li>
+<li>采用跳表加快查询</li>
+</ol>
+<h4 id="3-3-正向索引部分"><a href="#3-3-正向索引部分" class="headerlink" title="3.3 正向索引部分"></a>3.3 正向索引部分</h4><p>这一部分包括了段的元信息，域的元信息，词向量等上面出现过的每个文件的具体格式，因为太多了，详细的就看<a href="http://www.cnblogs.com/forfuture1978/archive/2009/12/14/1623599.html" target="_blank" rel="external">这篇博客</a>吧。</p>
+<p>这里写几个此时不理解的地方，以方便后面理解：</p>
+<ol>
+<li>既然段是一些文档的集合，为什么要跳过文档直接存段中有哪些域？ 是因为对于一个域来说，其除了其属于某个文档外，还有一些别的属性，比如索引域，标准化因子，偏移(可能用于高亮？)等。</li>
+</ol>
+<h4 id="3-4-反向索引部分"><a href="#3-4-反向索引部分" class="headerlink" title="3.4 反向索引部分"></a>3.4 反向索引部分</h4><p>分为词典和倒排表两部分。词典包括tis, tii文件，倒排表包括frq,prx中。frq中放文档号和词频，prx存放偏移等。</p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/termdictionary_thumb.jpg" alt=""></p>
+<p>tis： 保存了所有词的信息，包括所有词的数量，以及一些interval信息用于定义跳表，对于每个词，记录了其在倒排页表的偏移位置，其跳表的偏移位置等信息，并用上了一些编码技巧。</p>
+<p>tii: 词典索引文件是为了加快对词典文件中词的查找速度,保存每隔IndexInterval个词。<font color="red">词典索引文件是会被全部加载到内存中去的。</font></p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/frq_thumb_1.jpg" alt=""></p>
+<p>frq: 对于每个词，保存了这个词的倒排表以及跳表结构，倒排表中放了文档号和词频，跳表信息不再赘述。两者的信息就从对应的tis, tii的位置来得到。</p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/prx_thumb_1.jpg" alt=""></p>
+<p>prx: 每个term都有一个文档列表来表示存在多少文档包含这个词，并且在tis和tii中也会记录一个词在一个文档中存在多少次从而确定上图中对应数组的长度，这里可以不细追究。</p>
+<h4 id="3-5-标准化因子和删除文档"><a href="#3-5-标准化因子和删除文档" class="headerlink" title="3.5 标准化因子和删除文档"></a>3.5 标准化因子和删除文档</h4><p>比较细节的地方，略过，后面有用到的话会再开一篇记录。</p>
+<h2 id="4-索引建立"><a href="#4-索引建立" class="headerlink" title="4. 索引建立"></a>4. 索引建立</h2><h4 id="4-1-创建IndexWriter对象"><a href="#4-1-创建IndexWriter对象" class="headerlink" title="4.1 创建IndexWriter对象"></a>4.1 创建IndexWriter对象</h4><p>IndexWriter用于管理索引目录，与之相关的有IndexFileDeleter类，负责管理目录；SegmentInfos类，负责段对象的信息管理；MergeScheduler，负责段合并，被IndexWriter调用。</p>
+<p>IndexFileDeleter维护一个引用计数，当级数为0删除该索引。比较典型的情况出现在段的索引文件要合并成一个复合文件(cfs)时，先生成复合文件，然后把原始文件的引用计数-1， IndexFileDeleter.decRef()来删除掉它们。另一种情况出现在merge segment时，用ConcurrentMergeScheduler$MergeThread.run()方法来合并，也会使用IndexFileDeleter.</p>
+<p>为了保证事务性和并发性，一方面，writer采用commit的方式提交修改，也可以rollback.另一方面，定义了一个SimpleFSLock来给出了一种进程间通讯的方法，来维护全局唯一的资源。</p>
+<h4 id="4-2-创建Document对象，加入Field"><a href="#4-2-创建Document对象，加入Field" class="headerlink" title="4.2 创建Document对象，加入Field"></a>4.2 创建Document对象，加入Field</h4><p>代码如下，一般一个Doc会有路径,title，contents等域<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Document doc = <span class="keyword">new</span> Document();</div><div class="line">doc.add(<span class="keyword">new</span> Field(<span class="string">"path"</span>, f.getPath(), Field.Store.YES, Field.Index.NOT_ANALYZED));</div><div class="line">doc.add(<span class="keyword">new</span> Field(<span class="string">"modified"</span>,DateTools.timeToString(f.lastModified(), DateTools.Resolution.MINUTE),</div><div class="line">Field.Store.YES, Field.Index.NOT_ANALYZED));</div><div class="line">doc.add(<span class="keyword">new</span> Field(<span class="string">"contents"</span>, <span class="keyword">new</span> FileReader(f)));</div></pre></td></tr></table></figure></p>
+<h4 id="4-3-将文档加入IndexWriter"><a href="#4-3-将文档加入IndexWriter" class="headerlink" title="4.3 将文档加入IndexWriter"></a>4.3 将文档加入IndexWriter</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">writer.addDocument(doc);</div><div class="line">  --&gt;IndexWriter.addDocument(Document doc, Analyzer analyzer)</div><div class="line">    --&gt;doFlush = docWriter.addDocument(doc, analyzer);</div><div class="line">        --&gt; DocumentsWriter.updateDocument(Document, Analyzer, Term)</div></pre></td></tr></table></figure>
+<h4 id="4-4-将文档加入DocumentsWriter"><a href="#4-4-将文档加入DocumentsWriter" class="headerlink" title="4.4 将文档加入DocumentsWriter"></a>4.4 将文档加入DocumentsWriter</h4><p>对于一篇文档的建立索引过程就是一条流水线处理,不是由一个对象来完成的,而是用对象组合的方式形成的一个处理链,链上的每个对象仅理索引过程的一部分,称为索引链.</p>
+<p><strong>DocConsumer</strong>: 索引链的第一环，包括对索引域的处理，对存储域的处理和删除文档。首先，文档的处理和添加是支持多线程的，并且每个文档有一个全局唯一的文档号。DocumentsWriter.getThreadState这个函数用来处理文档号使之可以顺序发布，并且文档结构定义了flush到磁盘的时候文档必须按顺序，所以在flush之前会有一个queue。</p>
+<p><strong>DocumentsWriterThreadState</strong>: 由多线程来处理文档，加快处理速度。对于一个线程，也是处理索引域和存储域的文件信息，这里设计到同步和锁的问题，由上面提到的DocumentsWriter处理。</p>
+<p><strong>DocFieldProcessorPerField</strong>: 因为文档的域很多都重复，所以在一个线程处理一个文档的时候，不会对其中的每个域都创建对象，而是会复用已经存在的对象。使用hash表。域也会有自己的索引处理链条，来处理正向和反向索引的部分。对于一个域的一个Token，存在文字信息和偏移量两个信息，域会有自己的TokenStream对象，一个一个的拿到Token并调用add()函数处理。add函数会负责写入frq和prx的倒排部分。</p>
+<h4 id="4-5-CharBlockPool-ByteBlockPool-IntBlockPool管理"><a href="#4-5-CharBlockPool-ByteBlockPool-IntBlockPool管理" class="headerlink" title="4.5 CharBlockPool, ByteBlockPool, IntBlockPool管理"></a>4.5 CharBlockPool, ByteBlockPool, IntBlockPool管理</h4><p>在写入域索引的时候，会产生很多新的域和term，其在写入硬盘前的内存管理抽象成可以分配的资源，当资源缺少的时候则调用这几个对象请求资源。这里的管理方法类似于OS的内存管理，是分层的，每一层都一个块链表，上层块要大一些。 原Blog上有一个很详细的例子可以具体参考</p>
+<h4 id="4-6-关闭IndexWriter-写入磁盘"><a href="#4-6-关闭IndexWriter-写入磁盘" class="headerlink" title="4.6 关闭IndexWriter, 写入磁盘"></a>4.6 关闭IndexWriter, 写入磁盘</h4><p>将索引写入磁盘包括以下几个过程：</p>
+<ol>
+<li>得到要写入的段名：String segment = docWriter.getSegment();</li>
+<li>DocumentsWriter将缓存的信息写入段：docWriter.flush(flushDocStores);</li>
+<li>生成新的段信息对象：newSegment = new SegmentInfo(segment, flushedDocCount, directory, false, true, docStoreOffset, docStoreSegment, docStoreIsCompoundFile, docWriter.hasProx());</li>
+<li>准备删除文档：docWriter.pushDeletes();</li>
+<li>生成cfs段：docWriter.createCompoundFile(segment);</li>
+<li>删除文档：applyDeletes();</li>
+</ol>
+<h2 id="5-合并"><a href="#5-合并" class="headerlink" title="5. 合并"></a>5. 合并</h2><p>IndexWriter中与段合并有关的成员变量有：</p>
+<ol>
+<li>HashSet<segmentinfo> mergingSegments = new HashSet<segmentinfo>(); //保存正在合并的段，以防止合并期间再次选中被合并。</segmentinfo></segmentinfo></li>
+<li>MergePolicy mergePolicy = new LogByteSizeMergePolicy(this);//合并策略，也即选取哪些段来进行合并。</li>
+<li>MergeScheduler mergeScheduler = new ConcurrentMergeScheduler();//段合并器，背后有一个线程负责合并。</li>
+<li>LinkedList<mergepolicy.onemerge> pendingMerges = new LinkedList<mergepolicy.onemerge>();//等待被合并的任务</mergepolicy.onemerge></mergepolicy.onemerge></li>
+<li>Set<mergepolicy.onemerge> runningMerges = new HashSet<mergepolicy.onemerge>();//正在被合并的任务</mergepolicy.onemerge></mergepolicy.onemerge></li>
+</ol>
+<p><strong>段合并策略</strong>: 大段在前，小段在后。首先会选择差不多的段进行merge，并从小段开始，逐渐合并成更大的段。新来的小段就会直接追加到末尾。</p>
+<p><strong>反向索引合并</strong>: 是合并正向信息，相对过程比较清晰。而合并词典和倒排表就不这么简单了，因为在词典中，Lucene要求按照字典顺序排序，在倒排表中，文档号要按照从小到大顺序排序排序，在每个段中，文档号都是从零开始编号的。所以正向合并可能只是简单的合并即可，而反向合并包括对term的归并排序以及对文档进行重新编号。</p>
+<font color="red">在增量查询的过程中，如何维护词向量的评分信息，因为新加入的Term可能会导致其他所有的Case全部变化？</font>
+
+<p>在Lucene中并没有一开始就对评分进行一个记录，而是对于可能会涉及到的一些原始信息进行了额外的存储，比如一个Term出现的文档有哪些，位置有哪些等，记录下来。这样的话Merge不需要额外改变什么东西。</p>
+<h2 id="6-搜索"><a href="#6-搜索" class="headerlink" title="6. 搜索"></a>6. 搜索</h2><p>搜索的过程总的来说就是将词典及倒排表信息从索引中读出来，根据用户输入的查询语句合并倒排表，得到结果文档集并对文档进行打分的过程。<br><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene1_F510/searchprocess_thumb6_7fa78a1d-e324-43ad-b53c-95e730377f2a.jpg" alt=""></p>
+<p>总共包括以下几个过程：</p>
+<ol>
+<li>IndexReader打开索引文件，读取并打开指向索引文件的流.</li>
+<li>用户输入查询语句</li>
+<li>将查询语句转换为查询对象Query对象树</li>
+<li>构造Weight对象树，用于计算词的权重Term Weight，也即计算打分公式中与仅与搜索语句相关与文档无关的部分(红色部分)。</li>
+<li>构造Scorer对象树，用于计算打分(TermScorer.score())。</li>
+<li>在构造Scorer对象树的过程中，其叶子节点的TermScorer会将词典和倒排表从索引中读出来。</li>
+<li>构造SumScorer对象树，其是为了方便合并倒排表对Scorer对象树的从新组织，它的叶子节点仍为TermScorer，包含词典和倒排表。此步将倒排表合并后得到结果文档集，并对结果文档计算打分公式中的蓝色部分。打分公式中的求和符合，并非简单的相加，而是根据子查询倒排表的合并方式(与或非)来对子查询的打分求和，计算出父查询的打分。</li>
+<li>将收集的结果集合及打分返回给用户。</li>
+</ol>
+<h2 id="7-倒排索引设计详述"><a href="#7-倒排索引设计详述" class="headerlink" title="7. 倒排索引设计详述"></a>7. 倒排索引设计详述</h2><p>倒排部分分为词典tii和倒排表tis。</p>
+<h4 id="7-1-词典部分设计"><a href="#7-1-词典部分设计" class="headerlink" title="7.1 词典部分设计"></a>7.1 词典部分设计</h4><p>tii是跳表结构，暂时不说，tis是真正的词典结构。除了前面有一些必要的信息外，就是一个一个顺序存储的Term外加offset信息。对于Term部分，可以固定长度顺序存储，但是很浪费空间。可以直接存储并且额外存储一个链表指向位置，可以二分。可以保存前缀+offset的形式，并且对每一块单词，索引第一个单词。</p>
+<p>上述几种方式可以二分查找以加速，但是可以使用哈希的方式以O（1）来做。最小完美哈希可以最节省空间的做到这个事情，但是是针对静态集合的，不能很好的支持动态。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/倒排索引/" rel="tag">#倒排索引</a>
+          
+            <a href="/tags/全文检索/" rel="tag">#全文检索</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/17/ES/" rel="next" title="ElasticSearch 简介">
+                <i class="fa fa-chevron-left"></i> ElasticSearch 简介
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/31/Java-SE/" rel="prev" title="Java-SE">
+                Java-SE <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/22/Lucene/"
+           data-title="Lucene 学习笔记" data-url="http://flame4.github.io/2016/07/22/Lucene/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Lucene笔记"><span class="nav-text">Lucene笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-全文检索基础"><span class="nav-text">1. 全文检索基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#索引部分"><span class="nav-text">索引部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#搜索部分"><span class="nav-text">搜索部分</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-总体架构"><span class="nav-text">2. 总体架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-索引文件格式"><span class="nav-text">3. 索引文件格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-总览"><span class="nav-text">3.1 总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-编码方式"><span class="nav-text">3.2 编码方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-正向索引部分"><span class="nav-text">3.3 正向索引部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-反向索引部分"><span class="nav-text">3.4 反向索引部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-标准化因子和删除文档"><span class="nav-text">3.5 标准化因子和删除文档</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-索引建立"><span class="nav-text">4. 索引建立</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-创建IndexWriter对象"><span class="nav-text">4.1 创建IndexWriter对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-创建Document对象，加入Field"><span class="nav-text">4.2 创建Document对象，加入Field</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-将文档加入IndexWriter"><span class="nav-text">4.3 将文档加入IndexWriter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-4-将文档加入DocumentsWriter"><span class="nav-text">4.4 将文档加入DocumentsWriter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-5-CharBlockPool-ByteBlockPool-IntBlockPool管理"><span class="nav-text">4.5 CharBlockPool, ByteBlockPool, IntBlockPool管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-6-关闭IndexWriter-写入磁盘"><span class="nav-text">4.6 关闭IndexWriter, 写入磁盘</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-合并"><span class="nav-text">5. 合并</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-搜索"><span class="nav-text">6. 搜索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-倒排索引设计详述"><span class="nav-text">7. 倒排索引设计详述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-词典部分设计"><span class="nav-text">7.1 词典部分设计</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

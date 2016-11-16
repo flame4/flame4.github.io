@@ -1,0 +1,777 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="一致性算法,分布式协议," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘燚的个人空间" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="RAFT Protocollast Modified: 2016-07-14
+
+
+
+1. Introduction
+RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
+
+一致性问题和一致性算法在分布">
+<meta property="og:type" content="article">
+<meta property="og:title" content="raft Protocol">
+<meta property="og:url" content="http://flame4.github.io/2016/07/05/raft/index.html">
+<meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="RAFT Protocollast Modified: 2016-07-14
+
+
+
+1. Introduction
+RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
+
+一致性问题和一致性算法在分布">
+<meta property="og:image" content="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:image" content="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:image" content="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:image" content="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67">
+<meta property="og:updated_time" content="2016-09-06T17:21:06.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="raft Protocol">
+<meta name="twitter:description" content="RAFT Protocollast Modified: 2016-07-14
+
+
+
+1. Introduction
+RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
+
+一致性问题和一致性算法在分布">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://flame4.github.io/2016/07/05/raft/"/>
+
+  <title> raft Protocol | 刘燚的个人空间 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?d5cf5ead7c20f98832ff5f4fd7a1a592";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘燚的个人空间</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                raft Protocol
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-05T23:26:19+08:00" content="2016-07-05">
+              2016-07-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Distributed-System/" itemprop="url" rel="index">
+                    <span itemprop="name">Distributed System</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/05/raft/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/05/raft/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="RAFT-Protocol"><a href="#RAFT-Protocol" class="headerlink" title="RAFT Protocol"></a>RAFT Protocol</h1><p style="text-align:right">last Modified: 2016-07-14</p>
+
+
+<hr>
+<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><hr>
+<p><strong>RAFT</strong>是一种一致性算法，用于解决分布式系统中的<font color="red"><strong>冗余备份</strong></font>之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。<br><strong>Paxos</strong>是另一种分布式系统的协议，在90年被提出，<strong>RAFT</strong>可以做到与<strong>Paxos一样的功能</strong>，却比其更好理解，这也是<strong>RAFT</strong>的设计初衷。</p>
+<blockquote>
+<h5 id="一致性问题和一致性算法"><a href="#一致性问题和一致性算法" class="headerlink" title="一致性问题和一致性算法"></a>一致性问题和一致性算法</h5><p>在分布式系统中，我们在使用时只有一台客户机(访问端)与整个分布式服务机组交互，而且在我们看来，整个服务机组的表现应该与一台电脑一样，比如像hdfs那样呈现出一个文件系统，所以这里面会产生一致性问题。<br>一致性问题的存在起源是因为要保证分布式系统的可靠性，那么文件就不能仅仅只存储在一台电脑上(我们认为分布式系统中电脑宕机是正常的)，而要以多备份的形式存储，那么在客户机与文件交互的过程中，就需要保证多备份之间的一致性，这就是一致性问题。<br>一致性问题可以分为弱一致性和强一致性，后者要求每一次操作多备份的一致性，而前者要求多次操作的最终一致性。为了保证并发性，一般现在的算法都针对的是弱一致性。</p>
+<p>通常解决这类问题的方法分为三种：两阶段提交方法，分布式锁服务，乐观锁服务(<a href="http://blog.chinaunix.net/uid-26111972-id-3759540.html" target="_blank" rel="external">详见这篇博客</a>)。 Paxos属于分布式锁服务的一种。</p>
+</blockquote>
+<p><strong>RAFT</strong>相比其他的一致性算法，有以下几个特点：</p>
+<ul>
+<li>Strong Leader: 信息只能单向传递，这样做更容易理解</li>
+<li>Leader election: 使用随机计时器，方便了设计和冲突管理。</li>
+<li>Membership changes: 使用一种新的<strong>Joint consensus</strong>方法。</li>
+</ul>
+<hr>
+<h3 id="2-Replicated-state-machines"><a href="#2-Replicated-state-machines" class="headerlink" title="2. Replicated state machines"></a>2. Replicated state machines</h3><hr>
+<p><strong>RAFT</strong>要解决的问题是一致性问题，首先需要对这个问题做一个形式化的表述来方便处理，RAFT使用Replicated state machines模型来抽象一致性问题。  模型如下图：<br><img src="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<p>在每台servers上存在一个本地的state machines和一个Log表，存储的是本地的信息状态和client的操作序列。可以理解为状态机就像一张数据库表一样存放着当前数据信息，而log表放着指令集合。<br>在这个模型下，假设初始所有服务器的状态机都是一样的，那么只要可以保证指令序列Log在所有机器上保持一致性，那么自然最终的结果是可以一致性的。有两种方式可以实现这种一致性：Symmerty and Assymmetry. 前者是说一个client可以和所有的server进行通讯，而后者是说<font color="red">同一时刻</font>只能与一个server进行通讯，并由这个server向其他的server进行转发Log。 处于方便理解的考虑，RAFT选择了后者。所有的server之间的交互就通过Consensus module来完成，而一致性算法就是实现了这个Consensus module来保证所有的机器上的Log最终是相同的，并且可以满足高的并发性。</p>
+<blockquote>
+<h5 id="一致性算法的四个特征"><a href="#一致性算法的四个特征" class="headerlink" title="一致性算法的四个特征"></a>一致性算法的四个特征</h5><ol>
+<li>Safety: 首先要保证结果的正确性，要克服网络延迟，丢包等现象。</li>
+<li>fully available: 可以允许宕机。只要系统中还有过半的服务器能够正常运行，那么整个集群可以正常运行。宕机的服务器可能会在稍后的时间内恢复并重新加入。</li>
+<li>No timing dependency: 不依赖时间实现同步，允许不同机器的时钟不同。</li>
+<li>在通常情况下，如果过半的服务器完成了一项工作，那么认为这个工作完成，而不需要等到所有机器都完成。</li>
+</ol>
+</blockquote>
+<hr>
+<h3 id="3-Paxo’s-Drawbacks"><a href="#3-Paxo’s-Drawbacks" class="headerlink" title="3. Paxo’s Drawbacks"></a>3. Paxo’s Drawbacks</h3><hr>
+<ol>
+<li>难以理解</li>
+<li>很难实现</li>
+</ol>
+<hr>
+<h3 id="4-Designing-for-understandability"><a href="#4-Designing-for-understandability" class="headerlink" title="4. Designing for understandability"></a>4. Designing for understandability</h3><hr>
+<p><strong>设计原则</strong></p>
+<ol>
+<li><font color="red">易于理解</font></li>
+<li>易于实现</li>
+<li>一般操作的高效率</li>
+<li>任何情况下的安全性和一致性</li>
+</ol>
+<p>设计中使用了两种技术来提高<strong>understandibility</strong></p>
+<ol>
+<li>尽可能使用问题分解手段来简化问题的粒度</li>
+<li>简化每台机器的状态空间，来简化思考</li>
+</ol>
+<hr>
+<h3 id="5-The-RAFT-consensus-algorithm"><a href="#5-The-RAFT-consensus-algorithm" class="headerlink" title="5. The RAFT consensus algorithm"></a>5. The RAFT consensus algorithm</h3><hr>
+<p>首先，RAFT把所有的server划分为三部分： <strong>Leader</strong>, <strong>candidate</strong>, <strong>follower</strong>.<br>首先集群选出一个Leader,由Leader与Client交互，并且向所有Server转发Log表，以及其他的管理。这样的话可以简化设计，并且让信息单向流动。如果一个Leader挂了，那么整个协议会支持产生一个新的Leader。<br>在这种设计下，设计实现的功能可以被进一步分解为三个问题： <strong>Leader election</strong>, <strong>Log replication</strong>, <strong>safety</strong>。下面分别看三个问题</p>
+<h5 id="5-1-RAFT-Basic"><a href="#5-1-RAFT-Basic" class="headerlink" title="5.1 RAFT Basic"></a>5.1 RAFT Basic</h5><p>下图显示了一个服务器的状态转换图。<br><img src="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""><br>最开始所有的人都是Follower, 并且有一个<strong>随机的计时器到点</strong>，就会产生一次选举，产生Candidate，并有人最终获胜，成为一个Leader, 而其他人重新变为Follower。 一般的稳定状态下，就只有一个Leader和很多的Follower。至于其他情况，在后面的部分讨论。</p>
+<p><strong>Term</strong>： Raft把真实的时间分为一个个的连续的Term. Term可以理解为逻辑时间，也可以理解为一段稳定存在的时间，一般来说，一个新Term的产生是因为Leader挂了，而一个新Term的生存周期就是选举新Leader的过程，以及之后的稳定运行过程。所以每个Term的时间都是不相同的，参考下图(下图的Term3对应选举失败的情况，这时会再次进行选举)。<br><img src="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">注意：Term可以用来标记自己的处理阶段，所有的server不一定Term号都相同。每个Server都存有一个递增的Term号来表明自己的处理进程。所以如果一个Server收到一个来自其他Server的Log修改，但是Term如果比自己的小，则可以拒绝此服务。</div></pre></td></tr></table></figure>
+<p><strong>RPC</strong> : remote proceudre calls, 服务器间用来通讯的协议文件。在主要的功能实现中只需要两种RPC，第三种RPC用于提供server之间的快照，详细的见后面的讲述。</p>
+<h5 id="5-2-Leader-Election"><a href="#5-2-Leader-Election" class="headerlink" title="5.2 Leader Election"></a>5.2 Leader Election</h5><p>RAFT采取定期心跳包的形式来产生Leader。对于一个server来说，其生命周期的流程可以用以下几条来概括：</p>
+<ol>
+<li>如果一个Server进入了一个集群，其进入follower状态，并设置一个初始化的Term值，以及一个随机的Timer计时器。</li>
+<li>如果server处于follower状态，并在timer计时结束之间接受到一个有效的来自leader或者是candidate的<strong>RPCs</strong>(AppendEntries or RequestVote)，则其重置计时器，继续保持follower状态，<font color="red">并更新自己的term number为Leader的term number</font>。</li>
+<li>一个server如果处于Leader状态，其以一个远低于其他server Timer的时间间隔发送心跳包(AppendEntries RPC)，以维持自己Leader状态。</li>
+<li>如果一个follower发生election timeout， 则认为Leader已经挂掉，则其<font color="red">自增自己的Term number</font>, 然后转换为candidate状态。</li>
+<li>如果一个server处于candidate状态，则其<font color="red">对自己投票</font>，并向其他的server并行发送RequestVote RPC，直到以下三种情况出现：<ul>
+<li><strong>candidate win</strong> 胜出条件是一个candidate对于其给定的term number获得半数以上的选票, 对于任意一个Term，其他server只能投一次票，根据先到先服务的原则。胜出的candidate成为leader并立即发送心跳包防止选举过程。</li>
+<li><strong>Another Candidate Win</strong> 如果在等待选票的过程中其接受到其他的AppendEntries RPC，如果其Term number至少和其一样大，那么其认同这个Leader并退回follower阶段，否则拒绝这个RPC并继续进行选举。</li>
+<li><strong>No Winner for A Period</strong> 如果有很多follower同时成为candidate，那么票型就会分散，这时所有的candidate都会有time out，然后其自增自己的term number再进行下一轮。</li>
+</ul>
+</li>
+<li>如果一个server处于Leader的情况下收到了比自己大的 RequestVote RPC，那么? <strong>论文中没有提及</strong>。</li>
+</ol>
+<blockquote>
+<p>在初始化随机计时器和没有candidate胜出的情况下，都采用了CSMA/CD中的随机回退思想来减少冲突。在每次进入candidate状态时也会设置一个随时的timeout值。</p>
+</blockquote>
+<h5 id="5-3-Log-Replication"><a href="#5-3-Log-Replication" class="headerlink" title="5.3 Log Replication"></a>5.3 Log Replication</h5><p>当一个Leader形成后，就开始接受Client的指令集合。其根据指令不断生成一个个的Log Entry，然后附在AppendEntries RPC中发送。如果多数server确认了这个RPC(<strong>意味着回复报文？</strong>)，则Leader <em>Commit</em>这些操作并可以发送执行结果给Client。 对于那些没有回复的server， Leader会持续发送直到回复。Log Entries的示意图如下所示：<br><img src="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67" alt=""><br>(图片找不到完整的了 =。=)</p>
+<p>每个Log Entries有一个方格内的Term Number和一个Index Number。因为有多数的Log Entry后才执行，可以保证<em>Commit</em>的指令是冗余的。同时，领导人的日志中之前的所有日志条目也都会被提交，包括由其他领导人创建的条目。5.4 节会讨论某些当在领导人改变之后应用这条规则的隐晦内容，同时它也展示了这种提交的定义是安全的。领导人跟踪了最大的将会被提交的日志项的索引，并且索引值会被包含在未来的所有附加日志 RPCs （包括心跳包），这样其他的服务器才能最终知道领导人的提交位置。一旦跟随者知道一条日志条目已经被提交，那么它也会将这个日志条目应用到本地的状态机中（按照日志的顺序）。</p>
+<p><strong>日志机制</strong>： 作者设计了日志机制来保证一致性和安全性。就类似于数据库设计中的范式，日志机制其实就是两条原则：</p>
+<ol>
+<li>如果两个不同的Log中有相同的index和term，那么他们存的指令是相同的。</li>
+<li>如果两个不同的Log中有相同的index和term，那么他们存的之前的指令也都是相同的。</li>
+</ol>
+<p>第一条的合理性在于，相同的term只能由一个领导人产生,并且Log的存储顺序不变。第二条的合理性被发送的AppendEntries  RPC一致性检查保证： 如果一个Leader想要发送一个想被commit的指令，其将本地Log中的上一条指令的index和Term Number附在AppendEntries RPC中，如果follower检查自己的前一个Log与这个上一条指令不相符，则其拒绝接受这个RPC。简答理解，就是一个递归的步骤。</p>
+<hr>
+<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><hr>
+<h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/一致性算法/" rel="tag">#一致性算法</a>
+          
+            <a href="/tags/分布式协议/" rel="tag">#分布式协议</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/05/一致性哈希/" rel="next" title="一致性哈希">
+                <i class="fa fa-chevron-left"></i> 一致性哈希
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/05/Shell-base/" rel="prev" title="shell 用法简记">
+                shell 用法简记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/07/05/raft/"
+           data-title="raft Protocol" data-url="http://flame4.github.io/2016/07/05/raft/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Yi. Lewis" />
+          <p class="site-author-name" itemprop="name">Yi. Lewis</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/flame4" target="_blank" title="Git">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Git
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RAFT-Protocol"><span class="nav-text">RAFT Protocol</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Introduction"><span class="nav-text">1. Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一致性问题和一致性算法"><span class="nav-text">一致性问题和一致性算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Replicated-state-machines"><span class="nav-text">2. Replicated state machines</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一致性算法的四个特征"><span class="nav-text">一致性算法的四个特征</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Paxo’s-Drawbacks"><span class="nav-text">3. Paxo’s Drawbacks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Designing-for-understandability"><span class="nav-text">4. Designing for understandability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-The-RAFT-consensus-algorithm"><span class="nav-text">5. The RAFT consensus algorithm</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-1-RAFT-Basic"><span class="nav-text">5.1 RAFT Basic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-2-Leader-Election"><span class="nav-text">5.2 Leader Election</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-3-Log-Replication"><span class="nav-text">5.3 Log Replication</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Q-amp-A"><span class="nav-text">Q&A</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><span class="nav-text">1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><span class="nav-text">2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-这种设计中是否会出现脑裂问题？"><span class="nav-text">3. 这种设计中是否会出现脑裂问题？</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yi. Lewis</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"flame4"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

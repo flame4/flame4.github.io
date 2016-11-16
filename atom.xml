@@ -1,0 +1,902 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>刘燚的个人空间</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://flame4.github.io/"/>
+  <updated>2016-11-16T05:38:33.674Z</updated>
+  <id>http://flame4.github.io/</id>
+  
+  <author>
+    <name>Yi. Lewis</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Vagrant使用方式</title>
+    <link href="http://flame4.github.io/2016/11/12/vagrant/"/>
+    <id>http://flame4.github.io/2016/11/12/vagrant/</id>
+    <published>2016-11-12T15:26:19.000Z</published>
+    <updated>2016-11-16T05:38:33.674Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Vagrant-使用简介"><a href="#Vagrant-使用简介" class="headerlink" title="Vagrant 使用简介"></a>Vagrant 使用简介</h1><p style="text-align:right">last Modified: 2016-11-12</p>
+
+<p>之前找工作Blog断了快俩月,现在都尘埃落定了,Blog也可以重开了. 最近在公司玩了一把vagrant, 把写的wiki放上来. Vagrant生成的开发镜像有1.2G, 没法直接上传到github, 于是把vagrant的安装文件放在了上面,可以基于别人的centos来运行安装脚本,把php环境搭建好. 顺便一提, php安装的坑真的是多…</p>
+<h2 id="vagrant-快速搭建标准构建环境"><a href="#vagrant-快速搭建标准构建环境" class="headerlink" title="vagrant 快速搭建标准构建环境"></a>vagrant 快速搭建标准构建环境</h2><p>vagrant 是一个可以方便快速的构建标准开发环境镜像的工具, 使用vagrant可以帮助团队以尽量少的代价一次性构建标准镜像, 而在后面的开发环境中只需要使用这个镜像即可, 无需每台机器上进行安装. 在某种意义上,其与docker的思想相同,但是vagrant底层是基于虚拟机的,而vagrant本身只提供了上层的抽象命令来调用虚拟机接口. 与docker相比, vagrant的使用近乎零门槛, 可以在几分钟内让开发人员快速搭建一套可用的环境, 直接进行调试和开发, 避免很多无用的编译安装排错时间(安装过的人都知道里面坑多的让人想自杀).</p>
+<p>我在github中放了一套测试可用的镜像软件安装脚本,供看到的人使用.也欢迎再补充新的镜像,少让后人吃几坨屎.</p>
+<p>使用vagrant只需要以下几步:</p>
+<ol>
+<li>下载安装vagrant.</li>
+<li>下载安装virtualbox作为vagrant底层虚拟机支持.<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">cd /etc/yum.repos.d/</div><div class="line">wget http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo</div><div class="line"># 清空dnf中的缓存，让新的repo生效</div><div class="line">dnf clean all</div><div class="line"># 加速下载</div><div class="line">yum makecache</div><div class="line">dnf install VirtualBox-5.1</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>如果使用的是vmware或Hyper-v的环境,请参考<a href="https://www.vagrantup.com/docs/vmware/" target="_blank" rel="external">该部分官方文档</a>结合下方的配置文件进行对应的修改.</p>
+<ol>
+<li><p>首先将提供的镜像文件和配置模版(st.box, Vagrantfile-template)下载到自己指定的目录下,该目录即是一个vagrant项目的根目录. 此处以 /home/work/vgrt 为例. 然后执行下面操作:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">cd /home/work/vgrt</div><div class="line"># 添加模版镜像到本地镜像库</div><div class="line">vagrant box add stmkr st.box</div><div class="line"># 如果以前是已经init过的目录需要清除,否则可以跳过</div><div class="line">vagrant destroy &amp;&amp; rm -f Vagrantfile</div><div class="line"># 根据制作的镜像初始化目录,vagrant会在目录下生成Vagrant配置文件,根据文件来进行镜像生成</div><div class="line">vagrant init stmkr</div><div class="line"># 替换自动生成的模版,详细介绍可以参考下面的解析</div><div class="line">cp Vagrantfile-template Vagrantfile</div><div class="line"># 根据镜像启动虚拟机</div><div class="line">vagrant up --provider=virtualbox</div></pre></td></tr></table></figure>
+<p>等待命令执行完成后,你已经成功的构建了一个在虚拟机中的标准开发环境, 你可以在浏览器中执行127.0.0.1:4567来查看服务是否生效(4567是配置默认端口映射,你可以自己修改,具体请看后面的配置说明). vagrant提供共享目录功能,将本地的文件夹和虚拟机中的文件夹进行实时共享.你只需要在Vagrantfile配置文件中将本地的共享目录设置为自己的项目根目录,并在虚拟机中把nginx等配置中的项目读取路径指定为虚拟机里的共享目录, 即可实现在本地编辑修改,虚拟机实时测试的效果. 为了方便管理,请使用不同的vagrant的虚拟机目录和vagrant的共享目录.</p>
+</li>
+<li><p>配置自定义的配置文件. 以nginx.conf为例子,首先将自己配置的nginx.conf文件复制到共享目录下, <strong>请注意替换nginx配置文件中的项目目录为虚拟机中的目录,而不再是本机的目录</strong>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"># 用ssh方式登陆到虚拟机中</div><div class="line">vagrant ssh</div><div class="line"># 标准的安装环境推荐使用work用户,可以在这里设置密码.初始登陆的用户为vagrant, 密码也是vagrant</div><div class="line">sudo passwd work</div><div class="line">su work</div><div class="line"># 用自定义的配置文件替换默认配置, 请注意替换项目目录为虚拟机中的目录</div><div class="line">sudo  cp /share/nginx.conf /srv/nginx/conf/</div><div class="line"># 平滑替换配置文件</div><div class="line">sudo nginx -t</div><div class="line">sudo nginx -s reload</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>默认的nginx和php的安装目录为/srv/nginx和/srv/php, 可以直接将自己的配置文件替换掉原来的文件.</p>
+<ol>
+<li>当使用结束后,在Vagrantfile目录下执行 vagrant halt 将虚拟机关闭并且持久化, 在下次使用时只需要再次在目录下执行vagrant up即可.</li>
+</ol>
+<h2 id="Vagrantfile文件主要配置说明"><a href="#Vagrantfile文件主要配置说明" class="headerlink" title="Vagrantfile文件主要配置说明"></a>Vagrantfile文件主要配置说明</h2><p>下面对st.box实例镜像的vagrantfile文件进行简单解释, vagrantfile文件用于vagrant构建虚拟机时进行配置,对其中的一些东西的简单了解有助于帮助开发人员快速配置自己的项目目录, 网络端口, 系统资源分配等信息.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"># -*- mode: ruby -*-</div><div class="line"># vi: set ft=ruby :</div><div class="line"></div><div class="line"># 将主机的环境变量传递给虚拟机</div><div class="line"># ENV[&quot;JAVA_HOME&quot;] = &quot;/usr/local&quot;</div><div class="line"></div><div class="line">Vagrant.configure(&quot;2&quot;) do |config|</div><div class="line">  # 配置box的镜像源</div><div class="line">  config.vm.box = &quot;stmkr&quot;</div><div class="line">  # 配置端口映射, guest为虚拟机, host为本机</div><div class="line">  config.vm.network &quot;forwarded_port&quot;, guest: 80, host: 4567</div><div class="line">  # 配置共享目录,第一个为本机目录,第二个为虚拟机目录</div><div class="line">  config.vm.synced_folder &quot;/home/work/liteFramework&quot;, &quot;/share&quot;</div><div class="line">  # 设置虚拟机的资源分配</div><div class="line">  config.vm.provider &quot;virtualbox&quot; do |vb|</div><div class="line">      vb.memory = &quot;1024&quot;</div><div class="line">      vb.cpus = 2</div><div class="line">  end</div><div class="line">end</div></pre></td></tr></table></figure>
+<h2 id="vagrant-常用命令列表"><a href="#vagrant-常用命令列表" class="headerlink" title="vagrant 常用命令列表"></a>vagrant 常用命令列表</h2><p>vagrant init  把一个目录初始化为vagrant目录的根目录地址</p>
+<p>vagrant box add [boxname]  添加一个官方的镜像成为使用的环境，这条命令在init的目录下运行即可.</p>
+<p>vagrant up [–provider=vmware_fusion/virtualbox/parallels/aws] 启动一个虚拟机,执行后在后台执行，但没有连接</p>
+<p>vagrant ssh 使用ssh方式登录到执行的虚拟机内部交互  </p>
+<p>vagrant destroy 删除创建的实例,无法恢复.</p>
+<p>vagrant box remove [boxname] 删除添加的镜像文件</p>
+<p>touch+文件  可以把虚拟机里面的实例copy到本机的环境中实现交互</p>
+<p>vagrant reload –provision 快速重载vagrantfile文件重启虚拟机实例</p>
+<p>vagrant package 自己打包生成镜像的生产环境</p>
+<p>vagrant suspend 悬挂停机,内容没有被持久化,但是不会占用系统资源.</p>
+<p>vagrant halt 停机,此时会被持久画到磁盘,可以下次继续启用</p>
+<h2 id="vagrant自己加工镜像"><a href="#vagrant自己加工镜像" class="headerlink" title="vagrant自己加工镜像"></a>vagrant自己加工镜像</h2><p>当你希望自己加工环境并给周边小伙伴做到二次利用,那么vagrant package功能可以简单的满足.执行下面命令即可:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vagrant pacakge --output yourname.box</div></pre></td></tr></table></figure></p>
+<p>将生成的.box文件共享给他人并且按照上面的步骤即可快速搭建相同的环境.</p>
+<h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h2><h6 id="box-add的镜像下载在了哪里？"><a href="#box-add的镜像下载在了哪里？" class="headerlink" title="box add的镜像下载在了哪里？"></a>box add的镜像下载在了哪里？</h6><p>默认在用户目录下的 .vagrant.d/boxes 目录下，在具体项目执行时候在Vagrantfile里面通过config.vm.box指定使用哪个镜像。</p>
+<h6 id="使用完的虚拟机修改会保存吗？"><a href="#使用完的虚拟机修改会保存吗？" class="headerlink" title="使用完的虚拟机修改会保存吗？"></a>使用完的虚拟机修改会保存吗？</h6><p>使用halt后会持久化存储，如果是destroy的话就不会再存储了.在初始化镜像的时候根据vagrantfile中的shell脚本可以快速部署环境。但是如果环境很复杂，要下载很多东西，也要等很久。推荐的做法是在虚拟机中配置好环境好再生成自己的镜像给别人使用, 请参考自己生成镜像的部分。</p>
+<h6 id="同步的官方文档只有从内向外的，没有从外向内的，何解？"><a href="#同步的官方文档只有从内向外的，没有从外向内的，何解？" class="headerlink" title="同步的官方文档只有从内向外的，没有从外向内的，何解？"></a>同步的官方文档只有从内向外的，没有从外向内的，何解？</h6><p>内部的文档使用tech命令可以放到外部，但是更推荐在配置文件中设置共享文件夹，两端在操作时是实时同步的。</p>
+<h6 id="如何在一台机器上启动多个不同的虚拟机实例？"><a href="#如何在一台机器上启动多个不同的虚拟机实例？" class="headerlink" title="如何在一台机器上启动多个不同的虚拟机实例？"></a>如何在一台机器上启动多个不同的虚拟机实例？</h6><p>在一个Vagrantfile中通过声明多个实例，给予不同的名字即可，在运行时也可以指定去up哪个文件，配置多个实例之间的通讯。具体的部分参看<a href="https://www.vagrantup.com/docs/multi-machine/" target="_blank" rel="external">该部分官方文档</a>.</p>
+<h6 id="官网中的-vagrant共享目录到底在哪里？"><a href="#官网中的-vagrant共享目录到底在哪里？" class="headerlink" title="官网中的/vagrant共享目录到底在哪里？"></a>官网中的/vagrant共享目录到底在哪里？</h6><p>在启动日志中可以看到，如果不指定synced_folder, 实际上的/vagrant目录就被映射成为Vagrantfile所在的目录. 推荐在vagrantfile里面指定共享目录, 在本地目录修改的程序在虚拟机中是实时可见的.</p>
+<h6 id="vagrant是否可以分布式交互？"><a href="#vagrant是否可以分布式交互？" class="headerlink" title="vagrant是否可以分布式交互？"></a>vagrant是否可以分布式交互？</h6><p>目前看来是不可以的，它提供了一套方案，可以基于虚拟机来做，而虚拟机做分布式的方案本身就没太有。但其可以在一台机器上配置部署多个虚拟机, 并通过配置多个虚拟机之间的通信来搭建集群.</p>
+<h6 id="config-vm-box和config-vm-provider之间的关系"><a href="#config-vm-box和config-vm-provider之间的关系" class="headerlink" title="config.vm.box和config.vm.provider之间的关系?"></a>config.vm.box和config.vm.provider之间的关系?</h6><p>box是操作系统的镜像, 而provider是虚拟机的底层实现. 两者在配置层次上是不同的.对于一种provider一般提供一种配置, 不同的box可以选择不同的provider.</p>
+<h2 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h2><h6 id="virtualbox-安装问题"><a href="#virtualbox-安装问题" class="headerlink" title="virtualbox 安装问题"></a>virtualbox 安装问题</h6><p>在执行时候会遇到提示kernel-core-devel没有安装的问题，名字提示有问题，实际需要下载的就是kernel-devel, 命令如下：</p>
+<p>virtualbox通过官网下载的rpm在fedora上运行会有各种问题，推荐下面方式来下载安装virtualbox：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">cd /etc/yum.repos.d/</div><div class="line">wget http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo</div><div class="line"># 清空dnf中的缓存，让新的repo生效</div><div class="line">dnf clean all</div><div class="line"># 加速下载</div><div class="line">yum makecache</div><div class="line">dnf install VirtualBox-5.1</div></pre></td></tr></table></figure></p>
+<h6 id="vagrant-up连接超时"><a href="#vagrant-up连接超时" class="headerlink" title="vagrant up连接超时"></a>vagrant up连接超时</h6><p>经过查找是虚拟化没有开启，需要在bios-&gt;virtualization里面设置，然后就可以正常运行了。在vagrant里面没有提示。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Vagrant-使用简介&quot;&gt;&lt;a href=&quot;#Vagrant-使用简介&quot; class=&quot;headerlink&quot; title=&quot;Vagrant 使用简介&quot;&gt;&lt;/a&gt;Vagrant 使用简介&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last 
+    
+    </summary>
+    
+      <category term="DevOps" scheme="http://flame4.github.io/categories/DevOps/"/>
+    
+    
+      <category term="环境搭建" scheme="http://flame4.github.io/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Lucene 源码记录1</title>
+    <link href="http://flame4.github.io/2016/09/01/Lucene%E6%BA%90%E7%A0%811/"/>
+    <id>http://flame4.github.io/2016/09/01/Lucene源码1/</id>
+    <published>2016-09-01T15:26:19.000Z</published>
+    <updated>2016-09-07T04:10:16.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Lucene-源码阅读笔记-1"><a href="#Lucene-源码阅读笔记-1" class="headerlink" title="Lucene 源码阅读笔记 1"></a>Lucene 源码阅读笔记 1</h1><p style="text-align:right">last Modified: 2016-09-01</p>
+
+
+<p>开始了啃Lucene源码的漫漫长路，本笔记就一点一点记录自己的经历好了，也不知道能走多远,本次基于的版本是5.X,和之前的3.x有了比较大的改动，但核心思路变化不大。</p>
+<h3 id="Lucene-Search逻辑"><a href="#Lucene-Search逻辑" class="headerlink" title="Lucene Search逻辑"></a>Lucene Search逻辑</h3><ol>
+<li>DirectoryReader (extends IndexReader)获取文件，在这个过程中，所有关于该索引的元信息被加载入内存，也就是说新的磁盘改动暂时不可见。如果设计到的场景是实时更新的情况，可以调用 Directory.openIfChanged(IndexReader oldreader)方法.</li>
+<li>声明IndexSearcher，把indexreader注册进去</li>
+<li>使用QueryPhaser.parse()方法来获得一个Query， 也可以自己显式声明。</li>
+<li>IndexSearcher.search()函数</li>
+</ol>
+<h3 id="重要类表"><a href="#重要类表" class="headerlink" title="重要类表"></a>重要类表</h3><h5 id="search"><a href="#search" class="headerlink" title="search."></a>search.</h5>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Lucene-源码阅读笔记-1&quot;&gt;&lt;a href=&quot;#Lucene-源码阅读笔记-1&quot; class=&quot;headerlink&quot; title=&quot;Lucene 源码阅读笔记 1&quot;&gt;&lt;/a&gt;Lucene 源码阅读笔记 1&lt;/h1&gt;&lt;p style=&quot;text-align:
+    
+    </summary>
+    
+      <category term="搜索" scheme="http://flame4.github.io/categories/%E6%90%9C%E7%B4%A2/"/>
+    
+    
+      <category term="源码笔记" scheme="http://flame4.github.io/tags/%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0/"/>
+    
+      <category term="倒排索引" scheme="http://flame4.github.io/tags/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ElasticSearch 源码记录1</title>
+    <link href="http://flame4.github.io/2016/08/23/ES%E6%BA%90%E7%A0%811/"/>
+    <id>http://flame4.github.io/2016/08/23/ES源码1/</id>
+    <published>2016-08-23T15:26:19.000Z</published>
+    <updated>2016-09-06T17:19:08.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="ES-源码阅读笔记-1"><a href="#ES-源码阅读笔记-1" class="headerlink" title="ES 源码阅读笔记 1"></a>ES 源码阅读笔记 1</h1><p style="text-align:right">last Modified: 2016-08-24</p>
+
+
+
+<p>开始了啃ES源码的漫漫长路，本笔记就一点一点记录自己的经历好了，也不知道能走多远。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;ES-源码阅读笔记-1&quot;&gt;&lt;a href=&quot;#ES-源码阅读笔记-1&quot; class=&quot;headerlink&quot; title=&quot;ES 源码阅读笔记 1&quot;&gt;&lt;/a&gt;ES 源码阅读笔记 1&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modi
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="分布式系统" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"/>
+    
+      <category term="源码笔记" scheme="http://flame4.github.io/tags/%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>序列化与反序列化</title>
+    <link href="http://flame4.github.io/2016/08/11/Serialize/"/>
+    <id>http://flame4.github.io/2016/08/11/Serialize/</id>
+    <published>2016-08-11T15:26:19.000Z</published>
+    <updated>2016-09-06T17:21:16.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="序列化与反序列化"><a href="#序列化与反序列化" class="headerlink" title="序列化与反序列化"></a>序列化与反序列化</h1><p style="text-align:right">last Modified: 2016-08-23</p>
+
+
+<h2 id="1-概念简介"><a href="#1-概念简介" class="headerlink" title="1. 概念简介"></a>1. 概念简介</h2><p>序列化是系统组件之间通讯的一个比较重要的概念，在分布式系统和大数据量的系统中尤其重要。互联网的产生带来了机器间通讯的需求，而互联通讯的双方需要采用约定的协议，序列化和反序列化属于通讯协议的一部分。</p>
+<p>举个例子来说，因为client端想要和server交互，其就必须要定义一种协议来规定我请求的格式，在client端的程序一般会生成一个<strong>对象</strong>，用属性来表示想要传递的信息，然后将其通过网络流的方式来传送给server端，底下其实还是走的TCP，发的是byte数组。这个把对象转为byte过程就是序列化。而server端也会开一个流来接受byte数组，并反序列化出想要的信息来。另一种情况就是想要把信息化为二进制信息持久化到磁盘上。从这里可以看出，序列化发生在信息进入TCP等底层协议之前的最后一步。</p>
+<p>对于序列化和反序列化,需要注意的就是格式的问题，两边要约定同样的数据排列格式，不然就会产生解析错误。比如，如果发送端想发送一个int和一个long,那么接收端也必须先解读一个int,再解读一个long，不然就得不到正确结果。</p>
+<p>对于一个好的序列化和反序列化解决方案，应该有成熟，使用人群广泛等特点，并且空间开销和时间开销要好。</p>
+<h2 id="2-热升级问题"><a href="#2-热升级问题" class="headerlink" title="2.热升级问题"></a>2.热升级问题</h2><p>序列化的设计一个比较重要的地方就是滚动升级问题，也就是前后兼容性。</p>
+<p>在分布式RPC系统中，多节点之间存在升级的不同步问题。在系统升级的过程中也可能在执行任务，这时可能存在两个节点版本不一样的问题。如果两个版本之间的序列化方法有差异，则会导致各种各样的问题。传统的序列化方法就只能够全部停机更新版本后再上线，而后面看到新的protobuf等可以实现无缝连接。</p>
+<h2 id="3-几种常用方法"><a href="#3-几种常用方法" class="headerlink" title="3.几种常用方法"></a>3.几种常用方法</h2><p>IDL: 序列化描述语言，序列化是一种方案，其表达需要一种平台无关的语言来描述信息，这种语言就称为IDL(Interface description language).</p>
+<h4 id="XML"><a href="#XML" class="headerlink" title="XML"></a>XML</h4><p>xml就是最初的标签语言，在数据库查询和存储语言中也可以用到，自己就可以用作自己的IDL，并且具有自描述性，可阅读性好等特点。但是其空间占用大，因为有各种标签的冗余信息，如果被用来持久化的话，空间占用非常大.同时，其序列化和反序列化的操作时间都比较长。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">xsd:complexType</span> <span class="attr">name</span>=<span class="string">'UserInfo'</span>&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:sequence</span>&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">name</span>=<span class="string">'address'</span> <span class="attr">type</span>=<span class="string">'tns:Address'</span>/&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">name</span>=<span class="string">'address1'</span> <span class="attr">type</span>=<span class="string">'tns:Address'</span>/&gt;</span></div><div class="line">     <span class="tag">&lt;/<span class="name">xsd:sequence</span>&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:attribute</span> <span class="attr">name</span>=<span class="string">'userid'</span> <span class="attr">type</span>=<span class="string">'xsd:int'</span> /&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:attribute</span> <span class="attr">name</span>=<span class="string">'name'</span> <span class="attr">type</span>=<span class="string">'xsd:string'</span> /&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">xsd:complexType</span>&gt;</span></div></pre></td></tr></table></figure>
+<h4 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h4><p>JSON起源于弱类型语言Javascript， 它的产生来自于一种称之为”Associative array”的概念，其本质是就是采用”Attribute－value”的方式来描述对象。实际上在Javascript和PHP等弱类型语言中，类的描述方式就是Associative array。JSON的如下优点，使得它快速成为最广泛使用的序列化协议之一：</p>
+<ol>
+<li>这种Associative array格式非常符合工程师对对象的理解。</li>
+<li>它保持了XML的人眼可读（Human-readable）的优点。</li>
+<li>相对于XML而言，序列化后的数据更加简洁。 来自于的以下链接的研究表明：XML所产生序列化之后文件的大小接近JSON的两倍</li>
+<li>它具备Javascript的先天性支持，所以被广泛应用于Web browser的应用常景中，是Ajax的事实标准协议。</li>
+<li>与XML相比，其协议比较简单，解析速度比较快。</li>
+<li>松散的Associative array使得其具有良好的可扩展性和兼容性。</li>
+</ol>
+<p>JSon的前后兼容性很好，因为其一个对象是自包含的，当我从字符串中解析出一个json对象的时候，我自然就可以知道这个对象有哪些元素，两个版本之间的交互只需要各取所需就好了。RESTFul服务通讯使用的就是Json格式。</p>
+<h4 id="Thrift"><a href="#Thrift" class="headerlink" title="Thrift"></a>Thrift</h4><p>(抄百度)thrift是一个软件框架，用来进行可扩展且跨语言的服务的开发。它结合了功能强大的软件堆栈和代码生成引擎，以构建在 C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa, JavaScript, Node.js, Smalltalk, and OCaml 这些编程语言间无缝结合的、高效的服务。thrift允许定义一个简单的定义文件中的数据类型和服务接口，以作为输入文件，编译器生成代码用来方便地生成RPC客户端和服务器通信的无缝跨编程语言。</p>
+<p>Thrift的空间和时间效率比Json有了很大提升，其可以允许编写.thrift语言文件，然后编译生成对应的语言代码，并且提供了一系列的方法调用，用来压缩和传输。</p>
+<h4 id="Google-protobuf"><a href="#Google-protobuf" class="headerlink" title="Google protobuf"></a>Google protobuf</h4><p>Google protobuf也是一种类似与Thrift的编码工具，但是比Thrift精简很多，其编写的文件编译后的类只用来存信息，并且提供writeto和parseFrom方法。<a href="http://www.cnblogs.com/dkblog/archive/2012/03/27/2419010.html" target="_blank" rel="external">具体用法</a>看这里，<a href="http://blog.csdn.net/xqy1522/article/details/6942344" target="_blank" rel="external">与Thrift比较</a> 看这里。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;序列化与反序列化&quot;&gt;&lt;a href=&quot;#序列化与反序列化&quot; class=&quot;headerlink&quot; title=&quot;序列化与反序列化&quot;&gt;&lt;/a&gt;序列化与反序列化&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-0
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="serialize" scheme="http://flame4.github.io/tags/serialize/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java线程安全与同步</title>
+    <link href="http://flame4.github.io/2016/08/07/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E5%90%8C%E6%AD%A5/"/>
+    <id>http://flame4.github.io/2016/08/07/线程安全与同步/</id>
+    <published>2016-08-07T15:26:19.000Z</published>
+    <updated>2016-08-13T15:51:28.000Z</updated>
+    
+    <content type="html"><![CDATA[<p style="text-align:right">last Modified: 2016-08-13</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-08-13&lt;/p&gt;
+
+    
+    </summary>
+    
+      <category term="Java" scheme="http://flame4.github.io/categories/Java/"/>
+    
+    
+      <category term="多线程" scheme="http://flame4.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java基础库</title>
+    <link href="http://flame4.github.io/2016/08/04/Java-base/"/>
+    <id>http://flame4.github.io/2016/08/04/Java-base/</id>
+    <published>2016-08-04T15:26:19.000Z</published>
+    <updated>2016-08-13T15:51:32.000Z</updated>
+    
+    <content type="html"><![CDATA[<p style="text-align:right">last Modified: 2016-08-13</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-08-13&lt;/p&gt;
+
+    
+    </summary>
+    
+      <category term="Java" scheme="http://flame4.github.io/categories/Java/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>JVM</title>
+    <link href="http://flame4.github.io/2016/08/02/java-JVM/"/>
+    <id>http://flame4.github.io/2016/08/02/java-JVM/</id>
+    <published>2016-08-02T15:26:19.000Z</published>
+    <updated>2016-09-06T17:19:28.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Java-Jvm"><a href="#Java-Jvm" class="headerlink" title="Java Jvm"></a>Java Jvm</h1><p style="text-align:right">last Modified: 2016-08-14</p>
+
+<p>在运行程序的过程中,到底是谁在管理内存? java的内存模型中的内存和操作系统的关系究竟是什么?jvm与底层的交互管理是怎样的?这里理顺清楚这些细节的问题.为了理解这些，还是要从头开始。</p>
+<h3 id="1-内存模型"><a href="#1-内存模型" class="headerlink" title="1. 内存模型"></a>1. 内存模型</h3><p>这里从自上向下的概念来介绍关于Java内存的事情,同时也会记录一些关于其他平台的事情.</p>
+<p>内存模型描述了程序中各个变量(实例,变量,程序等)之间的关系,以及在实际的系统中变量存储到内存以及内存存储到变量这样子的实际细节。简单来说，内存模型规定了一种内存使用的格式，类似于把一大块内存划分成一个一个的逻辑区域，从而方便管理。对于操作系统来说，我们可以把内存模型理解为一个双层结构，第一层由操作系统维护，第二层由进程自己维护。这里不打算仔细写关于Linux内存模型的对象，因为太多了，什么三级地址，内核段用户段，LDT，GDT，中断，寄存器什么的，以后有时间会详细开一篇。这里简单罗列了一下区域和大体的用处，以便有个直观印象。</p>
+<p>ps: 一般搜Linux内存模型会出现下面两种维度：</p>
+<ol>
+<li>内核代码段 内核数据段 用户代码段 用户数据段 TSS段 LDT段 GDT段等</li>
+<li>全局区 常量区 代码区 堆区 栈区</li>
+</ol>
+<p>两者的关系是，第一个是操作系统层面的段管理，第二个是操作系统在为进程分配空间时候的策略，两者使用的段寄存器是不一样的。这里要明确的一点是，不论进程自己的内存模型是如何的，操作系统在分配进程空间的时候，一定是按照第二种的模型来进行分配和记录的(记录在TSS区).</p>
+<h3 id="2-进程"><a href="#2-进程" class="headerlink" title="2. 进程"></a>2. 进程</h3><p>比较清楚的是，对于操作系统来说，是用进程来抽象任务，从而实现一系列的管理和交互等功能的。以Linux为例子，在系统的运行初期会产生一个0号进程，所有的其他进程都是由其产生的子进程，共同形成一棵进程树。站在操作系统的角度看，一个操作系统(假设是单核)需要做的事情是一些超越进程的逻辑，比如维护用户信息，维护页表信息，以及进程切换的方法等，当然，还有另一部分，使用系统调用来和进程进行交互。拿进程切换来说，如果一个操作系统进入执行进程的逻辑，那么操作系统做的就是在进程列表中找到一个进程的信息，加载其信息(程序入口,寄存器值等)，然后继续执行。之后的逻辑就是进程内部的逻辑，进程并不能感知操作系统的存在，它最多也就是陷入内核中断，然后被切换，再在某一时刻再被唤醒，继续执行。从这里可以理解到的一点是，对于一个用户编写的进程，它做的事情就是发现自己诞生了，自己有执行的代码，有可以访问到的内存地址(一般是使用文件描述符来访问抽象出的文件系统)，有引起中断的方法(但其实进程并不知道自己被中断，被切换，它只是进行了系统调用)，其余的事情一律不知。</p>
+<h3 id="3-C-内存模型"><a href="#3-C-内存模型" class="headerlink" title="3. C++内存模型"></a>3. C++内存模型</h3><p>对于一个C++进程，其把底层都暴露给了程序员，程序员便可以自己操作内存编址等，那么操作系统加载的可执行c++代码，可以理解成就是直接的用户code。这个C++代码被编译后我猜想做的事情就是，声明并记录自己的内存模型指针信息，把代码加载到对应的地点，然后直接进入用户定义的main函数开始执行，在执行过程中的内存访问都直接通过指针的值get到。</p>
+<p>c++中，内存分为五个区域，跟操作系统的分配策略相同。</p>
+<h3 id="4-Java内存模型"><a href="#4-Java内存模型" class="headerlink" title="4. Java内存模型"></a>4. Java内存模型</h3><p>对于Java来说，每次启动一个java进程，都会运行一个jvm进程，然后由jvm来管理程序内存。jvm中会启动很多的线程来执行,比如垃圾回收，监控等。.class文件中的main方法也是作为一个线程启动的，所以才会说其模型天然支持多线程编程。</p>
+<p>既然如此，我们把自己写的java程序对应到C++上就是一件没有意义的事情了，因为一个是直接的裸进程环境，一个是jvm这个进程模拟出来的进程环境,有自己的内存模型逻辑。在这里应该搞清楚的，是两件事情，第一，jvm模拟的进程环境和C++中(或者说，进程级别)内存概念的对应关系，第二，是在jvm下模拟的内存环境对于多个线程的运行逻辑。而现在网上搜出来的很多Blog，其实说的都是第二件事情。</p>
+<h5 id="4-1-jvm简介"><a href="#4-1-jvm简介" class="headerlink" title="4.1 jvm简介"></a>4.1 jvm简介</h5><p>在介绍详细的内存模型之前，有必要先看一下对于虚拟机的整体介绍。Java虚拟机只是一种设计规范，而很多家厂商可能会有各自的设计实现，这一点类似SQL的设计。</p>
+<p>上面提到，在jvm里面所有的东西都是用线程来表示的，jvm中的线程可以分为守护线程和非守护线程，守护线程通常由虚拟机自己产生，比如垃圾回收。而非守护线程一般就自己的进程，如果所有的非守护进程结束，那么jvm虚拟机就会结束。</p>
+<p>Jvm将所有的内存信息保存到了”运行时数据区”中，这个数据区在官方文档中是很抽象的概念，需要实现者具体自己考虑。每个虚拟机实例都会有一个堆和一个方法区，这部分由所有的线程共享。堆属于“运行时数据区”，用于放置所有运行时产生的新对象，方法区放置class文件包含的类型信息等。</p>
+<h5 id="4-2-jvm环境与C-内存对应关系"><a href="#4-2-jvm环境与C-内存对应关系" class="headerlink" title="4.2 jvm环境与C++内存对应关系"></a>4.2 jvm环境与C++内存对应关系</h5><p>TODO.</p>
+<h5 id="4-3-jvm下的内存模型"><a href="#4-3-jvm下的内存模型" class="headerlink" title="4.3 jvm下的内存模型"></a>4.3 jvm下的内存模型</h5><p>Java内存模型的主要目标是定义程序中各个变量的访问规则，即在虚拟机中将变量存储到内存和从内存中取出变量这样底层细节,要保证各个线程之间的访问操作都是合法，安全，明确的。</p>
+<p>Java内存模型中规定了所有的变量都存储在主内存中，每条线程还有自己的工作内存（可以与前面将的处理器的高速缓存类比），线程的工作内存中保存了该线程使用到的变量到主内存副本拷贝，线程对变量的所有操作（读取、赋值）都必须在工作内存中进行，而不能直接读写主内存中的变量。不同线程之间无法直接访问对方工作内存中的变量，线程间变量值的传递均需要在主内存来完成，线程、主内存和工作内存的交互关系如下图所示。<br><img src="http://images.cnitblog.com/i/475287/201403/091134177063947.jpg" alt=""></p>
+<h5 id="4-4-到底谁是上帝之手"><a href="#4-4-到底谁是上帝之手" class="headerlink" title="4.4 到底谁是上帝之手"></a>4.4 到底谁是上帝之手</h5><p>考虑一个传统的进程，在执行编译好的二进制文件时，是启动了一个进程，装载各种变量区和寄存器，初始化各种静态变量等，然后由PC寄存器不断取指令执行的。而在jvm中，字节码操作的是主内存和工作内存之间的概念，那么是谁负责这个内存逻辑到真正的进程上的内存逻辑之间的转换呢？再考虑到垃圾回收线程是一个线程，其为什么可以管理到堆栈的内存逻辑呢?</p>
+<h3 id="5-垃圾回收"><a href="#5-垃圾回收" class="headerlink" title="5. 垃圾回收"></a>5. 垃圾回收</h3><p>jvm中对于垃圾回收的定义可以由具体厂商自行实现，通过上面的分析，很明显这一部分全是针对堆上的内存进行的。垃圾回收要做的一个就是释放掉没有引用的内存，另一个方面是要进行内存的紧致操作，以防止碎片化的产生。</p>
+<h3 id="6-内存碎片"><a href="#6-内存碎片" class="headerlink" title="6. 内存碎片"></a>6. 内存碎片</h3><h3 id="7-堆外内存"><a href="#7-堆外内存" class="headerlink" title="7. 堆外内存"></a>7. 堆外内存</h3>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Java-Jvm&quot;&gt;&lt;a href=&quot;#Java-Jvm&quot; class=&quot;headerlink&quot; title=&quot;Java Jvm&quot;&gt;&lt;/a&gt;Java Jvm&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-0
+    
+    </summary>
+    
+      <category term="Java" scheme="http://flame4.github.io/categories/Java/"/>
+    
+    
+      <category term="jvm" scheme="http://flame4.github.io/tags/jvm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java-SE</title>
+    <link href="http://flame4.github.io/2016/07/31/Java-SE/"/>
+    <id>http://flame4.github.io/2016/07/31/Java-SE/</id>
+    <published>2016-07-31T15:26:19.000Z</published>
+    <updated>2016-11-16T07:30:51.461Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Java-软件工程知识点"><a href="#Java-软件工程知识点" class="headerlink" title="Java 软件工程知识点"></a>Java 软件工程知识点</h1><p style="text-align:right">last Modified: 2016-09-07</p>
+
+<h2 id="1-软件架构风格"><a href="#1-软件架构风格" class="headerlink" title="1. 软件架构风格"></a>1. 软件架构风格</h2><h2 id="2-项目构建与管理"><a href="#2-项目构建与管理" class="headerlink" title="2. 项目构建与管理"></a>2. 项目构建与管理</h2><h3 id="Ant"><a href="#Ant" class="headerlink" title="Ant"></a>Ant</h3><p>Ant是java的build工具，与C的make类似，通过编写build.xml来实现java文件的编译与发布。C的make脚本是平台相关的，而ant本身是由java编写的平台无关工具，可以用来进行自动化调用程序完成项目的编译，打包，测试等，其通过读取目录下的build.xml文件来获取任务计划，相比于makefile，XML文件也更容易维护。</p>
+<p>一个Ant项目的配置文件就是经典的XML树的形式，有以下几个标签是比较重要的。</p>
+<p><strong>Project</strong>: 一个ant配置文件应该至少包含一个或者多个project元素，project是ant文件的根元素。标签属性包括name,default和basedir, 分别代表项目名称，默认执行的target以及任务的根目录。根目录默认情况下使用的是build.xml文件所在目录。 ant+任务名即可执行对应target, ant -f filename指定build.xml为特定文件。ant -projecthelp可以查看当前build.xml定义的所有任务.</p>
+<p><strong>Target</strong>: Ant基本执行单元,它可以包含一个或多个具体的任务。多个target可以存在相互依赖关系。标签属性如下</p>
+<ol>
+<li>name</li>
+<li>depends: 写明target之间的依赖关系,不同target之间由,隔开，可以由拓扑排序等确定执行顺序。</li>
+<li>description: 描述任务</li>
+<li>if/unless： 如果环境中对应属性存在/不存在，则执行该target,否则不执行。</li>
+</ol>
+<p><strong>property</strong>: 该元素可看作参量或者参数的定义，project的属性可以通过property元素来设定，也可在Ant之外设定。若要在外部引入某文件，例如build.properties文件，可以通过如下内容将其引入&lt; property file=” build.properties”/&gt;. 对于内部的property, 通过定义其name和value, 并调用${name}的方式可以取到定义的值。</p>
+<p>关于这三个属性的具体例子可以参考<a href="http://www.cnblogs.com/cyjch/archive/2012/03/28/2420761.html" target="_blank" rel="external">这篇博客</a>，这里写的也是这篇博客总结了一下子。对于每一个target内部，可以描述这个任务具体干什么事情。具体的任务类型也可以这篇博客，写的很详细了。从这里看出的是，ant本身并不只是用于java的编译和发布，其本质上是一个流程定义工具，可以利用内置的任务类型标签干很多事情，比如创建，删除，显示等。ant中也可以用java, javac, jar, war等命令来编译和打包java项目。所有的标签集合可以看<a href="http://ant.apache.org/manual/tasksoverview.html" target="_blank" rel="external">官方列表</a>.</p>
+<h3 id="Maven"><a href="#Maven" class="headerlink" title="Maven"></a>Maven</h3><p>Maven是最近流行的关于项目管理的标配工具。因为Ant的特性，其并没有提供一个依赖维护的功能，那么如果这里面需要引用一些开源的库或者其他人开发的库，就必须手动的把这些jar包添加到项目中(lib文件下)，这其实是很不方便的。在Maven中提供了这样的功能，官方会维护自己的Maven仓库用于存储jar包，maven解析pom.xml文件，将需要的外部库从网上下载(一般是从官方库，很多公司也会维护自己的内部库，经过配置后maven会优先从公司库下载)，放到本地的.m2文件夹下，以便重用。Maven的查找顺序是：本地仓库-&gt;中央仓库(公司)-&gt;默认备用远程仓库(官方)。如果没有查找到，就会报错。</p>
+<p>对于一个Maven项目, 默认会读取一个pom.xml文件，来指定任务的执行。Maven服务器提供了很多模板可以供快速生成一个标准使用的Maven，也可以通过自定义pom.xml自己生成。</p>
+<p><a href="http://www.cnblogs.com/yakov/archive/2011/11/26/maven_pom.html" target="_blank" rel="external">这篇博客</a>中比较详细的列出了pom.xml文件中包含的元素。下面写几个比较重要的。</p>
+<ol>
+<li>project: 根目录，这里与Ant的概念基本类似。</li>
+<li>groupId: 组织名，项目一般会属于某个组织，这个名字其实决定了实际的包名字，如org.apache.</li>
+<li>artifactId: 项目名，在 groupId 下的表示一个单独项目的唯一标识符。这个和目录名字不是一个概念，在本地随意修改也能运行。但是在存Maven仓库时，路径名会用到。</li>
+<li>version: 项目的版本号</li>
+<li>packaging： 打包机制，如pom,jar,maven-plugin,ejb,war,ear,rar,par。在Maven库中用/groupId/artifactId/version/packaging来唯一确定一个依赖。</li>
+<li>dependency: 依赖包，通过上面四个属性来添加依赖。可以通过内部标签设定是否添加依赖的依赖等。</li>
+<li>parent: 如果一个项目是多模块的，那么子模块必须packaging设置为pom，并用parent标签指定parent目录的POM.</li>
+<li>modules: 对应子模块的parent, 父模块应该使用modules来指定子模块, 父模块不需要考虑子模块内部的依赖关系，而且会根据子模块之间的顺序来进行拓扑排序的编译，不需要按顺序排列。</li>
+<li>properties: 定义pom中的常量，以方便在别的地方使用。</li>
+<li>build：构建时期的任务，阶段等定义都在这里。</li>
+<li>configuration:</li>
+</ol>
+<p>其余的标签详细介绍可以看<a href="http://blog.csdn.net/zhuxinhua/article/details/5788546" target="_blank" rel="external">这篇博客</a>。</p>
+<p>此外，所有的 POM 都继承自一个父 POM（无论是否显式定义了这个父 POM）。父 POM 也被称作 Super POM，它包含了一些可以被继承的默认设置。Maven 使用 effective pom（Super pom 加上工程自己的配置）来执行相关的目标，它帮助开发者在 pom.xml 中做尽可能少的配置，当然这些配置可以被方便的重写。查看 Super POM 默认配置的一个简单方法是执行以下命令：mvn help:effective-pom。这样会输出一个推荐配置的POM文件，所以POM一般不需要手动编写，maven提供了很多模板，只需要灵活修改即可。</p>
+<p>Maven中一个比较重要的概念是构建生命周期。构建生命周期是一组阶段的序列（sequence of phases），每个阶段定义了目标被执行的顺序。这里的阶段是生命周期的一部分。举例说明，一个典型的 Maven 构建生命周期是由以下几个阶段的序列组成的：</p>
+<ol>
+<li>prepare-resources：资源拷贝,本阶段可以自定义需要拷贝的资源</li>
+<li>compile:编译,本阶段完成源代码编译</li>
+<li>package:打包,本阶段根据 pom.xml 中描述的打包配置创建 JAR / WAR 包</li>
+<li>install:安装,本阶段在本地/远程仓库中安装工程包</li>
+</ol>
+<p>当需要在某个特定阶段之前或之后执行目标时，可以使用 pre-name和 post-name来定义这个目标。<strong>目标</strong>表示一个特定的、对构建和管理工程有帮助的任务。它可能绑定了 0 个或多个构建阶段。没有绑定任何构建阶段的目标可以在构建生命周期之外被直接调用执行。Maven有三个标准的生命周期:clean, default(build), site. 每种生命周期由几个特定的阶段组成，每个阶段可以绑定一个或者多个目标，一个目标实际上就是一个任务。如果一个阶段没有绑定任务，该阶段就什么都不做。通过这种方式，就可以实现流程化的管理。三种生命周期的具体阶段介绍可以参考<a href="http://blog.csdn.net/wanghantong/article/details/9375013" target="_blank" rel="external">这篇博客</a>。</p>
+<p>通俗的来讲，三个标准生命周期和上面典型的构建生命周期关系是，标准是由官方给的默认配置，而典型的是可以自定义的,一般情况下使用官方给定的周期即可，clean用于清理，build用于构建, site用于发布。以clean为例子，clean的阶段分为pre-clean, clean, post-clean。每个阶段都可以绑定目标来执行(<strong>待考证，一个阶段是只能绑定一个目标还是多个，如果是多个那么怎么确定顺序</strong>)。</p>
+<p>Maven中另一个比较重要的概念是插件。我们已经知道每个阶段都是通过定义目标来完成任务，而Maven的本体是一个插件框架，各种各样的目标定义都是通过插件来实现的。插件中用&lt; goals&gt;标签来定义一个目标，并用&lt; configuration&gt;等插件定义目标内容，用&lt; phase&gt;来定义目标作用的阶段。一个插件往往有多个目标模式，可以作用于不同的阶段。综上，在组织形式上，build.xml采用每个插件定义多个目标，每个目标对应一个阶段的模式，而在执行流程上，maven按照阶段执行，每个阶段执行对应的插件目标。下面放一个比较好看明白的例子<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">"http://maven.apache.org/POM/4.0.0"</span></span></div><div class="line">   <span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span></div><div class="line">   <span class="attr">xsi:schemaLocation</span>=<span class="string">"http://maven.apache.org/POM/4.0.0</span></div><div class="line">   http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;</div><div class="line"><span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.companyname.projectgroup<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>project<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">plugins</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-antrun-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">executions</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">id</span>&gt;</span>id.pre-clean<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">phase</span>&gt;</span>pre-clean<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>run<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">tasks</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">echo</span>&gt;</span>pre-clean phase<span class="tag">&lt;/<span class="name">echo</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">tasks</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">id</span>&gt;</span>id.clean<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">phase</span>&gt;</span>clean<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">goal</span>&gt;</span>run<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">tasks</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">echo</span>&gt;</span>clean phase<span class="tag">&lt;/<span class="name">echo</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">tasks</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">      <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">id</span>&gt;</span>id.post-clean<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">phase</span>&gt;</span>post-clean<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>run<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">tasks</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">echo</span>&gt;</span>post-clean phase<span class="tag">&lt;/<span class="name">echo</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">tasks</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<h3 id="Ant-ivy"><a href="#Ant-ivy" class="headerlink" title="Ant-ivy"></a>Ant-ivy</h3><p>ivy是ant的一种插件，在新的版本中ant支持了ivy的调用部分，只需要编译ivy的包放到ant的lib下即可，其从maven2的库中读取包，并使得Ant做到了Maven的包依赖下载的问题。</p>
+<h3 id="Maven-antrun-plugin"><a href="#Maven-antrun-plugin" class="headerlink" title="Maven-antrun-plugin"></a>Maven-antrun-plugin</h3><p>这个插件提供了在maven中运行Ant的能力，甚至可以把Ant的脚本命令直接嵌入到pom中，但是处于不污染pom的考虑，也支持直接调用外面的build.xml文件。</p>
+<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><h2 id="3-各种测试类型"><a href="#3-各种测试类型" class="headerlink" title="3. 各种测试类型"></a>3. 各种测试类型</h2><h2 id="4-JUnit-单元测试框架"><a href="#4-JUnit-单元测试框架" class="headerlink" title="4. JUnit 单元测试框架"></a>4. JUnit 单元测试框架</h2><h2 id="5-Java-设计模式"><a href="#5-Java-设计模式" class="headerlink" title="5. Java 设计模式"></a>5. Java 设计模式</h2><h2 id="6-Java日志库"><a href="#6-Java日志库" class="headerlink" title="6. Java日志库"></a>6. Java日志库</h2><h2 id="几个小疑问"><a href="#几个小疑问" class="headerlink" title="几个小疑问"></a>几个小疑问</h2><h6 id="java的一个项目中，经常会有src-gt-main-gt-java-gt-org-gt-apache…-gt-…java这样的结构，java是怎么知道一个文件夹是不是一个包的？"><a href="#java的一个项目中，经常会有src-gt-main-gt-java-gt-org-gt-apache…-gt-…java这样的结构，java是怎么知道一个文件夹是不是一个包的？" class="headerlink" title="java的一个项目中，经常会有src-&gt;main-&gt;java-&gt;org-&gt;apache….-&gt;…java这样的结构，java是怎么知道一个文件夹是不是一个包的？"></a>java的一个项目中，经常会有src-&gt;main-&gt;java-&gt;org-&gt;apache….-&gt;…java这样的结构，java是怎么知道一个文件夹是不是一个包的？</h6><h2 id="踩过的坑们"><a href="#踩过的坑们" class="headerlink" title="踩过的坑们"></a>踩过的坑们</h2><h6 id="Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到"><a href="#Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到" class="headerlink" title="Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到"></a>Ant在别人的机器上编译得过在我的机器上编译不过，提示代码无法找到</h6><p>经过查证，是在别人电脑上开发后没有add和commit，而我的项目是从远程库中pull下来的，所以找不到别人修改的代码。可怕的是在本机上是没有修改的代码，Ant竟然可以识别已经修改过的程序，害怕(SVN),具体原因不详</p>
+<h6 id="Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA-HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用"><a href="#Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA-HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用" class="headerlink" title="Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA_HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用"></a>Maven-antrun-plugin在调用的时候提示找不到javac编译器，JAVA_HOME路径设置的是jre的路径，但我已经在bashrc中修改过了，也set过了，没用</h6><p>临时的解决方案是在build.xml文件里面的javac 标签里面加入fork=”true”属性<br>在.bashrc和全局的bash.bashrc里面修改都没有用处，这个问题的原因和解答看下方</p>
+<h6 id="在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装"><a href="#在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装" class="headerlink" title="在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装"></a>在已经安装ivy的机器上执行Maven-antrun-plugin显示ivy没有安装</h6><p>结合上面的问题，猜想原因是maven独自维护了一套Ant的插件的同时也独自维护了一套Ant在本地库中，其与是不是在本地装载了Ant没有关系。现在还在查找其中原因。</p>
+<h6 id="Intellj有时候open-project会导入不了maven项目源码，而只有配置文件？"><a href="#Intellj有时候open-project会导入不了maven项目源码，而只有配置文件？" class="headerlink" title="Intellj有时候open project会导入不了maven项目源码，而只有配置文件？"></a>Intellj有时候open project会导入不了maven项目源码，而只有配置文件？</h6><p>从 new -&gt; exists project里面走maven</p>
+<h6 id="Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？"><a href="#Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？" class="headerlink" title="Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？"></a>Intellj有时候导入后文件不是java，而是一个空白文件底下一个红色J？</h6><p>导入方式不对</p>
+<h6 id="Maven在导入本地库一个jar包后，在intellj里面没法引用？"><a href="#Maven在导入本地库一个jar包后，在intellj里面没法引用？" class="headerlink" title="Maven在导入本地库一个jar包后，在intellj里面没法引用？"></a>Maven在导入本地库一个jar包后，在intellj里面没法引用？</h6><ol>
+<li>设置enable auto-import，从而刷新依赖。</li>
+<li>我当时使用的是父子项目类型，把整个项目编译后，在intellj里打开整个项目没法加载。但是分着打开子项目就可以加载了。我怀疑原因是一个项目不会在库中加载自己。但是其中一个核心的组件部分<packing>是jar的形式。</packing></li>
+<li>检查一下是不是intellj在下载本地库的时候卡住了</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Java-软件工程知识点&quot;&gt;&lt;a href=&quot;#Java-软件工程知识点&quot; class=&quot;headerlink&quot; title=&quot;Java 软件工程知识点&quot;&gt;&lt;/a&gt;Java 软件工程知识点&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last 
+    
+    </summary>
+    
+      <category term="Java" scheme="http://flame4.github.io/categories/Java/"/>
+    
+    
+      <category term="SE" scheme="http://flame4.github.io/tags/SE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Lucene 学习笔记</title>
+    <link href="http://flame4.github.io/2016/07/22/Lucene/"/>
+    <id>http://flame4.github.io/2016/07/22/Lucene/</id>
+    <published>2016-07-22T15:26:19.000Z</published>
+    <updated>2016-09-06T17:20:14.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Lucene笔记"><a href="#Lucene笔记" class="headerlink" title="Lucene笔记"></a>Lucene笔记</h1><p style="text-align:right">last Modified: 2016-07-27</p>
+
+
+
+<p>本笔记参照forfuture1978的《Lucene3.0原理和代码分析》系列blog所做,原来的文章已经写的非常好，细节也很到位，所以有500页。。。这里主要是对主要的逻辑流程做一个记录，让我能够在大体了解lucene是干什么的基础上，可以快速把逻辑串起来。</p>
+<h2 id="1-全文检索基础"><a href="#1-全文检索基础" class="headerlink" title="1. 全文检索基础"></a>1. 全文检索基础</h2><p>全文检索总体上来说针对的是非结构化的文件做的，如同理解的那样，基本原理做的就是基于倒排索引的查询。总体上来说分两部分：<strong>索引</strong>和<strong>搜索</strong>。</p>
+<h4 id="索引部分"><a href="#索引部分" class="headerlink" title="索引部分"></a>索引部分</h4><p>索引部分要做的事情就是基于已有文档建立倒排索引的过程：</p>
+<ol>
+<li>文件处理：文件通过分词组件分成一个一个的词语，然后进行语言处理，变为一个一个的词素(Term)。词语变为词素，一般在英文里面就是把复数变成单数，过去式变化等变为原始词根的过程。同时还有去除停用词的过程。</li>
+<li>建立词典和反向索引表：把所有得到的词素排序组合后得到反向索引表的词典，词典的key就是词素，value就是一列文档号。</li>
+<li>写入磁盘</li>
+</ol>
+<h4 id="搜索部分"><a href="#搜索部分" class="headerlink" title="搜索部分"></a>搜索部分</h4><p>搜索部分是给出搜索条件，返回结果的过程。</p>
+<ol>
+<li>输入查询，分析后得到查询词素和语法树，语法树是一些简单的列表操作，比如列表的交集，差集等。</li>
+<li>找到对应的倒排list，运算后获得符合要求的文档列表。</li>
+<li>根据相关性排序： TF-IDF算法，但对于一个用户就要计算一次的话就太慢了，一种解决方案是在预处理阶段就算好，但是这样的话增量更新是个问题，<strong>这里属于另一个范畴了，不讨论，如果有时间另开一个blog</strong></li>
+<li>返回结果</li>
+</ol>
+<p>Lucene也就是这样的大致思路，下面对每个部分做一些简单的学习。</p>
+<h2 id="2-总体架构"><a href="#2-总体架构" class="headerlink" title="2. 总体架构"></a>2. 总体架构</h2><p>总体架构图如下：</p>
+<p><img src="http://hi.csdn.net/attachment/201002/1/3634917_1265049062fG9p.jpg" alt=""></p>
+<p>其中IndexWriter和IndexSearcher是两个比较重要的工具类，一个向上读取文件后调用词语分析组织来向下创建所因，一个向上接受用户请求，调用词语分析组织生成语法树后向下查询，再计算排序后返回给用户。</p>
+<p>下图是代码包的关系结构：</p>
+<p><img src="http://hi.csdn.net/attachment/201002/1/3634917_12650490657464.jpg" alt=""></p>
+<pre><code>• Lucene的analysis模块主要负责词法分析及语言处理而形成Term。
+• Lucene的index模块主要负责索引的创建,里面有IndexWriter。
+• Lucene的store模块主要负责索引的读写。
+• Lucene的QueryParser主要负责语法分析。
+• Lucene的search模块主要负责对索引的搜索。
+• Lucene的similarity模块主要负责对相关性打分的实现。
+</code></pre><h2 id="3-索引文件格式"><a href="#3-索引文件格式" class="headerlink" title="3. 索引文件格式"></a>3. 索引文件格式</h2><h4 id="3-1-总览"><a href="#3-1-总览" class="headerlink" title="3.1 总览"></a>3.1 总览</h4><p>在逻辑上，索引的格式是一个词素加很多文档列表，这部分通过源代码分析实际是怎么样的。<br>这里面的实现思路和HBASE的思路基本相同，每次写到新的内存中，并生成新的段，段之间可以merge。</p>
+<p>首先，很多文档会组成一个文档集合，索引就建立在这个文档集合中。Lucene建立的索引包含了<strong>正向信息</strong>和<strong>反向信息</strong>。</p>
+<p>在Lucene中，文档库的构成分索引，段，文档，域，词几个层次。一个索引就是一个文档集合，放在一个文件夹中。一个集合会被分成很多独立的段，每个段有很多文档，每个文档有很多域(想象题目，作者，主体等)，每个域有很多词。</p>
+<p>一个lucene的索引文件如下图所示：</p>
+<p><img src="http://hi.csdn.net/attachment/201002/1/3634917_1265049315kxOZ.png" alt=""></p>
+<p>正向索引部分：</p>
+<ol>
+<li>segment_N 保存了当前索引的段个数，以及每个段的文档数。</li>
+<li>fdx, fdt 保存了此段包含的所有文档,每篇文档包含了多少域,每个域保存了那些信息。</li>
+<li>fnm保存了此段包含了多少个域,每个域的名称及索引方式。</li>
+<li>tvx,tvd,tvf保存了此段包含多少文档,每篇文档包含了多少域,每个域包含了多少词,每个词的字符串,位置等信息。</li>
+</ol>
+<p>反向索引：</p>
+<ol>
+<li>tis,tii保存了词典(Term Dictionary),也即此段包含的所有的词按字典顺序的排序。</li>
+<li>frq保存了倒排表,也即包含每个词的文档ID列表。</li>
+<li>prx保存了倒排表中每个词在包含此词的文档中的位置。</li>
+</ol>
+<font color="red">看到这里应该有所思考，为什么要把正向索引的信息保存下来？要知道正向索引并不能够代表原来文章，也不能给全文检索带来任何的好处。</font>
+
+<p>这样做是因为在Lucene中其实并没有存下原始的文档，而是在Add的初始过程中就以 Doc-&gt;Field-&gt;Term的形式来存储的，后面也只能拿到这样的数据。所以当然要存正向数据，不然后面查谁去 …</p>
+<h4 id="3-2-编码方式"><a href="#3-2-编码方式" class="headerlink" title="3.2 编码方式"></a>3.2 编码方式</h4><p>基本类型：</p>
+<ol>
+<li>Byte: 8bit</li>
+<li>Uint32: 4 Byte</li>
+<li>Uint64: 8 Byte</li>
+<li>VInt: 变长整形数，用多个byte，每个byte中提出最高一位来表示前面还没有，一个Byte有7个有效信息位</li>
+<li>Chars: Ascii的八位编码</li>
+<li>String： 先一个VINT表示char个数，然后跟着这些char</li>
+</ol>
+<p>为了减少内存占用和运算时间，还采用了以下的优化策略：</p>
+<ol>
+<li>Prefix + Suffix: 后一个词用前一个词的前缀offset加自己的独特部分表示</li>
+<li>Delta: 连续数字存储方式，后一个存的是与前一个的差值</li>
+<li>A,B?: 在一些A,B经常连续出现的场景下，把A最后一位空出一个bit来表示后面是否跟了一个B.A的实际值为A/2</li>
+<li>采用跳表加快查询</li>
+</ol>
+<h4 id="3-3-正向索引部分"><a href="#3-3-正向索引部分" class="headerlink" title="3.3 正向索引部分"></a>3.3 正向索引部分</h4><p>这一部分包括了段的元信息，域的元信息，词向量等上面出现过的每个文件的具体格式，因为太多了，详细的就看<a href="http://www.cnblogs.com/forfuture1978/archive/2009/12/14/1623599.html" target="_blank" rel="external">这篇博客</a>吧。</p>
+<p>这里写几个此时不理解的地方，以方便后面理解：</p>
+<ol>
+<li>既然段是一些文档的集合，为什么要跳过文档直接存段中有哪些域？ 是因为对于一个域来说，其除了其属于某个文档外，还有一些别的属性，比如索引域，标准化因子，偏移(可能用于高亮？)等。</li>
+</ol>
+<h4 id="3-4-反向索引部分"><a href="#3-4-反向索引部分" class="headerlink" title="3.4 反向索引部分"></a>3.4 反向索引部分</h4><p>分为词典和倒排表两部分。词典包括tis, tii文件，倒排表包括frq,prx中。frq中放文档号和词频，prx存放偏移等。</p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/termdictionary_thumb.jpg" alt=""></p>
+<p>tis： 保存了所有词的信息，包括所有词的数量，以及一些interval信息用于定义跳表，对于每个词，记录了其在倒排页表的偏移位置，其跳表的偏移位置等信息，并用上了一些编码技巧。</p>
+<p>tii: 词典索引文件是为了加快对词典文件中词的查找速度,保存每隔IndexInterval个词。<font color="red">词典索引文件是会被全部加载到内存中去的。</font></p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/frq_thumb_1.jpg" alt=""></p>
+<p>frq: 对于每个词，保存了这个词的倒排表以及跳表结构，倒排表中放了文档号和词频，跳表信息不再赘述。两者的信息就从对应的tis, tii的位置来得到。</p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene_3368/prx_thumb_1.jpg" alt=""></p>
+<p>prx: 每个term都有一个文档列表来表示存在多少文档包含这个词，并且在tis和tii中也会记录一个词在一个文档中存在多少次从而确定上图中对应数组的长度，这里可以不细追究。</p>
+<h4 id="3-5-标准化因子和删除文档"><a href="#3-5-标准化因子和删除文档" class="headerlink" title="3.5 标准化因子和删除文档"></a>3.5 标准化因子和删除文档</h4><p>比较细节的地方，略过，后面有用到的话会再开一篇记录。</p>
+<h2 id="4-索引建立"><a href="#4-索引建立" class="headerlink" title="4. 索引建立"></a>4. 索引建立</h2><h4 id="4-1-创建IndexWriter对象"><a href="#4-1-创建IndexWriter对象" class="headerlink" title="4.1 创建IndexWriter对象"></a>4.1 创建IndexWriter对象</h4><p>IndexWriter用于管理索引目录，与之相关的有IndexFileDeleter类，负责管理目录；SegmentInfos类，负责段对象的信息管理；MergeScheduler，负责段合并，被IndexWriter调用。</p>
+<p>IndexFileDeleter维护一个引用计数，当级数为0删除该索引。比较典型的情况出现在段的索引文件要合并成一个复合文件(cfs)时，先生成复合文件，然后把原始文件的引用计数-1， IndexFileDeleter.decRef()来删除掉它们。另一种情况出现在merge segment时，用ConcurrentMergeScheduler$MergeThread.run()方法来合并，也会使用IndexFileDeleter.</p>
+<p>为了保证事务性和并发性，一方面，writer采用commit的方式提交修改，也可以rollback.另一方面，定义了一个SimpleFSLock来给出了一种进程间通讯的方法，来维护全局唯一的资源。</p>
+<h4 id="4-2-创建Document对象，加入Field"><a href="#4-2-创建Document对象，加入Field" class="headerlink" title="4.2 创建Document对象，加入Field"></a>4.2 创建Document对象，加入Field</h4><p>代码如下，一般一个Doc会有路径,title，contents等域<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Document doc = <span class="keyword">new</span> Document();</div><div class="line">doc.add(<span class="keyword">new</span> Field(<span class="string">"path"</span>, f.getPath(), Field.Store.YES, Field.Index.NOT_ANALYZED));</div><div class="line">doc.add(<span class="keyword">new</span> Field(<span class="string">"modified"</span>,DateTools.timeToString(f.lastModified(), DateTools.Resolution.MINUTE),</div><div class="line">Field.Store.YES, Field.Index.NOT_ANALYZED));</div><div class="line">doc.add(<span class="keyword">new</span> Field(<span class="string">"contents"</span>, <span class="keyword">new</span> FileReader(f)));</div></pre></td></tr></table></figure></p>
+<h4 id="4-3-将文档加入IndexWriter"><a href="#4-3-将文档加入IndexWriter" class="headerlink" title="4.3 将文档加入IndexWriter"></a>4.3 将文档加入IndexWriter</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">writer.addDocument(doc);</div><div class="line">  --&gt;IndexWriter.addDocument(Document doc, Analyzer analyzer)</div><div class="line">    --&gt;doFlush = docWriter.addDocument(doc, analyzer);</div><div class="line">        --&gt; DocumentsWriter.updateDocument(Document, Analyzer, Term)</div></pre></td></tr></table></figure>
+<h4 id="4-4-将文档加入DocumentsWriter"><a href="#4-4-将文档加入DocumentsWriter" class="headerlink" title="4.4 将文档加入DocumentsWriter"></a>4.4 将文档加入DocumentsWriter</h4><p>对于一篇文档的建立索引过程就是一条流水线处理,不是由一个对象来完成的,而是用对象组合的方式形成的一个处理链,链上的每个对象仅理索引过程的一部分,称为索引链.</p>
+<p><strong>DocConsumer</strong>: 索引链的第一环，包括对索引域的处理，对存储域的处理和删除文档。首先，文档的处理和添加是支持多线程的，并且每个文档有一个全局唯一的文档号。DocumentsWriter.getThreadState这个函数用来处理文档号使之可以顺序发布，并且文档结构定义了flush到磁盘的时候文档必须按顺序，所以在flush之前会有一个queue。</p>
+<p><strong>DocumentsWriterThreadState</strong>: 由多线程来处理文档，加快处理速度。对于一个线程，也是处理索引域和存储域的文件信息，这里设计到同步和锁的问题，由上面提到的DocumentsWriter处理。</p>
+<p><strong>DocFieldProcessorPerField</strong>: 因为文档的域很多都重复，所以在一个线程处理一个文档的时候，不会对其中的每个域都创建对象，而是会复用已经存在的对象。使用hash表。域也会有自己的索引处理链条，来处理正向和反向索引的部分。对于一个域的一个Token，存在文字信息和偏移量两个信息，域会有自己的TokenStream对象，一个一个的拿到Token并调用add()函数处理。add函数会负责写入frq和prx的倒排部分。</p>
+<h4 id="4-5-CharBlockPool-ByteBlockPool-IntBlockPool管理"><a href="#4-5-CharBlockPool-ByteBlockPool-IntBlockPool管理" class="headerlink" title="4.5 CharBlockPool, ByteBlockPool, IntBlockPool管理"></a>4.5 CharBlockPool, ByteBlockPool, IntBlockPool管理</h4><p>在写入域索引的时候，会产生很多新的域和term，其在写入硬盘前的内存管理抽象成可以分配的资源，当资源缺少的时候则调用这几个对象请求资源。这里的管理方法类似于OS的内存管理，是分层的，每一层都一个块链表，上层块要大一些。 原Blog上有一个很详细的例子可以具体参考</p>
+<h4 id="4-6-关闭IndexWriter-写入磁盘"><a href="#4-6-关闭IndexWriter-写入磁盘" class="headerlink" title="4.6 关闭IndexWriter, 写入磁盘"></a>4.6 关闭IndexWriter, 写入磁盘</h4><p>将索引写入磁盘包括以下几个过程：</p>
+<ol>
+<li>得到要写入的段名：String segment = docWriter.getSegment();</li>
+<li>DocumentsWriter将缓存的信息写入段：docWriter.flush(flushDocStores);</li>
+<li>生成新的段信息对象：newSegment = new SegmentInfo(segment, flushedDocCount, directory, false, true, docStoreOffset, docStoreSegment, docStoreIsCompoundFile, docWriter.hasProx());</li>
+<li>准备删除文档：docWriter.pushDeletes();</li>
+<li>生成cfs段：docWriter.createCompoundFile(segment);</li>
+<li>删除文档：applyDeletes();</li>
+</ol>
+<h2 id="5-合并"><a href="#5-合并" class="headerlink" title="5. 合并"></a>5. 合并</h2><p>IndexWriter中与段合并有关的成员变量有：</p>
+<ol>
+<li>HashSet<segmentinfo> mergingSegments = new HashSet<segmentinfo>(); //保存正在合并的段，以防止合并期间再次选中被合并。</segmentinfo></segmentinfo></li>
+<li>MergePolicy mergePolicy = new LogByteSizeMergePolicy(this);//合并策略，也即选取哪些段来进行合并。</li>
+<li>MergeScheduler mergeScheduler = new ConcurrentMergeScheduler();//段合并器，背后有一个线程负责合并。</li>
+<li>LinkedList<mergepolicy.onemerge> pendingMerges = new LinkedList<mergepolicy.onemerge>();//等待被合并的任务</mergepolicy.onemerge></mergepolicy.onemerge></li>
+<li>Set<mergepolicy.onemerge> runningMerges = new HashSet<mergepolicy.onemerge>();//正在被合并的任务</mergepolicy.onemerge></mergepolicy.onemerge></li>
+</ol>
+<p><strong>段合并策略</strong>: 大段在前，小段在后。首先会选择差不多的段进行merge，并从小段开始，逐渐合并成更大的段。新来的小段就会直接追加到末尾。</p>
+<p><strong>反向索引合并</strong>: 是合并正向信息，相对过程比较清晰。而合并词典和倒排表就不这么简单了，因为在词典中，Lucene要求按照字典顺序排序，在倒排表中，文档号要按照从小到大顺序排序排序，在每个段中，文档号都是从零开始编号的。所以正向合并可能只是简单的合并即可，而反向合并包括对term的归并排序以及对文档进行重新编号。</p>
+<font color="red">在增量查询的过程中，如何维护词向量的评分信息，因为新加入的Term可能会导致其他所有的Case全部变化？</font>
+
+<p>在Lucene中并没有一开始就对评分进行一个记录，而是对于可能会涉及到的一些原始信息进行了额外的存储，比如一个Term出现的文档有哪些，位置有哪些等，记录下来。这样的话Merge不需要额外改变什么东西。</p>
+<h2 id="6-搜索"><a href="#6-搜索" class="headerlink" title="6. 搜索"></a>6. 搜索</h2><p>搜索的过程总的来说就是将词典及倒排表信息从索引中读出来，根据用户输入的查询语句合并倒排表，得到结果文档集并对文档进行打分的过程。<br><img src="http://images.cnblogs.com/cnblogs_com/forfuture1978/WindowsLiveWriter/LuceneLucene1_F510/searchprocess_thumb6_7fa78a1d-e324-43ad-b53c-95e730377f2a.jpg" alt=""></p>
+<p>总共包括以下几个过程：</p>
+<ol>
+<li>IndexReader打开索引文件，读取并打开指向索引文件的流.</li>
+<li>用户输入查询语句</li>
+<li>将查询语句转换为查询对象Query对象树</li>
+<li>构造Weight对象树，用于计算词的权重Term Weight，也即计算打分公式中与仅与搜索语句相关与文档无关的部分(红色部分)。</li>
+<li>构造Scorer对象树，用于计算打分(TermScorer.score())。</li>
+<li>在构造Scorer对象树的过程中，其叶子节点的TermScorer会将词典和倒排表从索引中读出来。</li>
+<li>构造SumScorer对象树，其是为了方便合并倒排表对Scorer对象树的从新组织，它的叶子节点仍为TermScorer，包含词典和倒排表。此步将倒排表合并后得到结果文档集，并对结果文档计算打分公式中的蓝色部分。打分公式中的求和符合，并非简单的相加，而是根据子查询倒排表的合并方式(与或非)来对子查询的打分求和，计算出父查询的打分。</li>
+<li>将收集的结果集合及打分返回给用户。</li>
+</ol>
+<h2 id="7-倒排索引设计详述"><a href="#7-倒排索引设计详述" class="headerlink" title="7. 倒排索引设计详述"></a>7. 倒排索引设计详述</h2><p>倒排部分分为词典tii和倒排表tis。</p>
+<h4 id="7-1-词典部分设计"><a href="#7-1-词典部分设计" class="headerlink" title="7.1 词典部分设计"></a>7.1 词典部分设计</h4><p>tii是跳表结构，暂时不说，tis是真正的词典结构。除了前面有一些必要的信息外，就是一个一个顺序存储的Term外加offset信息。对于Term部分，可以固定长度顺序存储，但是很浪费空间。可以直接存储并且额外存储一个链表指向位置，可以二分。可以保存前缀+offset的形式，并且对每一块单词，索引第一个单词。</p>
+<p>上述几种方式可以二分查找以加速，但是可以使用哈希的方式以O（1）来做。最小完美哈希可以最节省空间的做到这个事情，但是是针对静态集合的，不能很好的支持动态。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Lucene笔记&quot;&gt;&lt;a href=&quot;#Lucene笔记&quot; class=&quot;headerlink&quot; title=&quot;Lucene笔记&quot;&gt;&lt;/a&gt;Lucene笔记&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-0
+    
+    </summary>
+    
+      <category term="搜索" scheme="http://flame4.github.io/categories/%E6%90%9C%E7%B4%A2/"/>
+    
+    
+      <category term="倒排索引" scheme="http://flame4.github.io/tags/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/"/>
+    
+      <category term="全文检索" scheme="http://flame4.github.io/tags/%E5%85%A8%E6%96%87%E6%A3%80%E7%B4%A2/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ElasticSearch 简介</title>
+    <link href="http://flame4.github.io/2016/07/17/ES/"/>
+    <id>http://flame4.github.io/2016/07/17/ES/</id>
+    <published>2016-07-17T15:26:19.000Z</published>
+    <updated>2016-11-16T05:38:33.673Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="ElasticSearch-简介"><a href="#ElasticSearch-简介" class="headerlink" title="ElasticSearch 简介"></a>ElasticSearch 简介</h1><p style="text-align:right">last Modified: 2016-07-24</p>
+
+
+
+<h3 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h3><p>Elasticsearch是一个基于Apache Lucene(TM)的开源搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进、性能最好的、功能最全的搜索引擎库。</p>
+<p>但是，Lucene只是一个库。想要使用它，你必须使用Java来作为开发语言并将其直接集成到你的应用中，更糟糕的是，Lucene非常复杂，你需要深入了解检索的相关知识来理解它是如何工作的。</p>
+<p>Elasticsearch也使用Java开发并使用Lucene作为其核心来实现所有索引和搜索的功能，但是它的目的是通过简单的RESTful API来隐藏Lucene的复杂性，从而让全文搜索变得简单。</p>
+<p>不过，Elasticsearch不仅仅是Lucene和全文搜索，我们还能这样去描述它：</p>
+<pre><code>分布式的实时文件存储，每个字段都被索引并可被搜索
+分布式的实时分析搜索引擎
+可以扩展到上百台服务器，处理PB级结构化或非结构化数据
+</code></pre><p>而且，所有的这些功能被集成到一个服务里面，你的应用可以通过简单的RESTful API、各种语言的客户端甚至命令行与之交互。</p>
+<p>总结来说，其提供了分布式的存储和查询服务，并且基于Lucene提供了分词等功能，所以其可以作为分布式存储的底层存储实现。在我所了解的大数据生态中，上层提供的Hive等SQL查询都会被转化为基本的查询和插入，然后交给底层来实现。所以底层只需要提供几个简单的操作接口，就可与上层的计算引擎去耦合，而ES就可以做到这点。</p>
+<h3 id="2-基本概念"><a href="#2-基本概念" class="headerlink" title="2. 基本概念"></a>2. 基本概念</h3><h4 id="组织逻辑"><a href="#组织逻辑" class="headerlink" title="组织逻辑"></a>组织逻辑</h4><p>ES中的信息组织方式与传统数据库类似，类比来看如下：</p>
+<blockquote>
+<p><strong>Index(索引)</strong> ： 数据库　  　</p>
+<p><strong>Type(类型)</strong> ：　表</p>
+<p><strong>Document(文档)</strong>　：　行</p>
+<p><strong>Fields(列)</strong>　：　字段</p>
+</blockquote>
+<p>所以逻辑为，Elasticsearch集群可以包含多个索引(indices)（数据库），每一个索引可以包含多个类型(types)（表），每一个类型包含多个文档(documents)（行），然后每个文档包含多个字段(Fields)（列）。</p>
+<p>下面是一个文档的典型结构：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">"email"</span>:      <span class="string">"john@smith.com"</span>,</div><div class="line">    <span class="attr">"first_name"</span>: <span class="string">"John"</span>,</div><div class="line">    <span class="attr">"last_name"</span>:  <span class="string">"Smith"</span>,</div><div class="line">    <span class="attr">"info"</span>: &#123;</div><div class="line">        <span class="attr">"bio"</span>:         <span class="string">"Eco-warrior and defender of the weak"</span>,</div><div class="line">        <span class="attr">"age"</span>:         <span class="number">25</span>,</div><div class="line">        <span class="attr">"interests"</span>: [ <span class="string">"dolphins"</span>, <span class="string">"whales"</span> ]</div><div class="line">    &#125;,</div><div class="line">    <span class="attr">"join_date"</span>: <span class="string">"2014/05/01"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出，其实文档就是典型的半结构化组织。</p>
+<h4 id="架构逻辑"><a href="#架构逻辑" class="headerlink" title="架构逻辑"></a>架构逻辑</h4><p>ES是一个分布式的系统，所以在架构上也必然包含很多组件。　</p>
+<blockquote>
+<p><strong>Cluster(集群)</strong>：一个集群就是很多电脑构成的集合，用来协调工作存储等。类似于HDFS</p>
+<p><strong>Node(节点)</strong>： 一个节点就是一个ES逻辑单元，一个集群就由很多节点组成。集群中存在一个主节点进行管理节点，主节点不参与文档级别事务而只是管理集群，不成为性能瓶颈。可以理解一个节点就是一台机器。</p>
+<p><strong>Shard(分片)</strong>：一个分片(shard)是一个最小级别“工作单元(worker unit)”,它只是保存了索引中所有数据的一部分。文档存储在分片中，并且在分片中被索引，但是应用程序不会直接与它们通信，取而代之的是，直接与索引通信。</p>
+</blockquote>
+<p><strong>分片</strong>： 分片是比较重要的一个概念。分片可以分为主分片和复制分片。主分片表示的就是一部分文档，而复制分片是只是主分片的索引。<font color="red">复制分片的作用为冗余备份和提高读性能。</font> 一个节点可以有多个分片，在节点扩展或者是故障时，可以自动调节分片使得ES负载均衡。但过多的复制节点会导致流量都流向一台机器(因为这台机器上啥都有)，反而降低性能。</p>
+<h3 id="3-基本操作"><a href="#3-基本操作" class="headerlink" title="3. 基本操作"></a>3. 基本操作</h3><h4 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h4><p>文档由经典的Json嵌套组成。每个嵌套的key是字符串，值可以是字符串，数字，或者一个Json对象。一个文档必须有以下的元数据：<br><strong>_index</strong>,<br><strong>_type</strong>,<br><strong>_id</strong>. 三者确定一个文档。</p>
+<p>ES提供经典curl的rest方法，可以调用内部的API，格式如下<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -X&lt;VERB&gt; 'http://&lt;HOST&gt;:9200/&lt;PATH&gt;/[&lt;API&gt;]/[?&lt;PARAMETERS&gt;]' [-d '&#123;&lt;BODY&gt;&#125;']</div></pre></td></tr></table></figure></p>
+<p>verb为操作方式；path查询表，通常为/index/type；api可选，指定使用的api，一般会带_开头； parameters表示带的细化参数； 后面表示请求体，PUT方法有用。</p>
+<h4 id="新建文档"><a href="#新建文档" class="headerlink" title="新建文档"></a>新建文档</h4><p>PUT和POST方法，PUT用于自定义id，POST用于ES自动生成id，如下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">curl -XPOST 'localhost:9200/website/blog/1?pretty' -d '</div><div class="line">&#123;</div><div class="line">  "title": "My second blog entry",</div><div class="line">  "text":  "Still trying this out...",</div><div class="line">  "date":  "2014/01/01"</div><div class="line">&#125;'</div></pre></td></tr></table></figure></p>
+<h4 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h4><p>GET方法，可以自定义想要查询的熟悉。<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XGET 'localhost:9200/website/blog/1?pretty</div></pre></td></tr></table></figure></p>
+<p>查询的API为_search，如果查询一个es的type中所有文档，可以如下<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XGET localhost:9200/website/blog/_search?pretty</div></pre></td></tr></table></figure></p>
+<h4 id="Cluster级别API"><a href="#Cluster级别API" class="headerlink" title="Cluster级别API"></a>Cluster级别API</h4><p><strong>/_cat</strong>:  curl -XGET localhost:9200/_cat 可以查看_cat的API调用功能，包括index级别，shard级别等等。</p>
+<p><strong>创建index/type</strong>: 使用XPUT直接进行创建，比如在空的集群上 使用 curl -XPUT localhost:9200/aaa 来创建一个aaa的索引。</p>
+<h3 id="4-集群算法"><a href="#4-集群算法" class="headerlink" title="4. 集群算法"></a>4. 集群算法</h3><p>这部分针对分片，路由，故障等方面介绍ES使用的主要算法，以帮助理解细节。</p>
+<h4 id="故障处理"><a href="#故障处理" class="headerlink" title="故障处理"></a>故障处理</h4><p>为了防止故障丢失数据，ES一般建议产生复制分片，并且复制分片会自动分配到不同的节点上去，相同的分片不会放在同一节点上，因为这样没有任何好处。</p>
+<p>集群在ES中的可用度和稳定性用<strong>健康程度</strong>表示，分为绿色，黄色和红色。Green代表所有的主分片和复制分片可用，Yellow代表主分片可用，复制分片不全部可用，Red代表主分片不全部可用。</p>
+<p>一个绿色的情况如下图所示：<br><img src="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0203.png" alt=""><br>有三个主分片，每个主分片设置一个复制分片，并且主分片和复制分片分布在不同的节点上且全部可用。如果有三个节点，则可以扩展为下面的情况：<br><img src="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0205.png" alt=""><br>在遇到节点挂掉的情况下，集群会在瞬间把一个复制节点转为主节点。比如下图是上面挂掉节点1的情况：<br><img src="https://raw.githubusercontent.com/looly/elasticsearch-definitive-guide-cn/master/images/elas_0206.png" alt=""><br>此时，因为不是每个主分片都有两个复制分片(一开始就是这么设定的),所以集群为黄色，但是可以正常运作。在之后，ES会试图新增加复制节点以使得集群恢复为绿色。但因为涉及到大量数据迁移等操作，恢复绿色的过程可能不是那么快。</p>
+<h4 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h4><p>如何知道一个具体的文档在哪一个分片中？ES中就采用了最简单的HASH方法，默认情况下对于一个文档，使用 “_id”属性来产生hash码，再除以分片得到余数来决定。所以分片的个数必须在创建表的时候就确定。用户可以通过定义<strong>routing</strong>来实现自定义路由。</p>
+<h4 id="新建、索引、删除文档"><a href="#新建、索引、删除文档" class="headerlink" title="新建、索引、删除文档"></a>新建、索引、删除文档</h4><p>新建、索引和删除请求都是写(write)操作，它们必须在主分片上成功完成才能复制到相关的复制分片上。</p>
+<p>下面我们罗列在主分片和复制分片上成功新建、索引或删除一个文档必要的顺序步骤：</p>
+<pre><code>1.客户端给Master节点发送新建、索引或删除请求。
+2.Master节点使用文档的_id确定文档属于哪个分片。它转发请求到主分片存在的节点上。
+3.在主分片上执行请求，如果成功，它转发请求到相应的复制分片存在的节点上。当所有的复制节点报告成功，主分片的节点报告成功到请求的节点，请求的节点再报告给客户端。
+</code></pre><p>客户端接收到成功响应的时候，文档的修改已经被应用于主分片和所有的复制分片，修改就生效了。此外，还有如下几个参数可调：</p>
+<p><strong>Replication</strong>: 默认为所有复制节点完成后响应客户端，可以设置为主分片结束任务即反馈。<br><strong>Consistency</strong>: 主分片需要规定过半数的复制分片可用，以防止写入错误信息到错误分区。<br><strong>timeout</strong>: 当复制分片不够时，设置时间来等待更多复制分片出现。</p>
+<h4 id="检索文档"><a href="#检索文档" class="headerlink" title="检索文档"></a>检索文档</h4><p>下面罗列在主分片或复制分片上检索一个文档必要的顺序步骤：</p>
+<pre><code>1.客户端给Node 1发送get请求。
+2.节点使用文档的_id确定文档属于分片0。分片0对应的复制分片在三个节点上都有。此时，它转发请求到Node 2。
+3. Node 2返回endangered给Node 1然后返回给客户端。
+</code></pre><p>对于读请求，为了平衡负载，请求节点会为每个请求选择不同的分片——它会循环所有分片副本。</p>
+<p>可能的情况是，一个被索引的文档已经存在于主分片上却还没来得及同步到复制分片上。这时复制分片会报告文档未找到，主分片会成功返回文档。一旦索引请求成功返回给用户，文档则在主分片和复制分片都是可用的。</p>
+<h4 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h4><h3 id="5-拓展"><a href="#5-拓展" class="headerlink" title="5. 拓展"></a>5. 拓展</h3><h3 id="6-具体安装和配置"><a href="#6-具体安装和配置" class="headerlink" title="6. 具体安装和配置"></a>6. 具体安装和配置</h3><p>需要以下几个路径：</p>
+<ol>
+<li>配置文件路径: /etc/elasticsearch/conf</li>
+<li>日志路径: /var/log/elasticsearch</li>
+<li>进程文件路径: /var/run/elasticsearch</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;ElasticSearch-简介&quot;&gt;&lt;a href=&quot;#ElasticSearch-简介&quot; class=&quot;headerlink&quot; title=&quot;ElasticSearch 简介&quot;&gt;&lt;/a&gt;ElasticSearch 简介&lt;/h1&gt;&lt;p style=&quot;text-al
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="数据存储" scheme="http://flame4.github.io/tags/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/"/>
+    
+      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Python 高级特性</title>
+    <link href="http://flame4.github.io/2016/07/14/Python-Senior/"/>
+    <id>http://flame4.github.io/2016/07/14/Python-Senior/</id>
+    <published>2016-07-14T15:26:19.000Z</published>
+    <updated>2016-11-16T05:38:33.673Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Python-高级特性"><a href="#Python-高级特性" class="headerlink" title="Python 高级特性"></a>Python 高级特性</h1><p style="text-align:right">last Modified: 2016-11-12</p>
+
+
+<h4 id="1-With语句"><a href="#1-With语句" class="headerlink" title="1. With语句"></a>1. With语句</h4><p>With语句在Python2.6中被加入标准，作为try/finally的替代，用于资源访问进行控制的场合。</p>
+<p>先要明白几个概念：</p>
+<pre><code>1. 上下文管理器： 特殊对象，实现了__enter__()和__exit()__方法的对象，只有这种对象才能够支持with语句，其定义了with在执行时候要建立的&quot;运行时上下文&quot;，负责执行进入和退出操作。
+2. 运行时上下文： 在语句体执行前通过__enter__()进入运行时上下文，语句体执行完后通过__exit()__退出。简单的理解就是，with的语句体执行之前需要做的一些预处理工作和执行完之后的擦屁股操作，比如打开文件什么的。
+3. 上下文表达式： 我们可以自己定义一个上下文管理器给with使用，但一般为了避免麻烦，可以使用with自动生成上下文管理器。这通过调用with的时候送给其一个上下文表达式完成，可以在后面更好的理解。
+4. 语句体： with包裹的要执行的代码块。
+</code></pre><p>with的语法格式如下所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">with</span> context_expression [<span class="keyword">as</span> target(s)]:</div><div class="line">  <span class="keyword">with</span>-body</div></pre></td></tr></table></figure></p>
+<p>如果使用了as targets，会将<strong>enter</strong>()的返回值返回给target。With的作用是为了减少特定代码的编码量(比如文件读写和线程锁)，python也对这些内建类型加入了支持，方便人们调用。比如，对一个文件的读写可以这样写:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">with</span> open(<span class="string">"a.txt"</span>) <span class="keyword">as</span> file:</div><div class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> file.readline():</div><div class="line">    print(i)</div></pre></td></tr></table></figure></p>
+<p>在这个过程中,open表达式用于构建了一个上下文管理器，并把返回值赋给file. 可以猜想，对于文件，enter函数做的就是打开文件并处理异常，exit就是退出并处理异常。</p>
+<p>对于自定义的上下文管理器，大概像这样：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, <span class="string">"filename"</span>)</span>:</span></div><div class="line">    s = filename</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">      file = open(s)</div><div class="line">      <span class="keyword">return</span> self.file</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">      ...</div><div class="line">    <span class="keyword">finally</span>:</div><div class="line">      ...</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">      close(self.file)</div><div class="line">      ...</div><div class="line"></div><div class="line"><span class="keyword">with</span> A(<span class="string">"a.txt"</span>) <span class="keyword">as</span> a:</div><div class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> a.readline():</div><div class="line">    ...</div></pre></td></tr></table></figure></p>
+<h4 id="2-yield与迭代器"><a href="#2-yield与迭代器" class="headerlink" title="2. yield与迭代器"></a>2. yield与迭代器</h4><h4 id="3-python的字符大坑"><a href="#3-python的字符大坑" class="headerlink" title="3. python的字符大坑"></a>3. python的字符大坑</h4><p>一般的字符编码有ascll码, MBCS和unicode(包括utf-16, utf-8)等方案,具体的来源和不同可以<a href="http://www.cnblogs.com/huxi/archive/2010/12/05/1897271.html" target="_blank" rel="external">看这里</a>.</p>
+<p>在python2中,处理字符的中文编码是一个很蛋疼的问题.比如下面的一段例子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&gt;&gt;&gt; s = &apos;这个世界上&apos;</div><div class="line">&gt;&gt;&gt; s</div><div class="line">&apos;\xe8\xbf\x99\xe4\xb8\xaa\xe4\xb8\x96\xe7\x95\x8c\xe4\xb8\x8a&apos;</div><div class="line">&gt;&gt;&gt; s = u&apos;这个世界上&apos;</div><div class="line">&gt; &gt;&gt;&gt; s</div><div class="line">u&apos;\u8fd9\u4e2a\u4e16\u754c\u4e0a&apos;</div></pre></td></tr></table></figure></p>
+<h4 id="4-python装饰器"><a href="#4-python装饰器" class="headerlink" title="4. python装饰器"></a>4. python装饰器</h4><h4 id="5-python自省"><a href="#5-python自省" class="headerlink" title="5. python自省"></a>5. python自省</h4><h4 id="6-python-lambda表达式"><a href="#6-python-lambda表达式" class="headerlink" title="6. python lambda表达式"></a>6. python lambda表达式</h4><h4 id="7-python-新式类和旧式类"><a href="#7-python-新式类和旧式类" class="headerlink" title="7. python 新式类和旧式类"></a>7. python 新式类和旧式类</h4><p>python新式类的设计是为了更好的弥补OO的语言思想. 在python 2.2中, 为了声明为新式类, 需要显式继承object类. 而在python 3中, 默认即是新式类.</p>
+<p>新式类比旧式类的提升在于: 自省的支持, 新的属性, 多继承的搜索方式.<br>具体可以看下面几个blog.<br><a href="http://blog.csdn.net/u010066807/article/details/46896835" target="_blank" rel="external">blog1</a>, <a href="http://blog.csdn.net/u010576100/article/details/50593509" target="_blank" rel="external">blog2</a>,<br><a href="http://blog.csdn.net/xhw88398569/article/details/48663083" target="_blank" rel="external">super usage</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Python-高级特性&quot;&gt;&lt;a href=&quot;#Python-高级特性&quot; class=&quot;headerlink&quot; title=&quot;Python 高级特性&quot;&gt;&lt;/a&gt;Python 高级特性&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modi
+    
+    </summary>
+    
+      <category term="Python" scheme="http://flame4.github.io/categories/Python/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>LSM Tree</title>
+    <link href="http://flame4.github.io/2016/07/10/LSM-Tree/"/>
+    <id>http://flame4.github.io/2016/07/10/LSM-Tree/</id>
+    <published>2016-07-10T15:26:19.000Z</published>
+    <updated>2016-09-06T17:19:50.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="API-Implementation-for-Dymatic-Partition-Table-based-on-HBase-and-ES"><a href="#API-Implementation-for-Dymatic-Partition-Table-based-on-HBase-and-ES" class="headerlink" title="API Implementation for Dymatic Partition Table based on HBase and ES"></a>API Implementation for Dymatic Partition Table based on HBase and ES</h1><p style="text-align:right">last Modified: 2016-07-04</p>
+
+
+
+<font color="green">慢慢来，现在还理不清整体的逻辑，先把理解的部分写好</font>
+
+<p><strong>Notice</strong>: <font color="red">重要的部分</font>, <font color="green">后续可能修改的部分</font>。</p>
+<h3 id="1-倒排索引"><a href="#1-倒排索引" class="headerlink" title="1. 倒排索引"></a>1. 倒排索引</h3><p>倒排索引在搜索引擎中经常使用，用于建立快速查找关键词的机制。</p>
+<p>原理很简单，假设有多个doc， 每个doc有很多的单词。对于一个word a, 把所有a出现过的doc放在a的后面形成一个倒排列表，并对所有的word执行该操作，最后的结果组合成为一个倒排索引表。在给定单词的情况下，可以快速知道有哪些文档中含有该关键词。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">一般倒排索引都比原文件大，所以为了存储大量信息，经常把word划分并存到不同的机器上。</div></pre></td></tr></table></figure>
+<blockquote>
+<p>补充：正排索引</p>
+<p>倒排索引是针对一个word建立一个单元，而正排列表是针对一个文件进行排列,可以方便倒排索引的建立。包含下列4个字段：</p>
+<ol>
+<li>文件Id： 从1自增</li>
+<li>word字段：表示一个单词</li>
+<li>Nhits字段：表示该单词出现的次数</li>
+<li>HitList：单词出现的位置，以偏移量表示</li>
+</ol>
+<p>例子如图：<br><img src="http://images.51cto.com/files/uploadimg/20110518/233501799.jpg" alt=""></p>
+</blockquote>
+<h3 id="2-B-Tree"><a href="#2-B-Tree" class="headerlink" title="2. B+-Tree"></a>2. B<sup>+</sup>-Tree</h3><p>B<sup>+</sup>-Tree树是B-Tree的一种变种，两者都是外存索引。</p>
+<p>B-Tree在一般情况下，非叶子节点可以有n个值和n个指针。在索引查询时对n个值进行二分查找，如果失败进入对应的下一层，叶子节点都是不含有效信息的空指针。 B<sup>+</sup>-Tree的非叶子节点存了n-1个key和n个指针，key用来划分搜索空间，根据key进入下一级节点。叶子节点存放了所有的真实数据列表。 B<sup>+</sup>-Tree可以保证平衡，一个M叉的 B<sup>+</sup>-Tree维护自己的每一个节点有<strong>M/2-M个</strong>指针，否则采用合并或者拆分的手段，这部分如果需要具体实现再补充，否则就不深入了。</p>
+<blockquote>
+<p>B<sup>+</sup>-Tree比B-Tree更适合用于文件索引和数据库索引:</p>
+<ol>
+<li>B+-tree的内部结点并没有指向关键字具体信息的指针。因此其内部结点相对B 树更小。如果把所有同一内部结点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读入内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。</li>
+<li>由于非终结点并不是最终指向文件内容的结点，而只是叶子结点中关键字的索引。所以任何关键字的查找必须走一条从根结点到叶子结点的路。所有关键字查询的路径长度相同，导致每一个数据的查询效率相当。</li>
+<li>数据库索引采用B+树的主要原因是 B树在提高了磁盘IO性能的同时并没有解决元素遍历的效率低下的问题。正是为了解决这个问题，B+树应运而生。B+树只要遍历叶子节点就可以实现整棵树的遍历。而且在数据库中基于范围的查询是非常频繁的，而B树不支持这样的操作（或者说效率太低）。</li>
+</ol>
+</blockquote>
+<h3 id="3-LSM-Tree"><a href="#3-LSM-Tree" class="headerlink" title="3. LSM-Tree"></a>3. LSM-Tree</h3><p> B<sup>+</sup>-Tree可以用来实现在数据库上的index. 这里认为对于数据库来说，记录是一条一条存储的，BTree的index是用key来做的。 使用B<sup>+</sup>-Tree作为存储，则随着信息的增多，叶子节点会逐渐分裂。当叶子节点的总容量过大写入内存时，逻辑上连续的叶子节点可能会被写入物理上不相同的地方(因为页表的映射不是顺序的，而是贪心的)。在写入的性能上会有很大折扣，因为可能产生很多随机IO。</p>
+<p> 为了解决这个问题而引入的就是LSM-Tree， LSM可以做到B<sup>+</sup>-Tree做到的一切，也支持增删查改，其<font color="red">牺牲了部分读性能，大幅度提高写性能</font>。</p>
+<p>总的来看，LSM使用一个batch算法来把对于index的写入存在内存中，并等待时机。当内存中插入的index很大的时候，其采用一种类似于归并排序的方法把这些index的修改批量写入磁盘中。(当然写到这里其实啥也看没明白，往下看)</p>
+<p>首先了解一下基本的LSM-Tree，如下图所示。<br><img src="http://images.cnitblog.com/blog/319578/201408/281219493293115.png" alt=""></p>
+<p>一个LSM由在内存的C0-Tree和在磁盘的C1-Tree构成。信息的插入初始为存在C0中，当C0到达一定的size后从C0上拿下一些子树来<strong>merge</strong>到C1中去。也就是下面的这个图。C1中的每一个节点是一个single-page，每一层的节点会被组成一个Multi-pages来实现。Merge结束后的树被放回到原来的C1中。</p>
+<p>那么问题来了：照这种理解，按原论文中的图来看，C1中第二层最左边的节点应该要改写自己的指针才可以定位到新的块，那么难道要写一次磁盘吗？这其实是不可接受的。如果改一下磁盘指针还好说，如果引起了split或者是merge，那么整个磁盘块都要重新调整，这就很尴尬了。</p>
+<p>其实具体的LSM-Tree的实现和图上看到的有一个根本上的区别，那就是LSM-Tree中所有的写操作都是写内存，而对于叶子节点的插入和非叶子节点的插入都是一样的。<font color="green">具体的细节理解待我完全理清逻辑后补充上来，目前可以理解的是LSM-Tree可以针对key在内存中写操作，并把结果批量写入内存，在读取时从每个写的buffer中去查找，并且在内存做结果的merge，所以写性能快了很多，而读性能慢了很多，可以看levelDB这个项目。</font></p>
+<h3 id="4-HBASE和ElasticSearch-ES-简介"><a href="#4-HBASE和ElasticSearch-ES-简介" class="headerlink" title="4. HBASE和ElasticSearch(ES)简介"></a>4. HBASE和ElasticSearch(ES)简介</h3><p>HBASE是非关系型分布式数据库，需要运行在HDFS上，一般存储的都是稀疏数据，并提供内存操作，压缩以及每一列的布隆过滤器。HBASE是<font color="red">基于列存储的</font>,并可以通过JAVA API执行查询操作，并且<font color="green">一定会将其转化为Mapreduce</font>, 很多项目提供了类SQL的查询接口，并在内部编译为可以执行的Mapreduce程序，比如HIVE, PIG等。</p>
+<p>ElasticSearch 是一个搜索引擎的实现，提供分布式，<a href="http://baike.baidu.com/link?url=uno3skPbmlAxHTcC_MyTuBl-vFmXbl61UIIhP4cMrCUPxaRyimjRFVzIaelt5cu-_UftHstPb7gupdI1qO8PHK" target="_blank" rel="external">多租户</a>的全文搜索引擎服务。可以理解为单机全文搜索引擎的分布式实现，所以其工作场景上首先应该有大量的数据和文件，其次有需求是需要在这些大量文件中提供查询服务。</p>
+<h3 id="5-基于LSM-Tree的HBASE实现思路"><a href="#5-基于LSM-Tree的HBASE实现思路" class="headerlink" title="5. 基于LSM-Tree的HBASE实现思路"></a>5. 基于LSM-Tree的HBASE实现思路</h3><p>Hbase按照行健，列族，列限定符和时间戳四维坐标系来组织。<strong>无模式</strong>，只需要提前定义列族，不需要定义特定的列限定符，也就是说每一列族的每一条记录都可以自己定义列的个数。<strong>无类型</strong>， 所有数据都是以二进制字节存储。</p>
+<p><img src="http://img.blog.csdn.net/20130508221106201" alt=""><br>Hbase整体架构如上所示。对于Hbase中的一张表，首先由HMaster根据行健进行分区，每个子表为一个HRegion.每个HRegion对于每个列族有一个Store，<font color="green">每个store有一个MemStore的内存缓存机制</font>，并且有许多的StoreFile对象，每个StoreFile对象对应一个HFile对象，一个HFile就是一个实际的存储文件。 在这里就可以看出，实际上的HBase实现基于的就是LSM-Tree的思想。在一般的根据行健查询的用户场景下，首先根据行健确定是在哪个HRegion中，然后再根据MemStore和HFile来进行文件的读取。</p>
+<blockquote>
+<p><strong>.META</strong>: HMaster中用于存放HRegion索引信息的， 该文件也可能过大被分割为多个Region.</p><p><br><strong>-ROOT-</strong>: 存放.META信息.</p>
+</blockquote>
+<p>针对基于行健的查询上，流程如下图所示。<br><img src="http://www.ibm.com/developerworks/cn/analytics/library/ba-1604-hbase-develop-practice/img03.jpg" alt=""></p>
+<p>首先花费三次固定时间查找到正确的Region,然后在固定的Region内，先在Memstore内查找，如果存在于此，可以花费log(e)的时间查询得到。否则需要先花费log(b)在HFile上找到具体的列族位置，然后在进行顺序扫描进内存(因为同一列族基本都会存放在一起)之后进行查询。</p>
+<h5 id="Q1-在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？"><a href="#Q1-在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？" class="headerlink" title="Q1. 在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？"></a>Q1. 在每一个Region上，如果是基于列存储的，那么如何识别每一个Region的行健？</h5><p>我觉得是用序列号什么的？</p>
+<h5 id="Q2-时间戳的作用是什么？什么时候以什么手段修改的？"><a href="#Q2-时间戳的作用是什么？什么时候以什么手段修改的？" class="headerlink" title="Q2. 时间戳的作用是什么？什么时候以什么手段修改的？"></a>Q2. 时间戳的作用是什么？什么时候以什么手段修改的？</h5><p>我觉得这个是用于处理并发性的，作用类似与raft中的Item号。可能在弱一致性的要求下，只需要在最终有些什么merge之类的操作？</p>
+<h3 id="6-基于倒排索引的ElasticSearch实现"><a href="#6-基于倒排索引的ElasticSearch实现" class="headerlink" title="6. 基于倒排索引的ElasticSearch实现"></a>6. 基于倒排索引的ElasticSearch实现</h3><p>基于倒排索引的搜索引擎的查询和建立都已经很熟悉，主要考虑ElasticSearch的倒排索引的分布式实现的一些细节。</p>
+<p>当索引过于巨大，需要引入分片的概念。分片也就是将一个索引进行分割，每一个分片本身也是一个完整的索引结构并可以执行查询。分片可以分为<strong>主分片</strong>和<strong>复制分片</strong>， 主分片就是分割过的索引，而复制分片是主分片的冗余备份，其同时可以提供查询服务的带宽需求。</p>
+<p>对于一个查询来说，首先可以根据查询来确定信息在哪个分片上，这一步就是基于hash来做的。<br>具体的ES介绍放到下一篇中进行。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;API-Implementation-for-Dymatic-Partition-Table-based-on-HBase-and-ES&quot;&gt;&lt;a href=&quot;#API-Implementation-for-Dymatic-Partition-Table-based
+    
+    </summary>
+    
+      <category term="Database" scheme="http://flame4.github.io/categories/Database/"/>
+    
+    
+      <category term="Paper" scheme="http://flame4.github.io/tags/Paper/"/>
+    
+      <category term="Disk" scheme="http://flame4.github.io/tags/Disk/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>shell 用法简记</title>
+    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
+    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:21:26.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
+
+<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
+<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
+<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
+<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
+    
+    </summary>
+    
+      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>raft Protocol</title>
+    <link href="http://flame4.github.io/2016/07/05/raft/"/>
+    <id>http://flame4.github.io/2016/07/05/raft/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:21:06.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="RAFT-Protocol"><a href="#RAFT-Protocol" class="headerlink" title="RAFT Protocol"></a>RAFT Protocol</h1><p style="text-align:right">last Modified: 2016-07-14</p>
+
+
+<hr>
+<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><hr>
+<p><strong>RAFT</strong>是一种一致性算法，用于解决分布式系统中的<font color="red"><strong>冗余备份</strong></font>之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。<br><strong>Paxos</strong>是另一种分布式系统的协议，在90年被提出，<strong>RAFT</strong>可以做到与<strong>Paxos一样的功能</strong>，却比其更好理解，这也是<strong>RAFT</strong>的设计初衷。</p>
+<blockquote>
+<h5 id="一致性问题和一致性算法"><a href="#一致性问题和一致性算法" class="headerlink" title="一致性问题和一致性算法"></a>一致性问题和一致性算法</h5><p>在分布式系统中，我们在使用时只有一台客户机(访问端)与整个分布式服务机组交互，而且在我们看来，整个服务机组的表现应该与一台电脑一样，比如像hdfs那样呈现出一个文件系统，所以这里面会产生一致性问题。<br>一致性问题的存在起源是因为要保证分布式系统的可靠性，那么文件就不能仅仅只存储在一台电脑上(我们认为分布式系统中电脑宕机是正常的)，而要以多备份的形式存储，那么在客户机与文件交互的过程中，就需要保证多备份之间的一致性，这就是一致性问题。<br>一致性问题可以分为弱一致性和强一致性，后者要求每一次操作多备份的一致性，而前者要求多次操作的最终一致性。为了保证并发性，一般现在的算法都针对的是弱一致性。</p>
+<p>通常解决这类问题的方法分为三种：两阶段提交方法，分布式锁服务，乐观锁服务(<a href="http://blog.chinaunix.net/uid-26111972-id-3759540.html" target="_blank" rel="external">详见这篇博客</a>)。 Paxos属于分布式锁服务的一种。</p>
+</blockquote>
+<p><strong>RAFT</strong>相比其他的一致性算法，有以下几个特点：</p>
+<ul>
+<li>Strong Leader: 信息只能单向传递，这样做更容易理解</li>
+<li>Leader election: 使用随机计时器，方便了设计和冲突管理。</li>
+<li>Membership changes: 使用一种新的<strong>Joint consensus</strong>方法。</li>
+</ul>
+<hr>
+<h3 id="2-Replicated-state-machines"><a href="#2-Replicated-state-machines" class="headerlink" title="2. Replicated state machines"></a>2. Replicated state machines</h3><hr>
+<p><strong>RAFT</strong>要解决的问题是一致性问题，首先需要对这个问题做一个形式化的表述来方便处理，RAFT使用Replicated state machines模型来抽象一致性问题。  模型如下图：<br><img src="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<p>在每台servers上存在一个本地的state machines和一个Log表，存储的是本地的信息状态和client的操作序列。可以理解为状态机就像一张数据库表一样存放着当前数据信息，而log表放着指令集合。<br>在这个模型下，假设初始所有服务器的状态机都是一样的，那么只要可以保证指令序列Log在所有机器上保持一致性，那么自然最终的结果是可以一致性的。有两种方式可以实现这种一致性：Symmerty and Assymmetry. 前者是说一个client可以和所有的server进行通讯，而后者是说<font color="red">同一时刻</font>只能与一个server进行通讯，并由这个server向其他的server进行转发Log。 处于方便理解的考虑，RAFT选择了后者。所有的server之间的交互就通过Consensus module来完成，而一致性算法就是实现了这个Consensus module来保证所有的机器上的Log最终是相同的，并且可以满足高的并发性。</p>
+<blockquote>
+<h5 id="一致性算法的四个特征"><a href="#一致性算法的四个特征" class="headerlink" title="一致性算法的四个特征"></a>一致性算法的四个特征</h5><ol>
+<li>Safety: 首先要保证结果的正确性，要克服网络延迟，丢包等现象。</li>
+<li>fully available: 可以允许宕机。只要系统中还有过半的服务器能够正常运行，那么整个集群可以正常运行。宕机的服务器可能会在稍后的时间内恢复并重新加入。</li>
+<li>No timing dependency: 不依赖时间实现同步，允许不同机器的时钟不同。</li>
+<li>在通常情况下，如果过半的服务器完成了一项工作，那么认为这个工作完成，而不需要等到所有机器都完成。</li>
+</ol>
+</blockquote>
+<hr>
+<h3 id="3-Paxo’s-Drawbacks"><a href="#3-Paxo’s-Drawbacks" class="headerlink" title="3. Paxo’s Drawbacks"></a>3. Paxo’s Drawbacks</h3><hr>
+<ol>
+<li>难以理解</li>
+<li>很难实现</li>
+</ol>
+<hr>
+<h3 id="4-Designing-for-understandability"><a href="#4-Designing-for-understandability" class="headerlink" title="4. Designing for understandability"></a>4. Designing for understandability</h3><hr>
+<p><strong>设计原则</strong></p>
+<ol>
+<li><font color="red">易于理解</font></li>
+<li>易于实现</li>
+<li>一般操作的高效率</li>
+<li>任何情况下的安全性和一致性</li>
+</ol>
+<p>设计中使用了两种技术来提高<strong>understandibility</strong></p>
+<ol>
+<li>尽可能使用问题分解手段来简化问题的粒度</li>
+<li>简化每台机器的状态空间，来简化思考</li>
+</ol>
+<hr>
+<h3 id="5-The-RAFT-consensus-algorithm"><a href="#5-The-RAFT-consensus-algorithm" class="headerlink" title="5. The RAFT consensus algorithm"></a>5. The RAFT consensus algorithm</h3><hr>
+<p>首先，RAFT把所有的server划分为三部分： <strong>Leader</strong>, <strong>candidate</strong>, <strong>follower</strong>.<br>首先集群选出一个Leader,由Leader与Client交互，并且向所有Server转发Log表，以及其他的管理。这样的话可以简化设计，并且让信息单向流动。如果一个Leader挂了，那么整个协议会支持产生一个新的Leader。<br>在这种设计下，设计实现的功能可以被进一步分解为三个问题： <strong>Leader election</strong>, <strong>Log replication</strong>, <strong>safety</strong>。下面分别看三个问题</p>
+<h5 id="5-1-RAFT-Basic"><a href="#5-1-RAFT-Basic" class="headerlink" title="5.1 RAFT Basic"></a>5.1 RAFT Basic</h5><p>下图显示了一个服务器的状态转换图。<br><img src="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""><br>最开始所有的人都是Follower, 并且有一个<strong>随机的计时器到点</strong>，就会产生一次选举，产生Candidate，并有人最终获胜，成为一个Leader, 而其他人重新变为Follower。 一般的稳定状态下，就只有一个Leader和很多的Follower。至于其他情况，在后面的部分讨论。</p>
+<p><strong>Term</strong>： Raft把真实的时间分为一个个的连续的Term. Term可以理解为逻辑时间，也可以理解为一段稳定存在的时间，一般来说，一个新Term的产生是因为Leader挂了，而一个新Term的生存周期就是选举新Leader的过程，以及之后的稳定运行过程。所以每个Term的时间都是不相同的，参考下图(下图的Term3对应选举失败的情况，这时会再次进行选举)。<br><img src="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">注意：Term可以用来标记自己的处理阶段，所有的server不一定Term号都相同。每个Server都存有一个递增的Term号来表明自己的处理进程。所以如果一个Server收到一个来自其他Server的Log修改，但是Term如果比自己的小，则可以拒绝此服务。</div></pre></td></tr></table></figure>
+<p><strong>RPC</strong> : remote proceudre calls, 服务器间用来通讯的协议文件。在主要的功能实现中只需要两种RPC，第三种RPC用于提供server之间的快照，详细的见后面的讲述。</p>
+<h5 id="5-2-Leader-Election"><a href="#5-2-Leader-Election" class="headerlink" title="5.2 Leader Election"></a>5.2 Leader Election</h5><p>RAFT采取定期心跳包的形式来产生Leader。对于一个server来说，其生命周期的流程可以用以下几条来概括：</p>
+<ol>
+<li>如果一个Server进入了一个集群，其进入follower状态，并设置一个初始化的Term值，以及一个随机的Timer计时器。</li>
+<li>如果server处于follower状态，并在timer计时结束之间接受到一个有效的来自leader或者是candidate的<strong>RPCs</strong>(AppendEntries or RequestVote)，则其重置计时器，继续保持follower状态，<font color="red">并更新自己的term number为Leader的term number</font>。</li>
+<li>一个server如果处于Leader状态，其以一个远低于其他server Timer的时间间隔发送心跳包(AppendEntries RPC)，以维持自己Leader状态。</li>
+<li>如果一个follower发生election timeout， 则认为Leader已经挂掉，则其<font color="red">自增自己的Term number</font>, 然后转换为candidate状态。</li>
+<li>如果一个server处于candidate状态，则其<font color="red">对自己投票</font>，并向其他的server并行发送RequestVote RPC，直到以下三种情况出现：<ul>
+<li><strong>candidate win</strong> 胜出条件是一个candidate对于其给定的term number获得半数以上的选票, 对于任意一个Term，其他server只能投一次票，根据先到先服务的原则。胜出的candidate成为leader并立即发送心跳包防止选举过程。</li>
+<li><strong>Another Candidate Win</strong> 如果在等待选票的过程中其接受到其他的AppendEntries RPC，如果其Term number至少和其一样大，那么其认同这个Leader并退回follower阶段，否则拒绝这个RPC并继续进行选举。</li>
+<li><strong>No Winner for A Period</strong> 如果有很多follower同时成为candidate，那么票型就会分散，这时所有的candidate都会有time out，然后其自增自己的term number再进行下一轮。</li>
+</ul>
+</li>
+<li>如果一个server处于Leader的情况下收到了比自己大的 RequestVote RPC，那么? <strong>论文中没有提及</strong>。</li>
+</ol>
+<blockquote>
+<p>在初始化随机计时器和没有candidate胜出的情况下，都采用了CSMA/CD中的随机回退思想来减少冲突。在每次进入candidate状态时也会设置一个随时的timeout值。</p>
+</blockquote>
+<h5 id="5-3-Log-Replication"><a href="#5-3-Log-Replication" class="headerlink" title="5.3 Log Replication"></a>5.3 Log Replication</h5><p>当一个Leader形成后，就开始接受Client的指令集合。其根据指令不断生成一个个的Log Entry，然后附在AppendEntries RPC中发送。如果多数server确认了这个RPC(<strong>意味着回复报文？</strong>)，则Leader <em>Commit</em>这些操作并可以发送执行结果给Client。 对于那些没有回复的server， Leader会持续发送直到回复。Log Entries的示意图如下所示：<br><img src="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67" alt=""><br>(图片找不到完整的了 =。=)</p>
+<p>每个Log Entries有一个方格内的Term Number和一个Index Number。因为有多数的Log Entry后才执行，可以保证<em>Commit</em>的指令是冗余的。同时，领导人的日志中之前的所有日志条目也都会被提交，包括由其他领导人创建的条目。5.4 节会讨论某些当在领导人改变之后应用这条规则的隐晦内容，同时它也展示了这种提交的定义是安全的。领导人跟踪了最大的将会被提交的日志项的索引，并且索引值会被包含在未来的所有附加日志 RPCs （包括心跳包），这样其他的服务器才能最终知道领导人的提交位置。一旦跟随者知道一条日志条目已经被提交，那么它也会将这个日志条目应用到本地的状态机中（按照日志的顺序）。</p>
+<p><strong>日志机制</strong>： 作者设计了日志机制来保证一致性和安全性。就类似于数据库设计中的范式，日志机制其实就是两条原则：</p>
+<ol>
+<li>如果两个不同的Log中有相同的index和term，那么他们存的指令是相同的。</li>
+<li>如果两个不同的Log中有相同的index和term，那么他们存的之前的指令也都是相同的。</li>
+</ol>
+<p>第一条的合理性在于，相同的term只能由一个领导人产生,并且Log的存储顺序不变。第二条的合理性被发送的AppendEntries  RPC一致性检查保证： 如果一个Leader想要发送一个想被commit的指令，其将本地Log中的上一条指令的index和Term Number附在AppendEntries RPC中，如果follower检查自己的前一个Log与这个上一条指令不相符，则其拒绝接受这个RPC。简答理解，就是一个递归的步骤。</p>
+<hr>
+<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><hr>
+<h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;RAFT-Protocol&quot;&gt;&lt;a href=&quot;#RAFT-Protocol&quot; class=&quot;headerlink&quot; title=&quot;RAFT Protocol&quot;&gt;&lt;/a&gt;RAFT Protocol&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;l
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>一致性哈希</title>
+    <link href="http://flame4.github.io/2016/07/05/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/"/>
+    <id>http://flame4.github.io/2016/07/05/一致性哈希/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:18:40.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><p style="text-align:right">last Modified: 2016-09-05</p>
+
+
+<p>一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。</p>
+<h3 id="1-基本概念和场景"><a href="#1-基本概念和场景" class="headerlink" title="1.基本概念和场景"></a>1.基本概念和场景</h3><p>一致性哈希运用在分布式系统中的消息分发场景。</p>
+<p>无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单的hash函数就可以保证数据分布到不同的机器上，但当集群的机器加入或者离开，hash函数就会失效。此时为了使hash重新生效，只能够进行大量的数据迁移，使得hash可以使用，但这是显然不可以接受的。对于这样的情况，一致性哈希就可以比较好的派上用场。数据不可能在集群迁入和迁出时做到完全不移动，但是一致性哈希可以做到让尽量小的数据移动。</p>
+<h3 id="2-实现原理"><a href="#2-实现原理" class="headerlink" title="2. 实现原理"></a>2. 实现原理</h3><p>一致性哈希的核心思想是将原来节点固定，数据分发到节点上这样的思路改变为将节点也作为一个数据加入分发，并以一个数据环路为分发的载体。如下图所示.</p>
+<p><img src="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>对于数据，使用key作为hash的值，对于节点，使用唯一标识(ip, host等)作为hash值，并在环路上找到自己的位置。对于一条数据，顺时针找到后面一个节点，作为自己的归属。</p>
+<p>当一个新节点加入时，比如本来有Node1和3， 结果加入Node2后，Node1跟Node2之间的数据会从Node3转移到Node2。用这种方式保证了让比较少的数据进行移动。</p>
+<h3 id="3-数据倾斜问题"><a href="#3-数据倾斜问题" class="headerlink" title="3. 数据倾斜问题"></a>3. 数据倾斜问题</h3><p>在上图的实现过程中，可以看到，在节点数量较少的情况下，还是会存在很多数据迁移的情况，比如在三个节点时会移动0.2的数据，对于大数据的情况下，也不是一个可以接受的方案，在这种情况下，可以加入“虚拟节点的概念”，对于三个节点，可以均匀的产生300个节点，每100个实际上属于同一个物理节点，这三百个节点可以均匀分布在环上，数据迁移的时候按照实际的映射关系来进行迁移。</p>
+<p>但是虚拟节点也不是越多越好的。试想假设有10000条数据，有10000个虚拟节点，并且是由四个实际节点模拟的。为了均匀，分布规律为 1-2-3-4-1-2-3-4…… 这样在2失效后，会有1/4的数据需要移动，而且因为只有一条数据，但是这一条数据也要读取一个磁盘块，其实是一种很大的浪费。</p>
+<h3 id="4-数据扎堆问题"><a href="#4-数据扎堆问题" class="headerlink" title="4. 数据扎堆问题"></a>4. 数据扎堆问题</h3><p>假设所有的数据没有key, 而就是一个数字，会发生什么呢？ 我们依旧可以根据这个数字来计算key，但是如果有10000个数字，里面有9900个10，有100个其余数字，这种情况下，数据依旧会压到一个节点上，而这显然也不是我们想要的结果.</p>
+<p>这个问题的解决方案我没有找到比较合适的办法，回头再想想补上。但是这种场景一般不适用在分布式哈希算法的系统中，因为系统要做的事情并不是仅仅维护这么一大串数字，而是要提供必要的映射，从而满足用户的查询，从这个角度考虑，这样的问题事实上是没有考虑的必要的。</p>
+<h3 id="5-一致性哈希与数据一致性"><a href="#5-一致性哈希与数据一致性" class="headerlink" title="5. 一致性哈希与数据一致性"></a>5. 一致性哈希与数据一致性</h3><p>分布式存储在当前的应用，一方面是集群的信息存储，另一方面可以用于云存储。相比于集群存储，云存储更加灵活，可以动态扩容，并且也会提供相应的冗余等服务。除了基于一致性哈希的分布式系统，还有一类是基于元信息的，也就是存在key-&gt;node的元信息，由元信息直接查找得到映射关系。</p>
+<p>在现在的高可用云服务的情景下，一致性哈希存在以下几个缺点：</p>
+<ol>
+<li>在集群脱离时的数据迁移过程会与数据的读取操作冲突。为了保证服务，系统必须将源文件设置为只读，并提供服务，在此时迁移的速率不能过大沾满磁盘。如果这时发生宕机等情况，则使得复杂度会成倍上升，</li>
+<li>对应的副本在对应的机器上绑定本身会对集群不利，因为这样不能最大程度的平衡负载。</li>
+<li>在一致性上，需要对不同节点的数据进行对比，最终确定最新版本，这个事情在系统中的损耗不可接受。</li>
+</ol>
+<p>这两方面元数据的管理有着天然的优势，关于这些详细的优势可以参考<a href="http://blog.csdn.net/huanggang028/article/details/28891315" target="_blank" rel="external">这篇博客</a>.</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;一致性哈希&quot;&gt;&lt;a href=&quot;#一致性哈希&quot; class=&quot;headerlink&quot; title=&quot;一致性哈希&quot;&gt;&lt;/a&gt;一致性哈希&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-09-05&lt;/p&gt;
+
+
+&lt;
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+</feed>
