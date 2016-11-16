@@ -720,33 +720,6 @@
   </entry>
   
   <entry>
-    <title>shell 用法简记</title>
-    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
-    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
-    <published>2016-07-05T15:26:19.000Z</published>
-    <updated>2016-09-06T17:21:26.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
-
-<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
-<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
-<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
-<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
-    
-    </summary>
-    
-      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>raft Protocol</title>
     <link href="http://flame4.github.io/2016/07/05/raft/"/>
     <id>http://flame4.github.io/2016/07/05/raft/</id>
@@ -896,6 +869,33 @@
     
     
       <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>shell 用法简记</title>
+    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
+    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:21:26.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
+
+<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
+<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
+<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
+<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
+    
+    </summary>
+    
+      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
+    
     
   </entry>
   
