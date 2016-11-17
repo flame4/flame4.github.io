@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://flame4.github.io/2016/07/14/Python-Senior/</loc>
+    
+    <lastmod>2016-11-17T09:03:27.431Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://flame4.github.io/2016/07/31/Java-SE/</loc>
     
     <lastmod>2016-11-16T07:30:51.461Z</lastmod>
@@ -12,13 +19,6 @@
     <loc>http://flame4.github.io/2016/11/12/vagrant/</loc>
     
     <lastmod>2016-11-16T05:38:33.674Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2016/07/14/Python-Senior/</loc>
-    
-    <lastmod>2016-11-16T05:38:33.673Z</lastmod>
     
   </url>
   
