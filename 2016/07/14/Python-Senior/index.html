@@ -102,7 +102,7 @@
 1. With语句With语句在Python2.6中被加入标准，作为try/finally的替代，用于资源访问进行控制的场合。
 先要明白几个概念：
 1. 上下文管理器： 特殊对象，实现了__enter__()和__exit()__方法的对象，只有这种对象才能够支持with语句，其定义了with在执行时候要建立的&amp;quot">
-<meta property="og:updated_time" content="2016-11-17T09:03:27.431Z">
+<meta property="og:updated_time" content="2016-11-22T06:46:03.023Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python 高级特性">
 <meta name="twitter:description" content="Python 高级特性last Modified: 2016-11-17
@@ -368,7 +368,15 @@
 <p><strong>生成器</strong> 本质上也是一种迭代器!首先生成器是函数级别的概念,不是类级别的概念,这点要明确. 既然是一种迭代器,那么他就是要对于一个已经存在的或者还没有全部生成的集合序列做一定的操作的过程. 一个函数如果内部有yield关键字, 那么对其的调用不再返回一个(期望的)列表,而是返回一个generator对象,该对象含有next()方法.对比下面两种写法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
 <p>补充两篇博客: <a href="http://www.cnblogs.com/huxi/archive/2011/07/14/2106863.html" target="_blank" rel="external">生成器</a>, <a href="http://www.cnblogs.com/huxi/archive/2011/07/01/2095931.html" target="_blank" rel="external">迭代器</a></p>
 <h4 id="3-python的字符大坑"><a href="#3-python的字符大坑" class="headerlink" title="3. python的字符大坑"></a>3. python的字符大坑</h4><p>一般的字符编码有ascll码, MBCS和unicode(包括utf-16, utf-8)等方案,具体的来源和不同可以<a href="http://www.cnblogs.com/huxi/archive/2010/12/05/1897271.html" target="_blank" rel="external">看这里</a>.</p>
-<p>在python2中,处理字符的中文编码是一个很蛋疼的问题.比如下面的一段例子:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">'这个世界上'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s</div><div class="line"><span class="string">'\xe8\xbf\x99\xe4\xb8\xaa\xe4\xb8\x96\xe7\x95\x8c\xe4\xb8\x8a'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">u'这个世界上'</span></div><div class="line">&gt; &gt;&gt;&gt; s</div><div class="line"><span class="string">u'\u8fd9\u4e2a\u4e16\u754c\u4e0a'</span></div></pre></td></tr></table></figure></p>
+<p>在python2中,处理字符的中文编码是一个很蛋疼的问题.比如下面的一段例子:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">'这个世界上'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s</div><div class="line"><span class="string">'\xe8\xbf\x99\xe4\xb8\xaa\xe4\xb8\x96\xe7\x95\x8c\xe4\xb8\x8a'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">u'这个世界上'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s</div><div class="line"><span class="string">u'\u8fd9\u4e2a\u4e16\u754c\u4e0a'</span></div></pre></td></tr></table></figure></p>
+<p>对于有的交互界面, print函数比较智能, 可以打出汉字, 但有的就不行了, 在windows的中文程序根本没法调试. 里面繁杂的问题, 总结起来可以分为两个纬度来搞清楚.</p>
+<ol>
+<li><p>Unicode &amp; str 数据类型</p>
+<p> 在python中, 默认的字符串类型都为str, str即为utf-8编码的类型.在上面的博客中, 我们可以知道, utf-8使用了一些手段实现了对传统的ascll码的兼容(具体就不关心了). 然后对于汉字来说, 一般的常用字都可以用三个字节表示.</p>
+</li>
+<li><p>Encode 和 Decode 方法</p>
+</li>
+</ol>
 <h4 id="4-python装饰器"><a href="#4-python装饰器" class="headerlink" title="4. python装饰器"></a>4. python装饰器</h4><h4 id="5-python自省"><a href="#5-python自省" class="headerlink" title="5. python自省"></a>5. python自省</h4><h4 id="6-python-lambda表达式与函数嵌套"><a href="#6-python-lambda表达式与函数嵌套" class="headerlink" title="6. python lambda表达式与函数嵌套"></a>6. python lambda表达式与函数嵌套</h4><h4 id="7-python-新式类和旧式类"><a href="#7-python-新式类和旧式类" class="headerlink" title="7. python 新式类和旧式类"></a>7. python 新式类和旧式类</h4><p>python新式类的设计是为了更好的弥补OO的语言思想. 在python 2.2中, 为了声明为新式类, 需要显式继承object类. 而在python 3中, 默认即是新式类.</p>
 <p>新式类比旧式类的提升在于: 自省的支持, 新的属性, 多继承的搜索方式.<br>具体可以看下面几个blog.<br><a href="http://blog.csdn.net/u010066807/article/details/46896835" target="_blank" rel="external">blog1</a>, <a href="http://blog.csdn.net/u010576100/article/details/50593509" target="_blank" rel="external">blog2</a>,<br><a href="http://blog.csdn.net/xhw88398569/article/details/48663083" target="_blank" rel="external">super usage</a></p>
 
