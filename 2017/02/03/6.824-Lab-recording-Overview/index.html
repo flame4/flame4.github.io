@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="serialize," />
+  <meta name="keywords" content="Golang,分布式系统,分布式协议," />
 
 
 
@@ -86,28 +86,25 @@
 
 
 
-<meta name="description" content="序列化与反序列化last Modified: 2016-08-23
+<meta name="description" content="6.824 - lab 概览last Modified: 2017-02-03
 
-
-1. 概念简介序列化是系统组件之间通讯的一个比较重要的概念，在分布式系统和大数据量的系统中尤其重要。互联网的产生带来了机器间通讯的需求，而互联通讯的双方需要采用约定的协议，序列化和反序列化属于通讯协议的一部分。
-举个例子来说，因为client端想要和server交互，其就必须要定义一种协议来规定我请求的格式，在client端的">
+大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.
+项目结构工作流程main各种各样的启动函数和工具函数.123456789101112*.txt 一堆文本文件用作测试用例.te">
 <meta property="og:type" content="article">
-<meta property="og:title" content="序列化与反序列化">
-<meta property="og:url" content="http://flame4.github.io/2016/08/11/Serialize/index.html">
+<meta property="og:title" content="6.824 - Lab Recording - Overview">
+<meta property="og:url" content="http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/index.html">
 <meta property="og:site_name" content="刘燚的个人空间">
-<meta property="og:description" content="序列化与反序列化last Modified: 2016-08-23
+<meta property="og:description" content="6.824 - lab 概览last Modified: 2017-02-03
 
-
-1. 概念简介序列化是系统组件之间通讯的一个比较重要的概念，在分布式系统和大数据量的系统中尤其重要。互联网的产生带来了机器间通讯的需求，而互联通讯的双方需要采用约定的协议，序列化和反序列化属于通讯协议的一部分。
-举个例子来说，因为client端想要和server交互，其就必须要定义一种协议来规定我请求的格式，在client端的">
-<meta property="og:updated_time" content="2016-09-06T17:21:16.000Z">
+大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.
+项目结构工作流程main各种各样的启动函数和工具函数.123456789101112*.txt 一堆文本文件用作测试用例.te">
+<meta property="og:updated_time" content="2017-02-04T13:58:29.582Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="序列化与反序列化">
-<meta name="twitter:description" content="序列化与反序列化last Modified: 2016-08-23
+<meta name="twitter:title" content="6.824 - Lab Recording - Overview">
+<meta name="twitter:description" content="6.824 - lab 概览last Modified: 2017-02-03
 
-
-1. 概念简介序列化是系统组件之间通讯的一个比较重要的概念，在分布式系统和大数据量的系统中尤其重要。互联网的产生带来了机器间通讯的需求，而互联通讯的双方需要采用约定的协议，序列化和反序列化属于通讯协议的一部分。
-举个例子来说，因为client端想要和server交互，其就必须要定义一种协议来规定我请求的格式，在client端的">
+大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.
+项目结构工作流程main各种各样的启动函数和工具函数.123456789101112*.txt 一堆文本文件用作测试用例.te">
 
 
 
@@ -128,9 +125,9 @@
 
 
 
-  <link rel="canonical" href="http://flame4.github.io/2016/08/11/Serialize/"/>
+  <link rel="canonical" href="http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/"/>
 
-  <title> 序列化与反序列化 | 刘燚的个人空间 </title>
+  <title> 6.824 - Lab Recording - Overview | 刘燚的个人空间 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -280,7 +277,7 @@
             
             
               
-                序列化与反序列化
+                6.824 - Lab Recording - Overview
               
             
           </h1>
@@ -292,8 +289,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-11T23:26:19+08:00" content="2016-08-11">
-              2016-08-11
+            <time itemprop="dateCreated" datetime="2017-02-03T00:39:00+08:00" content="2017-02-03">
+              2017-02-03
             </time>
           </span>
 
@@ -322,8 +319,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/08/11/Serialize/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/11/Serialize/" itemprop="commentsCount"></span>
+                <a href="/2017/02/03/6.824-Lab-recording-Overview/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/03/6.824-Lab-recording-Overview/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -346,32 +343,14 @@
       
 
       
-        <h1 id="序列化与反序列化"><a href="#序列化与反序列化" class="headerlink" title="序列化与反序列化"></a>序列化与反序列化</h1><p style="text-align:right">last Modified: 2016-08-23</p>
+        <h1 id="6-824-lab-概览"><a href="#6-824-lab-概览" class="headerlink" title="6.824 - lab 概览"></a>6.824 - lab 概览</h1><p style="text-align:right">last Modified: 2017-02-03</p>
 
-
-<h2 id="1-概念简介"><a href="#1-概念简介" class="headerlink" title="1. 概念简介"></a>1. 概念简介</h2><p>序列化是系统组件之间通讯的一个比较重要的概念，在分布式系统和大数据量的系统中尤其重要。互联网的产生带来了机器间通讯的需求，而互联通讯的双方需要采用约定的协议，序列化和反序列化属于通讯协议的一部分。</p>
-<p>举个例子来说，因为client端想要和server交互，其就必须要定义一种协议来规定我请求的格式，在client端的程序一般会生成一个<strong>对象</strong>，用属性来表示想要传递的信息，然后将其通过网络流的方式来传送给server端，底下其实还是走的TCP，发的是byte数组。这个把对象转为byte过程就是序列化。而server端也会开一个流来接受byte数组，并反序列化出想要的信息来。另一种情况就是想要把信息化为二进制信息持久化到磁盘上。从这里可以看出，序列化发生在信息进入TCP等底层协议之前的最后一步。</p>
-<p>对于序列化和反序列化,需要注意的就是格式的问题，两边要约定同样的数据排列格式，不然就会产生解析错误。比如，如果发送端想发送一个int和一个long,那么接收端也必须先解读一个int,再解读一个long，不然就得不到正确结果。</p>
-<p>对于一个好的序列化和反序列化解决方案，应该有成熟，使用人群广泛等特点，并且空间开销和时间开销要好。</p>
-<h2 id="2-热升级问题"><a href="#2-热升级问题" class="headerlink" title="2.热升级问题"></a>2.热升级问题</h2><p>序列化的设计一个比较重要的地方就是滚动升级问题，也就是前后兼容性。</p>
-<p>在分布式RPC系统中，多节点之间存在升级的不同步问题。在系统升级的过程中也可能在执行任务，这时可能存在两个节点版本不一样的问题。如果两个版本之间的序列化方法有差异，则会导致各种各样的问题。传统的序列化方法就只能够全部停机更新版本后再上线，而后面看到新的protobuf等可以实现无缝连接。</p>
-<h2 id="3-几种常用方法"><a href="#3-几种常用方法" class="headerlink" title="3.几种常用方法"></a>3.几种常用方法</h2><p>IDL: 序列化描述语言，序列化是一种方案，其表达需要一种平台无关的语言来描述信息，这种语言就称为IDL(Interface description language).</p>
-<h4 id="XML"><a href="#XML" class="headerlink" title="XML"></a>XML</h4><p>xml就是最初的标签语言，在数据库查询和存储语言中也可以用到，自己就可以用作自己的IDL，并且具有自描述性，可阅读性好等特点。但是其空间占用大，因为有各种标签的冗余信息，如果被用来持久化的话，空间占用非常大.同时，其序列化和反序列化的操作时间都比较长。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">xsd:complexType</span> <span class="attr">name</span>=<span class="string">'UserInfo'</span>&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:sequence</span>&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">name</span>=<span class="string">'address'</span> <span class="attr">type</span>=<span class="string">'tns:Address'</span>/&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:element</span> <span class="attr">name</span>=<span class="string">'address1'</span> <span class="attr">type</span>=<span class="string">'tns:Address'</span>/&gt;</span></div><div class="line">     <span class="tag">&lt;/<span class="name">xsd:sequence</span>&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:attribute</span> <span class="attr">name</span>=<span class="string">'userid'</span> <span class="attr">type</span>=<span class="string">'xsd:int'</span> /&gt;</span></div><div class="line">     <span class="tag">&lt;<span class="name">xsd:attribute</span> <span class="attr">name</span>=<span class="string">'name'</span> <span class="attr">type</span>=<span class="string">'xsd:string'</span> /&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">xsd:complexType</span>&gt;</span></div></pre></td></tr></table></figure>
-<h4 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h4><p>JSON起源于弱类型语言Javascript， 它的产生来自于一种称之为”Associative array”的概念，其本质是就是采用”Attribute－value”的方式来描述对象。实际上在Javascript和PHP等弱类型语言中，类的描述方式就是Associative array。JSON的如下优点，使得它快速成为最广泛使用的序列化协议之一：</p>
-<ol>
-<li>这种Associative array格式非常符合工程师对对象的理解。</li>
-<li>它保持了XML的人眼可读（Human-readable）的优点。</li>
-<li>相对于XML而言，序列化后的数据更加简洁。 来自于的以下链接的研究表明：XML所产生序列化之后文件的大小接近JSON的两倍</li>
-<li>它具备Javascript的先天性支持，所以被广泛应用于Web browser的应用常景中，是Ajax的事实标准协议。</li>
-<li>与XML相比，其协议比较简单，解析速度比较快。</li>
-<li>松散的Associative array使得其具有良好的可扩展性和兼容性。</li>
-</ol>
-<p>JSon的前后兼容性很好，因为其一个对象是自包含的，当我从字符串中解析出一个json对象的时候，我自然就可以知道这个对象有哪些元素，两个版本之间的交互只需要各取所需就好了。RESTFul服务通讯使用的就是Json格式。</p>
-<h4 id="Thrift"><a href="#Thrift" class="headerlink" title="Thrift"></a>Thrift</h4><p>(抄百度)thrift是一个软件框架，用来进行可扩展且跨语言的服务的开发。它结合了功能强大的软件堆栈和代码生成引擎，以构建在 C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa, JavaScript, Node.js, Smalltalk, and OCaml 这些编程语言间无缝结合的、高效的服务。thrift允许定义一个简单的定义文件中的数据类型和服务接口，以作为输入文件，编译器生成代码用来方便地生成RPC客户端和服务器通信的无缝跨编程语言。</p>
-<p>Thrift的空间和时间效率比Json有了很大提升，其可以允许编写.thrift语言文件，然后编译生成对应的语言代码，并且提供了一系列的方法调用，用来压缩和传输。</p>
-<h4 id="Google-protobuf"><a href="#Google-protobuf" class="headerlink" title="Google protobuf"></a>Google protobuf</h4><p>Google protobuf也是一种类似与Thrift的编码工具，但是比Thrift精简很多，其编写的文件编译后的类只用来存信息，并且提供writeto和parseFrom方法。<a href="http://www.cnblogs.com/dkblog/archive/2012/03/27/2419010.html" target="_blank" rel="external">具体用法</a>看这里，<a href="http://blog.csdn.net/xqy1522/article/details/6942344" target="_blank" rel="external">与Thrift比较</a> 看这里。</p>
-
+<p>大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><h4 id="main"><a href="#main" class="headerlink" title="main"></a>main</h4><p>各种各样的启动函数和工具函数.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">*.txt 一堆文本文件用作测试用例.</div><div class="line">test-mr.sh  mapreduce部分的自动测试脚本</div><div class="line">test-wc.sh  TO SEE</div><div class="line">test-ii.sh  TO SEE</div><div class="line">diskvd.go   TO SEE</div><div class="line">ii.go       TO SEE</div><div class="line">lockc.go    TO SEE</div><div class="line">lockd.go    TO SEE</div><div class="line">pbc.go      TO SEE</div><div class="line">pbd.go      TO SEE</div><div class="line">viewd.go    TO SEE</div><div class="line">wc.go       TO SEE</div></pre></td></tr></table></figure></p>
+<h4 id="mapreduce"><a href="#mapreduce" class="headerlink" title="mapreduce"></a>mapreduce</h4><p>mapreduce包,实现简单的map-reduce功能.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">common.go 通用函数</div><div class="line">   | -- debug() 打印debug信息</div><div class="line">   | -- jobPhase string 指示task是一个map还是reduce</div><div class="line">   | -- KeyValue struct&#123;&#125; 通用kv结构体</div><div class="line">   | -- reduceName() 构建中间文件的文件名, 用于让map传递给reduce</div><div class="line">   | -- mergeName() 构建最后的输出文件名</div><div class="line"></div><div class="line">common_map.go</div><div class="line"></div><div class="line">common_reduce.go</div><div class="line"></div><div class="line">common_rpc.go rpc通信通用函数</div><div class="line">  | -- DoTaskArgs struct&#123;&#125; 当master调度一个任务给work的时候携带的信息RPC</div><div class="line">  | -- ShutdownReply struct&#123;&#125; 当work的任务被强制停止的时候, master会发送该RPC</div><div class="line">  | -- RegisterArgs struct&#123;&#125; 当work向master发送注册时候的RPC类型</div><div class="line">  | -- call() 发送所有RPC的函数, 当成功回复后返回true, 否则都返回err.</div><div class="line"></div><div class="line">master.go</div><div class="line">  | -- Master struct&#123;&#125; master结构体, 维护了worker的socket, 任务完成的消息队列, job的基本信息, 网络监听器和状态等. 实现Mutex接口.</div><div class="line">    | -- Register() work调用master的register函数, 用来加入master的调度队列.</div><div class="line">    | -- run()  执行mapreduce任务.</div><div class="line">    | -- Wait()</div><div class="line">    | -- killWorkers() 停止mapreduce, 给每个work一个停止RPC.并且收集一些任务执行信息.</div><div class="line">    | -- merge() 见master_splitmerge.go</div><div class="line">    | -- CleanupFiles() 见master_splitmerge.go</div><div class="line">    | -- Shutdown() 见master_rpc.go</div><div class="line">    | -- startRPCServer() 见master_rpc.go</div><div class="line">    | -- stopRPCServer() 见master_rpc.go</div><div class="line">  | -- Sequential() 生成master并且串行执行mapreduce的函数.</div><div class="line">  | --</div><div class="line"></div><div class="line">master_rpc.go</div><div class="line">  | -- Master.Shutdown() 停止master的RPC服务的方法.</div><div class="line">  | -- Master.StartRPCServer() 打开master的rpc服务, 持续接受已经注册的Worker的行为(是否周期性检测是否存活需要后面自己实现).</div><div class="line">  | -- Master.stopRPCServer() 停止RPC服务.</div><div class="line"></div><div class="line">master_splitmerge.go</div><div class="line">  | -- Master.merge() 将许多的reduce任务的结果汇总到一个输出文件中, 在这时候, 所有的reduce文件已经在本地目录中, 只需要读文件即可.</div><div class="line">  | -- Master.CleanupFiles() 删除中间文件.</div><div class="line"></div><div class="line">schedule.go</div><div class="line">  | -- schedule() 调度函数, 包括给map分配文件, 设定reduce, 以及交换k-v集合等东西.</div><div class="line">worker.go</div><div class="line"></div><div class="line">test_test.go</div></pre></td></tr></table></figure></p>
+<h2 id="Golang记录"><a href="#Golang记录" class="headerlink" title="Golang记录"></a>Golang记录</h2><p>golang的<a href="http://studygolang.com/articles/1644" target="_blank" rel="external">项目目录简介</a>, 官方文档的指导部分<a href="http://golang.org/doc/code.html" target="_blank" rel="external">在这里</a>.</p>
+<h6 id="go-test"><a href="#go-test" class="headerlink" title="go test"></a>go test</h6><p>go test以包为单位进行, 在包中应该存在”_test.go”为结尾的测试文件, 并且文件中存在 Test为前缀的函数, 并且该函数有一个 testing.T的接受参数即可(详细参看<a href="http://docscn.studygolang.com/pkg/testing/#pkg-overview" target="_blank" rel="external">test库</a>)</p>
+<h6 id="引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛"><a href="#引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛" class="headerlink" title="引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?"></a>引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?</h6>
       
     </div>
 
@@ -392,7 +371,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/serialize/" rel="tag">#serialize</a>
+            <a href="/tags/Golang/" rel="tag">#Golang</a>
+          
+            <a href="/tags/分布式系统/" rel="tag">#分布式系统</a>
+          
+            <a href="/tags/分布式协议/" rel="tag">#分布式协议</a>
           
         </div>
       
@@ -401,17 +384,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/08/07/线程安全与同步/" rel="next" title="Java线程安全与同步">
-                <i class="fa fa-chevron-left"></i> Java线程安全与同步
+              <a href="/2016/11/12/vagrant/" rel="next" title="Vagrant使用方式">
+                <i class="fa fa-chevron-left"></i> Vagrant使用方式
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/08/23/ES源码1/" rel="prev" title="ElasticSearch 源码记录1">
-                ElasticSearch 源码记录1 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -437,8 +416,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/08/11/Serialize/"
-           data-title="序列化与反序列化" data-url="http://flame4.github.io/2016/08/11/Serialize/">
+      <div class="ds-thread" data-thread-key="2017/02/03/6.824-Lab-recording-Overview/"
+           data-title="6.824 - Lab Recording - Overview" data-url="http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/">
       </div>
     
   </div>
@@ -547,7 +526,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#序列化与反序列化"><span class="nav-text">序列化与反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概念简介"><span class="nav-text">1. 概念简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-热升级问题"><span class="nav-text">2.热升级问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-几种常用方法"><span class="nav-text">3.几种常用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#XML"><span class="nav-text">XML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON"><span class="nav-text">JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Thrift"><span class="nav-text">Thrift</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Google-protobuf"><span class="nav-text">Google protobuf</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab-概览"><span class="nav-text">6.824 - lab 概览</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#项目结构"><span class="nav-text">项目结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#工作流程"><span class="nav-text">工作流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#main"><span class="nav-text">main</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mapreduce"><span class="nav-text">mapreduce</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang记录"><span class="nav-text">Golang记录</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#go-test"><span class="nav-text">go test</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛"><span class="nav-text">引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
