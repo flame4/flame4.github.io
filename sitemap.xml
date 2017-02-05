@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://flame4.github.io/2017/02/03/6.824-lab1/</loc>
+    
+    <lastmod>2017-02-05T14:32:08.302Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/</loc>
     
-    <lastmod>2017-02-04T15:03:34.382Z</lastmod>
+    <lastmod>2017-02-04T23:13:27.536Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://flame4.github.io/2016/07/31/Java-SE/</loc>
+    
+    <lastmod>2017-02-04T22:41:53.987Z</lastmod>
     
   </url>
   
@@ -12,13 +26,6 @@
     <loc>http://flame4.github.io/2016/07/14/Python-Senior/</loc>
     
     <lastmod>2016-11-22T06:46:03.023Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2016/07/31/Java-SE/</loc>
-    
-    <lastmod>2016-11-16T07:30:51.461Z</lastmod>
     
   </url>
   
@@ -33,13 +40,6 @@
     <loc>http://flame4.github.io/2016/07/17/ES/</loc>
     
     <lastmod>2016-11-16T05:38:33.673Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2016/09/01/Lucene%E6%BA%90%E7%A0%811/</loc>
-    
-    <lastmod>2016-09-07T04:10:16.000Z</lastmod>
     
   </url>
   
@@ -89,13 +89,6 @@
     <loc>http://flame4.github.io/2016/08/02/java-JVM/</loc>
     
     <lastmod>2016-09-06T17:19:28.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2016/08/23/ES%E6%BA%90%E7%A0%811/</loc>
-    
-    <lastmod>2016-09-06T17:19:08.000Z</lastmod>
     
   </url>
   

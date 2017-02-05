@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://flame4.github.io/"/>
-  <updated>2017-02-04T15:03:34.382Z</updated>
+  <updated>2017-02-04T23:13:27.536Z</updated>
   <id>http://flame4.github.io/</id>
   
   <author>
@@ -20,15 +20,15 @@
     <link href="http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/"/>
     <id>http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/</id>
     <published>2017-02-02T16:39:00.000Z</published>
-    <updated>2017-02-04T15:03:34.382Z</updated>
+    <updated>2017-02-04T23:13:27.536Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="6-824-lab-概览"><a href="#6-824-lab-概览" class="headerlink" title="6.824 - lab 概览"></a>6.824 - lab 概览</h1><p style="text-align:right">last Modified: 2017-02-03</p>
+    <content type="html"><![CDATA[<h1 id="6-824-lab-概览"><a href="#6-824-lab-概览" class="headerlink" title="6.824 - lab 概览"></a>6.824 - lab 概览</h1><p style="text-align:right">last Modified: 2017-02-04</p>
 
 <p>大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.</p>
 <h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><h4 id="main"><a href="#main" class="headerlink" title="main"></a>main</h4><p>各种各样的启动函数和工具函数.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">*.txt 一堆文本文件用作测试用例.</div><div class="line">test-mr.sh  mapreduce部分的自动测试脚本</div><div class="line">test-wc.sh  TO SEE</div><div class="line">test-ii.sh  TO SEE</div><div class="line">diskvd.go   TO SEE</div><div class="line">ii.go       TO SEE</div><div class="line">lockc.go    TO SEE</div><div class="line">lockd.go    TO SEE</div><div class="line">pbc.go      TO SEE</div><div class="line">pbd.go      TO SEE</div><div class="line">viewd.go    TO SEE</div><div class="line">wc.go       TO SEE</div></pre></td></tr></table></figure></p>
-<h4 id="mapreduce"><a href="#mapreduce" class="headerlink" title="mapreduce"></a>mapreduce</h4><p>mapreduce包,实现简单的map-reduce功能.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">common.go 通用函数</div><div class="line">   | -- debug() 打印debug信息</div><div class="line">   | -- jobPhase string 指示task是一个map还是reduce</div><div class="line">   | -- KeyValue struct&#123;&#125; 通用kv结构体</div><div class="line">   | -- reduceName() 构建中间文件的文件名, 用于让map传递给reduce</div><div class="line">   | -- mergeName() 构建最后的输出文件名</div><div class="line"></div><div class="line">common_map.go</div><div class="line">  | -- doMap() 读取输入文件, 执行用户定义的map任务, 并且输出文件到中间文件. 采用pull的方式.</div><div class="line"></div><div class="line">common_reduce.go</div><div class="line">  | -- doReduce() 读取中间文件, 计算用户定义的reduce任务, 并且输出为最后的输出文件.</div><div class="line"></div><div class="line">common_rpc.go rpc通信通用函数</div><div class="line">  | -- DoTaskArgs struct&#123;&#125; 当master调度一个任务给work的时候携带的信息RPC</div><div class="line">  | -- ShutdownReply struct&#123;&#125; 当work的任务被强制停止的时候, master会发送该RPC</div><div class="line">  | -- RegisterArgs struct&#123;&#125; 当work向master发送注册时候的RPC类型</div><div class="line">  | -- call() 发送所有RPC的函数, 当成功回复后返回true, 否则都返回err.</div><div class="line"></div><div class="line">master.go</div><div class="line">  | -- Master struct&#123;&#125; master结构体, 维护了worker的socket, 任务完成的消息队列, job的基本信息, 网络监听器和状态等. 实现Mutex接口.</div><div class="line">    | -- Register() work调用master的register函数, 用来加入master的调度队列.</div><div class="line">    | -- forwardRegistrations()</div><div class="line">    | -- run()  执行mapreduce任务. [是任务的入口函数]</div><div class="line">    | -- Wait() 等待, 直到所有任务都执行完毕. master中的一个队列就会被消费完全.</div><div class="line">    | -- killWorkers() 停止mapreduce, 给每个work一个停止RPC.并且收集一些任务执行信息.</div><div class="line">    | -- merge() 见master_splitmerge.go</div><div class="line">    | -- CleanupFiles() 见master_splitmerge.go</div><div class="line">    | -- Shutdown() 见master_rpc.go</div><div class="line">    | -- startRPCServer() 见master_rpc.go</div><div class="line">    | -- stopRPCServer() 见master_rpc.go</div><div class="line">  | -- Sequential() 生成master并且串行执行mapreduce的函数.</div><div class="line">  | -- Distributed() 使用go程来并行执行map和reduce任务.</div><div class="line"></div><div class="line">master_rpc.go</div><div class="line">  | -- Master.Shutdown() 停止master的RPC服务的方法.</div><div class="line">  | -- Master.StartRPCServer() 打开master的rpc服务, 持续接受已经注册的Worker的行为(是否周期性检测是否存活需要后面自己实现).</div><div class="line">  | -- Master.stopRPCServer() 停止RPC服务.</div><div class="line"></div><div class="line">master_splitmerge.go</div><div class="line">  | -- Master.merge() 将许多的reduce任务的结果汇总到一个输出文件中, 在这时候, 所有的reduce文件已经在本地目录中, 只需要读文件即可.</div><div class="line">  | -- Master.CleanupFiles() 删除中间文件.</div><div class="line"></div><div class="line">schedule.go</div><div class="line">  | -- schedule() 调度函数, 包括给map分配文件, 设定reduce, 以及交换k-v集合等东西.</div><div class="line">worker.go</div><div class="line">  | -- worker struct&#123;&#125; worker实现.</div><div class="line">    | -- DoTask() 执行master分配的计算任务. 首先更新状态, 然后根据类型, 执行doMap或者是doReduce任务.</div><div class="line">    | -- Shutdown() 当所有任务都结束后, master会发送结束的RPC, 然后worker调用Shutdown, 返回执行的task数字.</div><div class="line">    | -- register() 向master函数进行注册.</div><div class="line">  | -- Runworker() 启动一个Worker, 向master注册, 并且等待任务.</div><div class="line"></div><div class="line">test_test.go</div></pre></td></tr></table></figure></p>
+<h4 id="mapreduce"><a href="#mapreduce" class="headerlink" title="mapreduce"></a>mapreduce</h4><p>mapreduce包,实现简单的map-reduce功能.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">common.go 通用函数</div><div class="line">   | -- debug() 打印debug信息</div><div class="line">   | -- jobPhase string 指示task是一个map还是reduce</div><div class="line">   | -- KeyValue struct&#123;&#125; 通用kv结构体</div><div class="line">   | -- reduceName() 构建中间文件的文件名, 用于让map传递给reduce</div><div class="line">   | -- mergeName() 构建最后的输出文件名</div><div class="line"></div><div class="line">common_map.go</div><div class="line">  | -- doMap() 读取输入文件, 执行用户定义的map任务, 并且输出文件到中间文件. 采用pull的方式.</div><div class="line"></div><div class="line">common_reduce.go</div><div class="line">  | -- doReduce() 读取中间文件, 计算用户定义的reduce任务, 并且输出为最后的输出文件.</div><div class="line"></div><div class="line">common_rpc.go rpc通信通用函数</div><div class="line">  | -- DoTaskArgs struct&#123;&#125; 当master调度一个任务给work的时候携带的信息RPC</div><div class="line">  | -- ShutdownReply struct&#123;&#125; 当work的任务被强制停止的时候, master会发送该RPC</div><div class="line">  | -- RegisterArgs struct&#123;&#125; 当work向master发送注册时候的RPC类型</div><div class="line">  | -- call() 发送所有RPC的函数, 当成功回复后返回true, 否则都返回err.</div><div class="line"></div><div class="line">master.go</div><div class="line">  | -- Master struct&#123;&#125; master结构体, 维护了worker的socket, 任务完成的消息队列, job的基本信息, 网络监听器和状态等. 实现Mutex接口.</div><div class="line">    | -- Register() work调用master的register函数, 用来加入master的调度队列.</div><div class="line">    | -- forwardRegistrations() 将注册的函数加入channel中, 供调度函数使用. </div><div class="line">    | -- run()  执行mapreduce任务. [是任务的入口函数]</div><div class="line">    | -- Wait() 等待, 直到所有任务都执行完毕. master中的一个队列就会被消费完全.</div><div class="line">    | -- killWorkers() 停止mapreduce, 给每个work一个停止RPC.并且收集一些任务执行信息.</div><div class="line">    | -- merge() 见master_splitmerge.go</div><div class="line">    | -- CleanupFiles() 见master_splitmerge.go</div><div class="line">    | -- Shutdown() 见master_rpc.go</div><div class="line">    | -- startRPCServer() 见master_rpc.go</div><div class="line">    | -- stopRPCServer() 见master_rpc.go</div><div class="line">  | -- Sequential() 生成master并且串行执行mapreduce的函数.</div><div class="line">  | -- Distributed() 使用go程来并行执行map和reduce任务.</div><div class="line"></div><div class="line">master_rpc.go</div><div class="line">  | -- Master.Shutdown() 停止master的RPC服务的方法.</div><div class="line">  | -- Master.StartRPCServer() 打开master的rpc服务, 持续接受已经注册的Worker的行为(是否周期性检测是否存活需要后面自己实现).</div><div class="line">  | -- Master.stopRPCServer() 停止RPC服务.</div><div class="line"></div><div class="line">master_splitmerge.go</div><div class="line">  | -- Master.merge() 将许多的reduce任务的结果汇总到一个输出文件中, 在这时候, 所有的reduce文件已经在本地目录中, 只需要读文件即可.</div><div class="line">  | -- Master.CleanupFiles() 删除中间文件.</div><div class="line"></div><div class="line">schedule.go</div><div class="line">  | -- schedule() 调度函数, 包括给map分配文件, 设定reduce, 以及交换k-v集合等东西.</div><div class="line">worker.go</div><div class="line">  | -- worker struct&#123;&#125; worker实现.</div><div class="line">    | -- DoTask() 执行master分配的计算任务. 首先更新状态, 然后根据类型, 执行doMap或者是doReduce任务.</div><div class="line">    | -- Shutdown() 当所有任务都结束后, master会发送结束的RPC, 然后worker调用Shutdown, 返回执行的task数字.</div><div class="line">    | -- register() 向master函数进行注册.</div><div class="line">  | -- Runworker() 启动一个Worker, 向master注册, 并且等待任务.</div><div class="line"></div><div class="line">test_test.go</div></pre></td></tr></table></figure></p>
 <h2 id="Golang记录"><a href="#Golang记录" class="headerlink" title="Golang记录"></a>Golang记录</h2><p>golang的<a href="http://studygolang.com/articles/1644" target="_blank" rel="external">项目目录简介</a>, 官方文档的指导部分<a href="http://golang.org/doc/code.html" target="_blank" rel="external">在这里</a>.</p>
-<h6 id="go-test"><a href="#go-test" class="headerlink" title="go test"></a>go test</h6><p>go test以包为单位进行, 在包中应该存在”_test.go”为结尾的测试文件, 并且文件中存在 Test为前缀的函数, 并且该函数有一个 testing.T的接受参数即可(详细参看<a href="http://docscn.studygolang.com/pkg/testing/#pkg-overview" target="_blank" rel="external">test库</a>)</p>
+<h6 id="go-test"><a href="#go-test" class="headerlink" title="go test"></a>go test</h6><p>go test以包为单位进行, 在包中应该存在”_test.go”为结尾的测试文件, 并且文件中存在 Test为前缀的函数, 并且该函数有一个 testing.T的接受参数即可(详细参看<a href="http://docscn.studygolang.com/pkg/testing/#pkg-overview" target="_blank" rel="external">test库</a>)<br>常用的go test命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">go test 测试当前目录下 *_test.go文件</div><div class="line">go test [-file] filename 测试某个特定文件</div><div class="line">go test -run=&apos;method&apos;/-run method 执行特定的方法, method作为前缀使用</div><div class="line">-v 参数输出所有结果, 否则输出失败结果.</div></pre></td></tr></table></figure></p>
 <h6 id="引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛"><a href="#引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛" class="headerlink" title="引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?"></a>引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?</h6>]]></content>
     
     <summary type="html">
@@ -38,6 +38,54 @@
     </summary>
     
       <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="Golang" scheme="http://flame4.github.io/tags/Golang/"/>
+    
+      <category term="分布式系统" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"/>
+    
+      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>6.824 - Lab1</title>
+    <link href="http://flame4.github.io/2017/02/03/6.824-lab1/"/>
+    <id>http://flame4.github.io/2017/02/03/6.824-lab1/</id>
+    <published>2017-02-02T16:39:00.000Z</published>
+    <updated>2017-02-05T14:32:08.302Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><p style="text-align:right">last Modified: 2017-02-04</p>
+
+<p>记录lab1的实现思路</p>
+<h2 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h2><p>main函数里存在以下的入口:</p>
+<ol>
+<li>Sequential()</li>
+<li>Distributed()</li>
+</ol>
+<p>master.run -&gt; schedule() -&gt; finish() -&gt; merge() -&gt; send true to doneChannel.</p>
+<p><strong>标准mr</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Map Input: 一系列k-v, v是文件中的一行, k是这行开头的偏移量.</div><div class="line">Map Output: 一系列k-v, 是map函数处理后的输出.</div><div class="line">Reduce Input: 把相同的k-v优先分配到相同reducer中并且保证负载均衡.</div><div class="line">Reduce Output: 处理后的输出.</div><div class="line">n个reducer会有n个文件的输出, 最后可以汇总为一个.</div></pre></td></tr></table></figure></p>
+<p><strong>项目mr</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Map Input: 一个输入文件.</div><div class="line">Map Output: 一系列k-v, 是map函数处理后的输出.</div></pre></td></tr></table></figure></p>
+<h4 id="part1"><a href="#part1" class="headerlink" title="part1"></a>part1</h4><p>此处只是最简单的实现流程, master的rpc服务并没有启动.<br>实现doMap()和doReduce()两个函数, 在Sequential里, 调度函数依次调度doMap和doReduce, 所以doMap()应该做以下几件事情:</p>
+<ol>
+<li>读取输入文件(初始化为标准mr格式不做).</li>
+<li>调用mapF函数, 规定的输入参数为 file string(文件名), value string(文本内容), 得到 []KeyValue的中间结果.</li>
+<li>输出中间结果到中间文件.</li>
+</ol>
+<p>需要考虑两个问题:</p>
+<ol>
+<li>如何将不同的key-value对分发到不同的中间文件, 从而让不同的reducer读取, 达到简单的负载均衡? 代码给出了一个简单的hash.</li>
+<li>如何保存key-value对作为中间结果? 可以使用每行 key:value的方式, 但要考虑好换行, 引号等问题. 如果使用json, 则在多mapper共同写入一个中间文件的时候会出现json encode和decode频繁消耗资源的问题, 权衡后使用json. (测试数据量小,可以直接从内存一次性刷入磁盘), json还有一个好处, 如果存在相同的key, 可以用json中的数组来实现.</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;6-824-lab1&quot;&gt;&lt;a href=&quot;#6-824-lab1&quot; class=&quot;headerlink&quot; title=&quot;6.824 - lab1&quot;&gt;&lt;/a&gt;6.824 - lab1&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modi
+    
+    </summary>
+    
+      <category term="Distributed System入口" scheme="http://flame4.github.io/categories/Distributed-System%E5%85%A5%E5%8F%A3/"/>
     
     
       <category term="Golang" scheme="http://flame4.github.io/tags/Golang/"/>
@@ -117,69 +165,6 @@
     
     
       <category term="环境搭建" scheme="http://flame4.github.io/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Lucene 源码记录1</title>
-    <link href="http://flame4.github.io/2016/09/01/Lucene%E6%BA%90%E7%A0%811/"/>
-    <id>http://flame4.github.io/2016/09/01/Lucene源码1/</id>
-    <published>2016-09-01T15:26:19.000Z</published>
-    <updated>2016-09-07T04:10:16.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Lucene-源码阅读笔记-1"><a href="#Lucene-源码阅读笔记-1" class="headerlink" title="Lucene 源码阅读笔记 1"></a>Lucene 源码阅读笔记 1</h1><p style="text-align:right">last Modified: 2016-09-01</p>
-
-
-<p>开始了啃Lucene源码的漫漫长路，本笔记就一点一点记录自己的经历好了，也不知道能走多远,本次基于的版本是5.X,和之前的3.x有了比较大的改动，但核心思路变化不大。</p>
-<h3 id="Lucene-Search逻辑"><a href="#Lucene-Search逻辑" class="headerlink" title="Lucene Search逻辑"></a>Lucene Search逻辑</h3><ol>
-<li>DirectoryReader (extends IndexReader)获取文件，在这个过程中，所有关于该索引的元信息被加载入内存，也就是说新的磁盘改动暂时不可见。如果设计到的场景是实时更新的情况，可以调用 Directory.openIfChanged(IndexReader oldreader)方法.</li>
-<li>声明IndexSearcher，把indexreader注册进去</li>
-<li>使用QueryPhaser.parse()方法来获得一个Query， 也可以自己显式声明。</li>
-<li>IndexSearcher.search()函数</li>
-</ol>
-<h3 id="重要类表"><a href="#重要类表" class="headerlink" title="重要类表"></a>重要类表</h3><h5 id="search"><a href="#search" class="headerlink" title="search."></a>search.</h5>]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;Lucene-源码阅读笔记-1&quot;&gt;&lt;a href=&quot;#Lucene-源码阅读笔记-1&quot; class=&quot;headerlink&quot; title=&quot;Lucene 源码阅读笔记 1&quot;&gt;&lt;/a&gt;Lucene 源码阅读笔记 1&lt;/h1&gt;&lt;p style=&quot;text-align:
-    
-    </summary>
-    
-      <category term="搜索" scheme="http://flame4.github.io/categories/%E6%90%9C%E7%B4%A2/"/>
-    
-    
-      <category term="源码笔记" scheme="http://flame4.github.io/tags/%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0/"/>
-    
-      <category term="倒排索引" scheme="http://flame4.github.io/tags/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ElasticSearch 源码记录1</title>
-    <link href="http://flame4.github.io/2016/08/23/ES%E6%BA%90%E7%A0%811/"/>
-    <id>http://flame4.github.io/2016/08/23/ES源码1/</id>
-    <published>2016-08-23T15:26:19.000Z</published>
-    <updated>2016-09-06T17:19:08.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="ES-源码阅读笔记-1"><a href="#ES-源码阅读笔记-1" class="headerlink" title="ES 源码阅读笔记 1"></a>ES 源码阅读笔记 1</h1><p style="text-align:right">last Modified: 2016-08-24</p>
-
-
-
-<p>开始了啃ES源码的漫漫长路，本笔记就一点一点记录自己的经历好了，也不知道能走多远。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;ES-源码阅读笔记-1&quot;&gt;&lt;a href=&quot;#ES-源码阅读笔记-1&quot; class=&quot;headerlink&quot; title=&quot;ES 源码阅读笔记 1&quot;&gt;&lt;/a&gt;ES 源码阅读笔记 1&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modi
-    
-    </summary>
-    
-      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
-    
-    
-      <category term="分布式系统" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"/>
-    
-      <category term="源码笔记" scheme="http://flame4.github.io/tags/%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
@@ -327,7 +312,7 @@
     <link href="http://flame4.github.io/2016/07/31/Java-SE/"/>
     <id>http://flame4.github.io/2016/07/31/Java-SE/</id>
     <published>2016-07-31T15:26:19.000Z</published>
-    <updated>2016-11-16T07:30:51.461Z</updated>
+    <updated>2017-02-04T22:41:53.987Z</updated>
     
     <content type="html"><![CDATA[<h1 id="Java-软件工程知识点"><a href="#Java-软件工程知识点" class="headerlink" title="Java 软件工程知识点"></a>Java 软件工程知识点</h1><p style="text-align:right">last Modified: 2016-09-07</p>
 

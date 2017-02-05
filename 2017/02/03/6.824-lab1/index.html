@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Golang,分布式系统,分布式协议," />
 
 
 
@@ -86,12 +86,43 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="刘燚的个人空间">
-<meta property="og:url" content="http://flame4.github.io/categories/DevOps/index.html">
+<meta name="description" content="6.824 - lab1last Modified: 2017-02-04
+
+记录lab1的实现思路
+执行流程main函数里存在以下的入口:
+
+Sequential()
+Distributed()
+
+master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
+标准mr12345Ma">
+<meta property="og:type" content="article">
+<meta property="og:title" content="6.824 - Lab1">
+<meta property="og:url" content="http://flame4.github.io/2017/02/03/6.824-lab1/index.html">
 <meta property="og:site_name" content="刘燚的个人空间">
+<meta property="og:description" content="6.824 - lab1last Modified: 2017-02-04
+
+记录lab1的实现思路
+执行流程main函数里存在以下的入口:
+
+Sequential()
+Distributed()
+
+master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
+标准mr12345Ma">
+<meta property="og:updated_time" content="2017-02-05T14:32:08.302Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="刘燚的个人空间">
+<meta name="twitter:title" content="6.824 - Lab1">
+<meta name="twitter:description" content="6.824 - lab1last Modified: 2017-02-04
+
+记录lab1的实现思路
+执行流程main函数里存在以下的入口:
+
+Sequential()
+Distributed()
+
+master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
+标准mr12345Ma">
 
 
 
@@ -112,9 +143,9 @@
 
 
 
-  <link rel="canonical" href="http://flame4.github.io/categories/DevOps/"/>
+  <link rel="canonical" href="http://flame4.github.io/2017/02/03/6.824-lab1/"/>
 
-  <title> 分类: DevOps | 刘燚的个人空间 </title>
+  <title> 6.824 - Lab1 | 刘燚的个人空间 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -145,7 +176,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -243,47 +274,176 @@
           <div id="content" class="content">
             
 
-  <section id="posts" class="posts-collapse">
-    <div class="collection-title">
-      <h2 >
-        DevOps
-        <small>分类</small>
-      </h2>
-    </div>
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
 
     
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                6.824 - Lab1
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-02-03T00:39:00+08:00" content="2017-02-03">
+              2017-02-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Distributed-System入口/" itemprop="url" rel="index">
+                    <span itemprop="name">Distributed System入口</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/02/03/6.824-lab1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/03/6.824-lab1/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
       
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+      
+        <h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><p style="text-align:right">last Modified: 2017-02-04</p>
 
-      <h1 class="post-title">
+<p>记录lab1的实现思路</p>
+<h2 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h2><p>main函数里存在以下的入口:</p>
+<ol>
+<li>Sequential()</li>
+<li>Distributed()</li>
+</ol>
+<p>master.run -&gt; schedule() -&gt; finish() -&gt; merge() -&gt; send true to doneChannel.</p>
+<p><strong>标准mr</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Map Input: 一系列k-v, v是文件中的一行, k是这行开头的偏移量.</div><div class="line">Map Output: 一系列k-v, 是map函数处理后的输出.</div><div class="line">Reduce Input: 把相同的k-v优先分配到相同reducer中并且保证负载均衡.</div><div class="line">Reduce Output: 处理后的输出.</div><div class="line">n个reducer会有n个文件的输出, 最后可以汇总为一个.</div></pre></td></tr></table></figure></p>
+<p><strong>项目mr</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Map Input: 一个输入文件.</div><div class="line">Map Output: 一系列k-v, 是map函数处理后的输出.</div></pre></td></tr></table></figure></p>
+<h4 id="part1"><a href="#part1" class="headerlink" title="part1"></a>part1</h4><p>此处只是最简单的实现流程, master的rpc服务并没有启动.<br>实现doMap()和doReduce()两个函数, 在Sequential里, 调度函数依次调度doMap和doReduce, 所以doMap()应该做以下几件事情:</p>
+<ol>
+<li>读取输入文件(初始化为标准mr格式不做).</li>
+<li>调用mapF函数, 规定的输入参数为 file string(文件名), value string(文本内容), 得到 []KeyValue的中间结果.</li>
+<li>输出中间结果到中间文件.</li>
+</ol>
+<p>需要考虑两个问题:</p>
+<ol>
+<li>如何将不同的key-value对分发到不同的中间文件, 从而让不同的reducer读取, 达到简单的负载均衡? 代码给出了一个简单的hash.</li>
+<li>如何保存key-value对作为中间结果? 可以使用每行 key:value的方式, 但要考虑好换行, 引号等问题. 如果使用json, 则在多mapper共同写入一个中间文件的时候会出现json encode和decode频繁消耗资源的问题, 权衡后使用json. (测试数据量小,可以直接从内存一次性刷入磁盘), json还有一个好处, 如果存在相同的key, 可以用json中的数组来实现.</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
         
-            <a class="post-title-link" href="/2016/11/12/vagrant/" itemprop="url">
-              
-                <span itemprop="name">Vagrant使用方式</span>
-              
-            </a>
+      
+    </div>
+
+    <div>
+      
         
-      </h1>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-11-12T23:26:19+08:00"
-              content="2016-11-12" >
-          11-12
-        </time>
-      </div>
+      
+    </div>
 
-    </header>
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag">#Golang</a>
+          
+            <a href="/tags/分布式系统/" rel="tag">#分布式系统</a>
+          
+            <a href="/tags/分布式协议/" rel="tag">#分布式协议</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/12/vagrant/" rel="next" title="Vagrant使用方式">
+                <i class="fa fa-chevron-left"></i> Vagrant使用方式
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/03/6.824-Lab-recording-Overview/" rel="prev" title="6.824 - Lab Recording - Overview">
+                6.824 - Lab Recording - Overview <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </article>
 
 
-    
-  </section>
 
-  
-
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -291,6 +451,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/02/03/6.824-lab1/"
+           data-title="6.824 - Lab1" data-url="http://flame4.github.io/2017/02/03/6.824-lab1/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -310,8 +478,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.jpg"
@@ -379,6 +556,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -482,6 +670,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
