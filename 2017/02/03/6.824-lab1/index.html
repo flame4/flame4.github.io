@@ -110,7 +110,7 @@ Distributed()
 
 master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
 标准mr12345Ma">
-<meta property="og:updated_time" content="2017-02-06T10:19:43.966Z">
+<meta property="og:updated_time" content="2017-02-18T13:50:30.123Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="6.824 - Lab1">
 <meta name="twitter:description" content="6.824 - lab1last Modified: 2017-02-04
@@ -383,6 +383,13 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
 <li>如何将不同的key-value对分发到不同的中间文件, 从而让不同的reducer读取, 达到简单的负载均衡? 代码给出了一个简单的hash.</li>
 <li>如何保存key-value对作为中间结果? 可以使用每行 key:value的方式, 但要考虑好换行, 引号等问题. 如果使用json, 则在多mapper共同写入一个中间文件的时候会出现json encode和decode频繁消耗资源的问题, 权衡后使用json. (测试数据量小,可以直接从内存一次性刷入磁盘), json还有一个好处, 如果存在相同的key, 可以用json中的数组来实现.</li>
 </ol>
+<p>同理，doRuce流程:</p>
+<ol>
+<li>从不同的map中间文件中得到自己要处理的</li>
+<li>将最终的reduce函数执行后输出到文件</li>
+</ol>
+<h4 id="part2"><a href="#part2" class="headerlink" title="part2"></a>part2</h4><p>简单的mapreduce wordcount, 已经写过多次, 不多说.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mapper input: 整篇文章</div><div class="line">mapper output: &lt;a, 1&gt;, &lt;b, 1&gt; ..</div><div class="line">reducer input: &lt;a, &lt;1,1,1,&gt;&gt; ...</div><div class="line">reducer output: &lt;a, 10&gt; ...</div></pre></td></tr></table></figure></p>
+<p>这里注意的是 如何定义一个string中的分割符号, 给出的方法是 unicode.isletter.<br>go的string可以直接用切片方式抽取字符串(实现了某个接口类似函数重载还是内置只提供了这种类型的读取作为一种特殊情况?).<br>贴一个<a href="https://blog.golang.org/strings" target="_blank" rel="external">string的含义</a></p>
 
       
     </div>
@@ -417,13 +424,17 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/02/03/6.824-Lab-recording-Overview/" rel="next" title="6.824 - Lab Recording - Overview">
-                <i class="fa fa-chevron-left"></i> 6.824 - Lab Recording - Overview
+              <a href="/2016/12/16/语言包管理总结/" rel="next" title="语言包管理总结">
+                <i class="fa fa-chevron-left"></i> 语言包管理总结
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/03/6.824-Lab-recording-Overview/" rel="prev" title="6.824 - Lab Recording - Overview">
+                6.824 - Lab Recording - Overview <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -495,7 +506,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-count">16</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -512,7 +523,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -559,7 +570,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>

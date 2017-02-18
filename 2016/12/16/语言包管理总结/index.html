@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="一致性算法," />
+  <meta name="keywords" content="程序语言,项目管理," />
 
 
 
@@ -86,33 +86,28 @@
 
 
 
-<meta name="description" content="一致性哈希last Modified: 2016-09-05
-
-
-一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。
-1.基本概念和场景一致性哈希运用在分布式系统中的消息分发场景。
-无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单">
+<meta name="description" content="语言包管理总结在接触各种编程语言的时候，令我头疼的一件事情就是如果管理一个项目，项目的包引用，发布是怎么样的，什么原理，有什么工具和坑点。如果不对这些比较熟悉，就变得只会写hello world. 所以在这里开一个题目记录一下自己遇到的语言包管理。
+1. GoGo语言中最重要的两个环境变量是GOROOT和GOPATH.
+GOROOT: GO语言包的安装路径.
+GOPATH: 项目路径.
+Go语言的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一致性哈希">
-<meta property="og:url" content="http://flame4.github.io/2016/07/05/一致性哈希/index.html">
+<meta property="og:title" content="语言包管理总结">
+<meta property="og:url" content="http://flame4.github.io/2016/12/16/语言包管理总结/index.html">
 <meta property="og:site_name" content="刘燚的个人空间">
-<meta property="og:description" content="一致性哈希last Modified: 2016-09-05
-
-
-一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。
-1.基本概念和场景一致性哈希运用在分布式系统中的消息分发场景。
-无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单">
-<meta property="og:image" content="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:updated_time" content="2016-09-06T17:18:40.000Z">
+<meta property="og:description" content="语言包管理总结在接触各种编程语言的时候，令我头疼的一件事情就是如果管理一个项目，项目的包引用，发布是怎么样的，什么原理，有什么工具和坑点。如果不对这些比较熟悉，就变得只会写hello world. 所以在这里开一个题目记录一下自己遇到的语言包管理。
+1. GoGo语言中最重要的两个环境变量是GOROOT和GOPATH.
+GOROOT: GO语言包的安装路径.
+GOPATH: 项目路径.
+Go语言的">
+<meta property="og:updated_time" content="2017-02-18T13:11:18.870Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一致性哈希">
-<meta name="twitter:description" content="一致性哈希last Modified: 2016-09-05
-
-
-一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。
-1.基本概念和场景一致性哈希运用在分布式系统中的消息分发场景。
-无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单">
-<meta name="twitter:image" content="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta name="twitter:title" content="语言包管理总结">
+<meta name="twitter:description" content="语言包管理总结在接触各种编程语言的时候，令我头疼的一件事情就是如果管理一个项目，项目的包引用，发布是怎么样的，什么原理，有什么工具和坑点。如果不对这些比较熟悉，就变得只会写hello world. 所以在这里开一个题目记录一下自己遇到的语言包管理。
+1. GoGo语言中最重要的两个环境变量是GOROOT和GOPATH.
+GOROOT: GO语言包的安装路径.
+GOPATH: 项目路径.
+Go语言的">
 
 
 
@@ -133,9 +128,9 @@
 
 
 
-  <link rel="canonical" href="http://flame4.github.io/2016/07/05/一致性哈希/"/>
+  <link rel="canonical" href="http://flame4.github.io/2016/12/16/语言包管理总结/"/>
 
-  <title> 一致性哈希 | 刘燚的个人空间 </title>
+  <title> 语言包管理总结 | 刘燚的个人空间 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -285,7 +280,7 @@
             
             
               
-                一致性哈希
+                语言包管理总结
               
             
           </h1>
@@ -297,8 +292,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-05T23:26:19+08:00" content="2016-07-05">
-              2016-07-05
+            <time itemprop="dateCreated" datetime="2016-12-16T23:26:19+08:00" content="2016-12-16">
+              2016-12-16
             </time>
           </span>
 
@@ -311,8 +306,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Distributed-System/" itemprop="url" rel="index">
-                    <span itemprop="name">Distributed System</span>
+                  <a href="/categories/DevOps/" itemprop="url" rel="index">
+                    <span itemprop="name">DevOps</span>
                   </a>
                 </span>
 
@@ -327,8 +322,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/07/05/一致性哈希/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/05/一致性哈希/" itemprop="commentsCount"></span>
+                <a href="/2016/12/16/语言包管理总结/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/16/语言包管理总结/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -351,28 +346,12 @@
       
 
       
-        <h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><p style="text-align:right">last Modified: 2016-09-05</p>
-
-
-<p>一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。</p>
-<h3 id="1-基本概念和场景"><a href="#1-基本概念和场景" class="headerlink" title="1.基本概念和场景"></a>1.基本概念和场景</h3><p>一致性哈希运用在分布式系统中的消息分发场景。</p>
-<p>无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单的hash函数就可以保证数据分布到不同的机器上，但当集群的机器加入或者离开，hash函数就会失效。此时为了使hash重新生效，只能够进行大量的数据迁移，使得hash可以使用，但这是显然不可以接受的。对于这样的情况，一致性哈希就可以比较好的派上用场。数据不可能在集群迁入和迁出时做到完全不移动，但是一致性哈希可以做到让尽量小的数据移动。</p>
-<h3 id="2-实现原理"><a href="#2-实现原理" class="headerlink" title="2. 实现原理"></a>2. 实现原理</h3><p>一致性哈希的核心思想是将原来节点固定，数据分发到节点上这样的思路改变为将节点也作为一个数据加入分发，并以一个数据环路为分发的载体。如下图所示.</p>
-<p><img src="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
-<p>对于数据，使用key作为hash的值，对于节点，使用唯一标识(ip, host等)作为hash值，并在环路上找到自己的位置。对于一条数据，顺时针找到后面一个节点，作为自己的归属。</p>
-<p>当一个新节点加入时，比如本来有Node1和3， 结果加入Node2后，Node1跟Node2之间的数据会从Node3转移到Node2。用这种方式保证了让比较少的数据进行移动。</p>
-<h3 id="3-数据倾斜问题"><a href="#3-数据倾斜问题" class="headerlink" title="3. 数据倾斜问题"></a>3. 数据倾斜问题</h3><p>在上图的实现过程中，可以看到，在节点数量较少的情况下，还是会存在很多数据迁移的情况，比如在三个节点时会移动0.2的数据，对于大数据的情况下，也不是一个可以接受的方案，在这种情况下，可以加入“虚拟节点的概念”，对于三个节点，可以均匀的产生300个节点，每100个实际上属于同一个物理节点，这三百个节点可以均匀分布在环上，数据迁移的时候按照实际的映射关系来进行迁移。</p>
-<p>但是虚拟节点也不是越多越好的。试想假设有10000条数据，有10000个虚拟节点，并且是由四个实际节点模拟的。为了均匀，分布规律为 1-2-3-4-1-2-3-4…… 这样在2失效后，会有1/4的数据需要移动，而且因为只有一条数据，但是这一条数据也要读取一个磁盘块，其实是一种很大的浪费。</p>
-<h3 id="4-数据扎堆问题"><a href="#4-数据扎堆问题" class="headerlink" title="4. 数据扎堆问题"></a>4. 数据扎堆问题</h3><p>假设所有的数据没有key, 而就是一个数字，会发生什么呢？ 我们依旧可以根据这个数字来计算key，但是如果有10000个数字，里面有9900个10，有100个其余数字，这种情况下，数据依旧会压到一个节点上，而这显然也不是我们想要的结果.</p>
-<p>这个问题的解决方案我没有找到比较合适的办法，回头再想想补上。但是这种场景一般不适用在分布式哈希算法的系统中，因为系统要做的事情并不是仅仅维护这么一大串数字，而是要提供必要的映射，从而满足用户的查询，从这个角度考虑，这样的问题事实上是没有考虑的必要的。</p>
-<h3 id="5-一致性哈希与数据一致性"><a href="#5-一致性哈希与数据一致性" class="headerlink" title="5. 一致性哈希与数据一致性"></a>5. 一致性哈希与数据一致性</h3><p>分布式存储在当前的应用，一方面是集群的信息存储，另一方面可以用于云存储。相比于集群存储，云存储更加灵活，可以动态扩容，并且也会提供相应的冗余等服务。除了基于一致性哈希的分布式系统，还有一类是基于元信息的，也就是存在key-&gt;node的元信息，由元信息直接查找得到映射关系。</p>
-<p>在现在的高可用云服务的情景下，一致性哈希存在以下几个缺点：</p>
-<ol>
-<li>在集群脱离时的数据迁移过程会与数据的读取操作冲突。为了保证服务，系统必须将源文件设置为只读，并提供服务，在此时迁移的速率不能过大沾满磁盘。如果这时发生宕机等情况，则使得复杂度会成倍上升，</li>
-<li>对应的副本在对应的机器上绑定本身会对集群不利，因为这样不能最大程度的平衡负载。</li>
-<li>在一致性上，需要对不同节点的数据进行对比，最终确定最新版本，这个事情在系统中的损耗不可接受。</li>
-</ol>
-<p>这两方面元数据的管理有着天然的优势，关于这些详细的优势可以参考<a href="http://blog.csdn.net/huanggang028/article/details/28891315" target="_blank" rel="external">这篇博客</a>.</p>
+        <h1 id="语言包管理总结"><a href="#语言包管理总结" class="headerlink" title="语言包管理总结"></a>语言包管理总结</h1><p>在接触各种编程语言的时候，令我头疼的一件事情就是如果管理一个项目，项目的包引用，发布是怎么样的，什么原理，有什么工具和坑点。如果不对这些比较熟悉，就变得只会写hello world. 所以在这里开一个题目记录一下自己遇到的语言包管理。</p>
+<h3 id="1-Go"><a href="#1-Go" class="headerlink" title="1. Go"></a>1. Go</h3><p>Go语言中最重要的两个环境变量是<strong>GOROOT</strong>和<strong>GOPATH</strong>.</p>
+<pre><code>GOROOT: GO语言包的安装路径.
+GOPATH: 项目路径.
+</code></pre><p>Go语言的一个经典项目目录如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
+<h6 id="如果有多个项目，-GOPATH是怎么生效的？"><a href="#如果有多个项目，-GOPATH是怎么生效的？" class="headerlink" title="如果有多个项目， GOPATH是怎么生效的？"></a>如果有多个项目， GOPATH是怎么生效的？</h6><p>GOPATH可以允许用；分割开的多个项目路径。</p>
 
       
     </div>
@@ -394,7 +373,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/一致性算法/" rel="tag">#一致性算法</a>
+            <a href="/tags/程序语言/" rel="tag">#程序语言</a>
+          
+            <a href="/tags/项目管理/" rel="tag">#项目管理</a>
           
         </div>
       
@@ -403,16 +384,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/05/Shell-base/" rel="next" title="shell 用法简记">
-                <i class="fa fa-chevron-left"></i> shell 用法简记
+              <a href="/2016/11/12/vagrant/" rel="next" title="Vagrant使用方式">
+                <i class="fa fa-chevron-left"></i> Vagrant使用方式
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/10/LSM-Tree/" rel="prev" title="LSM Tree">
-                LSM Tree <i class="fa fa-chevron-right"></i>
+              <a href="/2017/02/03/6.824-lab1/" rel="prev" title="6.824 - Lab1">
+                6.824 - Lab1 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -439,8 +420,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/07/05/一致性哈希/"
-           data-title="一致性哈希" data-url="http://flame4.github.io/2016/07/05/一致性哈希/">
+      <div class="ds-thread" data-thread-key="2016/12/16/语言包管理总结/"
+           data-title="语言包管理总结" data-url="http://flame4.github.io/2016/12/16/语言包管理总结/">
       </div>
     
   </div>
@@ -549,7 +530,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一致性哈希"><span class="nav-text">一致性哈希</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-基本概念和场景"><span class="nav-text">1.基本概念和场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-实现原理"><span class="nav-text">2. 实现原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-数据倾斜问题"><span class="nav-text">3. 数据倾斜问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-数据扎堆问题"><span class="nav-text">4. 数据扎堆问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-一致性哈希与数据一致性"><span class="nav-text">5. 一致性哈希与数据一致性</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#语言包管理总结"><span class="nav-text">语言包管理总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Go"><span class="nav-text">1. Go</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#如果有多个项目，-GOPATH是怎么生效的？"><span class="nav-text">如果有多个项目， GOPATH是怎么生效的？</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>

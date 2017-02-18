@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://flame4.github.io/"/>
-  <updated>2017-02-06T10:19:43.966Z</updated>
+  <updated>2017-02-18T13:11:18.878Z</updated>
   <id>http://flame4.github.io/</id>
   
   <author>
@@ -16,11 +16,57 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>6.824 - Lab Recording - Overview</title>
+    <link href="http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/"/>
+    <id>http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/</id>
+    <published>2017-02-02T16:39:00.000Z</published>
+    <updated>2017-02-18T13:11:18.878Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="6-824-lab-概览"><a href="#6-824-lab-概览" class="headerlink" title="6.824 - lab 概览"></a>6.824 - lab 概览</h1><p style="text-align:right">last Modified: 2017-02-04</p>
+
+<p>大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><h4 id="main"><a href="#main" class="headerlink" title="main"></a>main</h4><p>各种各样的启动函数和工具函数.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">*.txt 一堆文本文件用作测试用例.</div><div class="line">test-mr.sh  mapreduce部分的自动测试脚本</div><div class="line">test-wc.sh  TO SEE</div><div class="line">test-ii.sh  TO SEE</div><div class="line">diskvd.go   TO SEE</div><div class="line">ii.go       TO SEE</div><div class="line">lockc.go    TO SEE</div><div class="line">lockd.go    TO SEE</div><div class="line">pbc.go      TO SEE</div><div class="line">pbd.go      TO SEE</div><div class="line">viewd.go    TO SEE</div><div class="line">wc.go       TO SEE</div></pre></td></tr></table></figure></p>
+<h4 id="mapreduce"><a href="#mapreduce" class="headerlink" title="mapreduce"></a>mapreduce</h4><p>mapreduce包,实现简单的map-reduce功能.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">common.go 通用函数</div><div class="line">   | -- debug() 打印debug信息</div><div class="line">   | -- jobPhase string 指示task是一个map还是reduce</div><div class="line">   | -- KeyValue struct&#123;&#125; 通用kv结构体</div><div class="line">   | -- reduceName() 构建中间文件的文件名, 用于让map传递给reduce</div><div class="line">   | -- mergeName() 构建最后的输出文件名</div><div class="line">   | -- exists() 判断文件是否存在的简单封装</div><div class="line"></div><div class="line">common_map.go</div><div class="line">  | -- doMap() 读取输入文件, 执行用户定义的map任务, 并且输出文件到中间文件. 采用pull的方式.</div><div class="line"></div><div class="line">common_reduce.go</div><div class="line">  | -- doReduce() 读取中间文件, 计算用户定义的reduce任务, 并且输出为最后的输出文件.</div><div class="line"></div><div class="line">common_rpc.go rpc通信通用函数</div><div class="line">  | -- DoTaskArgs struct&#123;&#125; 当master调度一个任务给work的时候携带的信息RPC</div><div class="line">  | -- ShutdownReply struct&#123;&#125; 当work的任务被强制停止的时候, master会发送该RPC</div><div class="line">  | -- RegisterArgs struct&#123;&#125; 当work向master发送注册时候的RPC类型</div><div class="line">  | -- call() 发送所有RPC的函数, 当成功回复后返回true, 否则都返回err.</div><div class="line"></div><div class="line">master.go</div><div class="line">  | -- Master struct&#123;&#125; master结构体, 维护了worker的socket, 任务完成的消息队列, job的基本信息, 网络监听器和状态等. 实现Mutex接口.</div><div class="line">    | -- Register() work调用master的register函数, 用来加入master的调度队列.</div><div class="line">    | -- forwardRegistrations() 将注册的函数加入channel中, 供调度函数使用.</div><div class="line">    | -- run()  执行mapreduce任务. [是任务的入口函数]</div><div class="line">    | -- Wait() 等待, 直到所有任务都执行完毕. master中的一个队列就会被消费完全.</div><div class="line">    | -- killWorkers() 停止mapreduce, 给每个work一个停止RPC.并且收集一些任务执行信息.</div><div class="line">    | -- merge() 见master_splitmerge.go</div><div class="line">    | -- CleanupFiles() 见master_splitmerge.go</div><div class="line">    | -- Shutdown() 见master_rpc.go</div><div class="line">    | -- startRPCServer() 见master_rpc.go</div><div class="line">    | -- stopRPCServer() 见master_rpc.go</div><div class="line">  | -- Sequential() 生成master并且串行执行mapreduce的函数.</div><div class="line">  | -- Distributed() 使用go程来并行执行map和reduce任务.</div><div class="line"></div><div class="line">master_rpc.go</div><div class="line">  | -- Master.Shutdown() 停止master的RPC服务的方法.</div><div class="line">  | -- Master.StartRPCServer() 打开master的rpc服务, 持续接受已经注册的Worker的行为(是否周期性检测是否存活需要后面自己实现).</div><div class="line">  | -- Master.stopRPCServer() 停止RPC服务.</div><div class="line"></div><div class="line">master_splitmerge.go</div><div class="line">  | -- Master.merge() 将许多的reduce任务的结果汇总到一个输出文件中, 在这时候, 所有的reduce文件已经在本地目录中, 只需要读文件即可.</div><div class="line">  | -- Master.CleanupFiles() 删除中间文件.</div><div class="line"></div><div class="line">schedule.go</div><div class="line">  | -- schedule() 调度函数, 包括给map分配文件, 设定reduce, 以及交换k-v集合等东西.</div><div class="line">worker.go</div><div class="line">  | -- worker struct&#123;&#125; worker实现.</div><div class="line">    | -- DoTask() 执行master分配的计算任务. 首先更新状态, 然后根据类型, 执行doMap或者是doReduce任务.</div><div class="line">    | -- Shutdown() 当所有任务都结束后, master会发送结束的RPC, 然后worker调用Shutdown, 返回执行的task数字.</div><div class="line">    | -- register() 向master函数进行注册.</div><div class="line">  | -- Runworker() 启动一个Worker, 向master注册, 并且等待任务.</div><div class="line"></div><div class="line">test_test.go</div></pre></td></tr></table></figure></p>
+<h2 id="Golang记录"><a href="#Golang记录" class="headerlink" title="Golang记录"></a>Golang记录</h2><p>golang的<a href="http://studygolang.com/articles/1644" target="_blank" rel="external">项目目录简介</a>, 官方文档的指导部分<a href="http://golang.org/doc/code.html" target="_blank" rel="external">在这里</a>.</p>
+<h6 id="go-test"><a href="#go-test" class="headerlink" title="go test"></a>go test</h6><p>go test以包为单位进行, 在包中应该存在 <strong>_test.go</strong> 为结尾的测试文件, 并且文件中存在 Test为前缀的函数, 并且该函数有一个 testing.T的接受参数即可(详细参看<a href="http://docscn.studygolang.com/pkg/testing/#pkg-overview" target="_blank" rel="external">test库</a>)<br>常用的go test命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">go test 测试当前目录下 *_test.go文件</div><div class="line">go test [-file] filename 测试某个特定文件</div><div class="line">go test -run=&apos;method&apos;/-run method 执行特定的方法, method作为前缀使用</div><div class="line">-v 参数输出所有结果, 否则输出失败结果.</div></pre></td></tr></table></figure></p>
+<h6 id="引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛"><a href="#引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛" class="headerlink" title="引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?"></a>引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?</h6><p>TO TEST.</p>
+<h6 id="go参数中的interface-和…参数的含义"><a href="#go参数中的interface-和…参数的含义" class="headerlink" title="go参数中的interface{}和…参数的含义"></a>go参数中的interface{}和…参数的含义</h6><p>interface{} 代表空接口, 也就是任何类型.<br>…表示可变参数长度</p>
+<h6 id="go-build"><a href="#go-build" class="headerlink" title="go build"></a>go build</h6><p>单个包中多个文件有互相依赖的时候, go run 单独的文件会失败.<br>简单操作, 可以把有依赖的先放在前面 一起go, 比如 go run a.go b.go c.go<br>手动拓扑排序.</p>
+<h6 id="常用接口"><a href="#常用接口" class="headerlink" title="常用接口"></a>常用接口</h6><ol>
+<li>string接口的 String(), 可以用于在fmt中输出.</li>
+<li>error接口的 Error(), 用于标准函数外的错误处理.</li>
+</ol>
+<h6 id="go参数传递原则"><a href="#go参数传递原则" class="headerlink" title="go参数传递原则"></a>go参数传递原则</h6><ol>
+<li>slice,map,channel为引用传递</li>
+<li>其余为值传递，比如数组和struct都是copy的值传递，内部的操作不会影响外面。(<a href="https://blog.go-zh.org/go-slices-usage-and-internals" target="_blank" rel="external">https://blog.go-zh.org/go-slices-usage-and-internals</a>)</li>
+</ol>
+<h6 id="go并发编程模式"><a href="#go并发编程模式" class="headerlink" title="go并发编程模式"></a>go并发编程模式</h6><p><a href="http://air.googol.im/2014/03/15/go-concurrency-patterns-pipelines-and-cancellation.html" target="_blank" rel="external">人懒帖文章</a></p>
+<h6 id="go-import-github"><a href="#go-import-github" class="headerlink" title="go import github"></a>go import github</h6><p>import 一个github的时候发生的事情:<br>go get发生的事情:</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;6-824-lab-概览&quot;&gt;&lt;a href=&quot;#6-824-lab-概览&quot; class=&quot;headerlink&quot; title=&quot;6.824 - lab 概览&quot;&gt;&lt;/a&gt;6.824 - lab 概览&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;l
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="Golang" scheme="http://flame4.github.io/tags/Golang/"/>
+    
+      <category term="分布式系统" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"/>
+    
+      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
+    
+  </entry>
+  
+  <entry>
     <title>6.824 - Lab1</title>
     <link href="http://flame4.github.io/2017/02/03/6.824-lab1/"/>
     <id>http://flame4.github.io/2017/02/03/6.824-lab1/</id>
     <published>2017-02-02T16:39:00.000Z</published>
-    <updated>2017-02-06T10:19:43.966Z</updated>
+    <updated>2017-02-18T13:50:30.123Z</updated>
     
     <content type="html"><![CDATA[<h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><p style="text-align:right">last Modified: 2017-02-04</p>
 
@@ -44,6 +90,13 @@
 <li>如何将不同的key-value对分发到不同的中间文件, 从而让不同的reducer读取, 达到简单的负载均衡? 代码给出了一个简单的hash.</li>
 <li>如何保存key-value对作为中间结果? 可以使用每行 key:value的方式, 但要考虑好换行, 引号等问题. 如果使用json, 则在多mapper共同写入一个中间文件的时候会出现json encode和decode频繁消耗资源的问题, 权衡后使用json. (测试数据量小,可以直接从内存一次性刷入磁盘), json还有一个好处, 如果存在相同的key, 可以用json中的数组来实现.</li>
 </ol>
+<p>同理，doRuce流程:</p>
+<ol>
+<li>从不同的map中间文件中得到自己要处理的</li>
+<li>将最终的reduce函数执行后输出到文件</li>
+</ol>
+<h4 id="part2"><a href="#part2" class="headerlink" title="part2"></a>part2</h4><p>简单的mapreduce wordcount, 已经写过多次, 不多说.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mapper input: 整篇文章</div><div class="line">mapper output: &lt;a, 1&gt;, &lt;b, 1&gt; ..</div><div class="line">reducer input: &lt;a, &lt;1,1,1,&gt;&gt; ...</div><div class="line">reducer output: &lt;a, 10&gt; ...</div></pre></td></tr></table></figure></p>
+<p>这里注意的是 如何定义一个string中的分割符号, 给出的方法是 unicode.isletter.<br>go的string可以直接用切片方式抽取字符串(实现了某个接口类似函数重载还是内置只提供了这种类型的读取作为一种特殊情况?).<br>贴一个<a href="https://blog.golang.org/strings" target="_blank" rel="external">string的含义</a></p>
 ]]></content>
     
     <summary type="html">
@@ -64,50 +117,32 @@
   </entry>
   
   <entry>
-    <title>6.824 - Lab Recording - Overview</title>
-    <link href="http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/"/>
-    <id>http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/</id>
-    <published>2017-02-02T16:39:00.000Z</published>
-    <updated>2017-02-08T04:12:23.706Z</updated>
+    <title>语言包管理总结</title>
+    <link href="http://flame4.github.io/2016/12/16/%E8%AF%AD%E8%A8%80%E5%8C%85%E7%AE%A1%E7%90%86%E6%80%BB%E7%BB%93/"/>
+    <id>http://flame4.github.io/2016/12/16/语言包管理总结/</id>
+    <published>2016-12-16T15:26:19.000Z</published>
+    <updated>2017-02-18T13:11:18.870Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="6-824-lab-概览"><a href="#6-824-lab-概览" class="headerlink" title="6.824 - lab 概览"></a>6.824 - lab 概览</h1><p style="text-align:right">last Modified: 2017-02-04</p>
-
-<p>大年初一开个坑, 记录一下6.824的lab历程. 本篇主要记录一下官方给的代码结构以及测试用脚本的使用方法等, 顺便写一点golang里面比较方便的项目管理方法,包括测试, 自动简化等等.</p>
-<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><h4 id="main"><a href="#main" class="headerlink" title="main"></a>main</h4><p>各种各样的启动函数和工具函数.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">*.txt 一堆文本文件用作测试用例.</div><div class="line">test-mr.sh  mapreduce部分的自动测试脚本</div><div class="line">test-wc.sh  TO SEE</div><div class="line">test-ii.sh  TO SEE</div><div class="line">diskvd.go   TO SEE</div><div class="line">ii.go       TO SEE</div><div class="line">lockc.go    TO SEE</div><div class="line">lockd.go    TO SEE</div><div class="line">pbc.go      TO SEE</div><div class="line">pbd.go      TO SEE</div><div class="line">viewd.go    TO SEE</div><div class="line">wc.go       TO SEE</div></pre></td></tr></table></figure></p>
-<h4 id="mapreduce"><a href="#mapreduce" class="headerlink" title="mapreduce"></a>mapreduce</h4><p>mapreduce包,实现简单的map-reduce功能.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">common.go 通用函数</div><div class="line">   | -- debug() 打印debug信息</div><div class="line">   | -- jobPhase string 指示task是一个map还是reduce</div><div class="line">   | -- KeyValue struct&#123;&#125; 通用kv结构体</div><div class="line">   | -- reduceName() 构建中间文件的文件名, 用于让map传递给reduce</div><div class="line">   | -- mergeName() 构建最后的输出文件名</div><div class="line">   | -- exists() 判断文件是否存在的简单封装</div><div class="line"></div><div class="line">common_map.go</div><div class="line">  | -- doMap() 读取输入文件, 执行用户定义的map任务, 并且输出文件到中间文件. 采用pull的方式.</div><div class="line"></div><div class="line">common_reduce.go</div><div class="line">  | -- doReduce() 读取中间文件, 计算用户定义的reduce任务, 并且输出为最后的输出文件.</div><div class="line"></div><div class="line">common_rpc.go rpc通信通用函数</div><div class="line">  | -- DoTaskArgs struct&#123;&#125; 当master调度一个任务给work的时候携带的信息RPC</div><div class="line">  | -- ShutdownReply struct&#123;&#125; 当work的任务被强制停止的时候, master会发送该RPC</div><div class="line">  | -- RegisterArgs struct&#123;&#125; 当work向master发送注册时候的RPC类型</div><div class="line">  | -- call() 发送所有RPC的函数, 当成功回复后返回true, 否则都返回err.</div><div class="line"></div><div class="line">master.go</div><div class="line">  | -- Master struct&#123;&#125; master结构体, 维护了worker的socket, 任务完成的消息队列, job的基本信息, 网络监听器和状态等. 实现Mutex接口.</div><div class="line">    | -- Register() work调用master的register函数, 用来加入master的调度队列.</div><div class="line">    | -- forwardRegistrations() 将注册的函数加入channel中, 供调度函数使用.</div><div class="line">    | -- run()  执行mapreduce任务. [是任务的入口函数]</div><div class="line">    | -- Wait() 等待, 直到所有任务都执行完毕. master中的一个队列就会被消费完全.</div><div class="line">    | -- killWorkers() 停止mapreduce, 给每个work一个停止RPC.并且收集一些任务执行信息.</div><div class="line">    | -- merge() 见master_splitmerge.go</div><div class="line">    | -- CleanupFiles() 见master_splitmerge.go</div><div class="line">    | -- Shutdown() 见master_rpc.go</div><div class="line">    | -- startRPCServer() 见master_rpc.go</div><div class="line">    | -- stopRPCServer() 见master_rpc.go</div><div class="line">  | -- Sequential() 生成master并且串行执行mapreduce的函数.</div><div class="line">  | -- Distributed() 使用go程来并行执行map和reduce任务.</div><div class="line"></div><div class="line">master_rpc.go</div><div class="line">  | -- Master.Shutdown() 停止master的RPC服务的方法.</div><div class="line">  | -- Master.StartRPCServer() 打开master的rpc服务, 持续接受已经注册的Worker的行为(是否周期性检测是否存活需要后面自己实现).</div><div class="line">  | -- Master.stopRPCServer() 停止RPC服务.</div><div class="line"></div><div class="line">master_splitmerge.go</div><div class="line">  | -- Master.merge() 将许多的reduce任务的结果汇总到一个输出文件中, 在这时候, 所有的reduce文件已经在本地目录中, 只需要读文件即可.</div><div class="line">  | -- Master.CleanupFiles() 删除中间文件.</div><div class="line"></div><div class="line">schedule.go</div><div class="line">  | -- schedule() 调度函数, 包括给map分配文件, 设定reduce, 以及交换k-v集合等东西.</div><div class="line">worker.go</div><div class="line">  | -- worker struct&#123;&#125; worker实现.</div><div class="line">    | -- DoTask() 执行master分配的计算任务. 首先更新状态, 然后根据类型, 执行doMap或者是doReduce任务.</div><div class="line">    | -- Shutdown() 当所有任务都结束后, master会发送结束的RPC, 然后worker调用Shutdown, 返回执行的task数字.</div><div class="line">    | -- register() 向master函数进行注册.</div><div class="line">  | -- Runworker() 启动一个Worker, 向master注册, 并且等待任务.</div><div class="line"></div><div class="line">test_test.go</div></pre></td></tr></table></figure></p>
-<h2 id="Golang记录"><a href="#Golang记录" class="headerlink" title="Golang记录"></a>Golang记录</h2><p>golang的<a href="http://studygolang.com/articles/1644" target="_blank" rel="external">项目目录简介</a>, 官方文档的指导部分<a href="http://golang.org/doc/code.html" target="_blank" rel="external">在这里</a>.</p>
-<h6 id="go-test"><a href="#go-test" class="headerlink" title="go test"></a>go test</h6><p>go test以包为单位进行, 在包中应该存在”_test.go”为结尾的测试文件, 并且文件中存在 Test为前缀的函数, 并且该函数有一个 testing.T的接受参数即可(详细参看<a href="http://docscn.studygolang.com/pkg/testing/#pkg-overview" target="_blank" rel="external">test库</a>)<br>常用的go test命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">go test 测试当前目录下 *_test.go文件</div><div class="line">go test [-file] filename 测试某个特定文件</div><div class="line">go test -run=&apos;method&apos;/-run method 执行特定的方法, method作为前缀使用</div><div class="line">-v 参数输出所有结果, 否则输出失败结果.</div></pre></td></tr></table></figure></p>
-<h6 id="引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛"><a href="#引用包中的函数都是大写开始-那么包中的小写函数可以使用嘛" class="headerlink" title="引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?"></a>引用包中的函数都是大写开始, 那么包中的小写函数可以使用嘛?</h6><p>TO TEST.</p>
-<h6 id="go参数中的interface-和…参数的含义"><a href="#go参数中的interface-和…参数的含义" class="headerlink" title="go参数中的interface{}和…参数的含义"></a>go参数中的interface{}和…参数的含义</h6><p>interface{} 代表空接口, 也就是任何类型.<br>…表示可变参数长度</p>
-<h6 id="go-build"><a href="#go-build" class="headerlink" title="go build"></a>go build</h6><p>单个包中多个文件有互相依赖的时候, go run 单独的文件会失败.<br>简单操作, 可以把有依赖的先放在前面 一起go, 比如 go run a.go b.go c.go<br>手动拓扑排序.</p>
-<h6 id="常用接口"><a href="#常用接口" class="headerlink" title="常用接口"></a>常用接口</h6><ol>
-<li>string接口的 String(), 可以用于在fmt中输出.</li>
-<li>error接口的 Error(), 用于标准函数外的错误处理.</li>
-</ol>
-<h6 id="go参数传递原则"><a href="#go参数传递原则" class="headerlink" title="go参数传递原则"></a>go参数传递原则</h6><ol>
-<li>数组传递会copy一份新的过去,需要区分指针.</li>
-<li>管道传递可以直接使用,不需要区分指针.</li>
-<li>对象传递会copy一份新的过去,需要区分指针.</li>
-<li>todo</li>
-</ol>
-<h6 id="go并发编程模式"><a href="#go并发编程模式" class="headerlink" title="go并发编程模式"></a>go并发编程模式</h6><p><a href="http://air.googol.im/2014/03/15/go-concurrency-patterns-pipelines-and-cancellation.html" target="_blank" rel="external">人懒帖文章</a></p>
-<h6 id="go-panic-recover"><a href="#go-panic-recover" class="headerlink" title="go-panic-recover"></a>go-panic-recover</h6><p>todo</p>
+    <content type="html"><![CDATA[<h1 id="语言包管理总结"><a href="#语言包管理总结" class="headerlink" title="语言包管理总结"></a>语言包管理总结</h1><p>在接触各种编程语言的时候，令我头疼的一件事情就是如果管理一个项目，项目的包引用，发布是怎么样的，什么原理，有什么工具和坑点。如果不对这些比较熟悉，就变得只会写hello world. 所以在这里开一个题目记录一下自己遇到的语言包管理。</p>
+<h3 id="1-Go"><a href="#1-Go" class="headerlink" title="1. Go"></a>1. Go</h3><p>Go语言中最重要的两个环境变量是<strong>GOROOT</strong>和<strong>GOPATH</strong>.</p>
+<pre><code>GOROOT: GO语言包的安装路径.
+GOPATH: 项目路径.
+</code></pre><p>Go语言的一个经典项目目录如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
+<h6 id="如果有多个项目，-GOPATH是怎么生效的？"><a href="#如果有多个项目，-GOPATH是怎么生效的？" class="headerlink" title="如果有多个项目， GOPATH是怎么生效的？"></a>如果有多个项目， GOPATH是怎么生效的？</h6><p>GOPATH可以允许用；分割开的多个项目路径。</p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;h1 id=&quot;6-824-lab-概览&quot;&gt;&lt;a href=&quot;#6-824-lab-概览&quot; class=&quot;headerlink&quot; title=&quot;6.824 - lab 概览&quot;&gt;&lt;/a&gt;6.824 - lab 概览&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;l
+      &lt;h1 id=&quot;语言包管理总结&quot;&gt;&lt;a href=&quot;#语言包管理总结&quot; class=&quot;headerlink&quot; title=&quot;语言包管理总结&quot;&gt;&lt;/a&gt;语言包管理总结&lt;/h1&gt;&lt;p&gt;在接触各种编程语言的时候，令我头疼的一件事情就是如果管理一个项目，项目的包引用，发布是怎么样的，什么
     
     </summary>
     
-      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+      <category term="DevOps" scheme="http://flame4.github.io/categories/DevOps/"/>
     
     
-      <category term="Golang" scheme="http://flame4.github.io/tags/Golang/"/>
+      <category term="程序语言" scheme="http://flame4.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%AF%AD%E8%A8%80/"/>
     
-      <category term="分布式系统" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"/>
-    
-      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
+      <category term="项目管理" scheme="http://flame4.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/"/>
     
   </entry>
   
@@ -813,6 +848,33 @@
   </entry>
   
   <entry>
+    <title>shell 用法简记</title>
+    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
+    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:21:26.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
+
+<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
+<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
+<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
+<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
+    
+    </summary>
+    
+      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>raft Protocol</title>
     <link href="http://flame4.github.io/2016/07/05/raft/"/>
     <id>http://flame4.github.io/2016/07/05/raft/</id>
@@ -915,33 +977,6 @@
       <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
     
       <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>shell 用法简记</title>
-    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
-    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
-    <published>2016-07-05T15:26:19.000Z</published>
-    <updated>2016-09-06T17:21:26.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
-
-<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
-<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
-<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
-<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
-    
-    </summary>
-    
-      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
-    
     
   </entry>
   
