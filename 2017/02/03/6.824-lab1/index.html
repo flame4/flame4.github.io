@@ -86,7 +86,7 @@
 
 
 
-<meta name="description" content="6.824 - lab1last Modified: 2017-02-04
+<meta name="description" content="6.824 - lab1last Modified: 2017-02-21
 
 记录lab1的实现思路
 执行流程main函数里存在以下的入口:
@@ -100,7 +100,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
 <meta property="og:title" content="6.824 - Lab1">
 <meta property="og:url" content="http://flame4.github.io/2017/02/03/6.824-lab1/index.html">
 <meta property="og:site_name" content="刘燚的个人空间">
-<meta property="og:description" content="6.824 - lab1last Modified: 2017-02-04
+<meta property="og:description" content="6.824 - lab1last Modified: 2017-02-21
 
 记录lab1的实现思路
 执行流程main函数里存在以下的入口:
@@ -110,10 +110,10 @@ Distributed()
 
 master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
 标准mr12345Ma">
-<meta property="og:updated_time" content="2017-02-18T13:50:30.123Z">
+<meta property="og:updated_time" content="2017-02-21T14:43:30.297Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="6.824 - Lab1">
-<meta name="twitter:description" content="6.824 - lab1last Modified: 2017-02-04
+<meta name="twitter:description" content="6.824 - lab1last Modified: 2017-02-21
 
 记录lab1的实现思路
 执行流程main函数里存在以下的入口:
@@ -307,7 +307,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-02-03T00:39:00+08:00" content="2017-02-03">
+            <time itemprop="dateCreated" datetime="2017-02-03T00:50:00+08:00" content="2017-02-03">
               2017-02-03
             </time>
           </span>
@@ -361,7 +361,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
       
 
       
-        <h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><p style="text-align:right">last Modified: 2017-02-04</p>
+        <h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><p style="text-align:right">last Modified: 2017-02-21</p>
 
 <p>记录lab1的实现思路</p>
 <h2 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h2><p>main函数里存在以下的入口:</p>
@@ -389,7 +389,16 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
 <li>将最终的reduce函数执行后输出到文件</li>
 </ol>
 <h4 id="part2"><a href="#part2" class="headerlink" title="part2"></a>part2</h4><p>简单的mapreduce wordcount, 已经写过多次, 不多说.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mapper input: 整篇文章</div><div class="line">mapper output: &lt;a, 1&gt;, &lt;b, 1&gt; ..</div><div class="line">reducer input: &lt;a, &lt;1,1,1,&gt;&gt; ...</div><div class="line">reducer output: &lt;a, 10&gt; ...</div></pre></td></tr></table></figure></p>
-<p>这里注意的是 如何定义一个string中的分割符号, 给出的方法是 unicode.isletter.<br>go的string可以直接用切片方式抽取字符串(实现了某个接口类似函数重载还是内置只提供了这种类型的读取作为一种特殊情况?).<br>贴一个<a href="https://blog.golang.org/strings" target="_blank" rel="external">string的含义</a></p>
+<p>这里注意的是 如何定义一个string中的分割符号, 给出的方法是 unicode.isletter.<br>go的string可以直接用切片方式抽取字符串(实现了某个接口类似函数重载还是内置只提供了这种类型的读取作为一种特殊情况?).</p>
+<h4 id="part3"><a href="#part3" class="headerlink" title="part3"></a>part3</h4><p>执行分布式的master-worker分发模式. 使用schedule.go中的schedule函数进行调度.master和worker之间通过rpc进行通讯和同步, 底层通过unix socket来进行通讯.</p>
+<p>执行流程:</p>
+<ol>
+<li>master开启rpc server并注册自己的方法, 然后用net.Listener监听unix. 并且每个connection使用rpcs来进行操作.</li>
+<li>master的run过程调用schedule函数, map一次, reduce一次.因为要保证先map, 所以map必须等所有任务结束后才可以返回. 其中每次调度阶段会执行一次master的forwardRegistrations来产生一些worker(每个worker都是go程), 来进行任务的分配.而结束阶段会kill所有的worker.</li>
+<li>worker的产生发生在schedule里面,开启新的go程调用worker.go中的Runworker函数,该函数产生一个worker, worker向master注册自己, 并且开启自己的rpcserver. 在schedule中存在一个chan可以检测worker数量,并在添加新的worker时候, 加入chan, 供schedule函数使用. 所以schedule首先调用Runworker, 并且在chan中获取这个worker使用.</li>
+<li>map和reduce阶段中上述chan有两个, 会产生reduce的函数复用worker的现象嘛?</li>
+</ol>
+<p>简单写一下自己最薄弱的网络编程部分go的一些记录.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">1. TODO</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -424,17 +433,13 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/16/语言包管理总结/" rel="next" title="语言包管理总结">
-                <i class="fa fa-chevron-left"></i> 语言包管理总结
+              <a href="/2017/02/03/6.824-Lab-recording-Overview/" rel="next" title="6.824 - Lab Recording - Overview">
+                <i class="fa fa-chevron-left"></i> 6.824 - Lab Recording - Overview
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/02/03/6.824-Lab-recording-Overview/" rel="prev" title="6.824 - Lab Recording - Overview">
-                6.824 - Lab Recording - Overview <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -506,7 +511,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">16</span>
+              <span class="site-state-item-count">15</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -523,7 +528,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -570,7 +575,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part3"><span class="nav-text">part3</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
