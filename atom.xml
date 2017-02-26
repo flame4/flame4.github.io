@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://flame4.github.io/"/>
-  <updated>2017-02-23T13:46:35.143Z</updated>
+  <updated>2017-02-26T13:15:04.931Z</updated>
   <id>http://flame4.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://flame4.github.io/2017/02/03/6.824-lab1/"/>
     <id>http://flame4.github.io/2017/02/03/6.824-lab1/</id>
     <published>2017-02-02T16:50:00.000Z</published>
-    <updated>2017-02-23T13:46:35.143Z</updated>
+    <updated>2017-02-26T13:15:04.931Z</updated>
     
     <content type="html"><![CDATA[<h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><p style="text-align:right">last Modified: 2017-02-23</p>
 
@@ -65,6 +65,8 @@
 <li>监听通道,如果新的worker进来,分配job给worker.同时监听worker的回答,如果完成任务,要分配给新的任务.</li>
 <li>当所有任务完成后返回.</li>
 </ol>
+<p>看到这里, 其实实现了一个简单的线程池和任务队列模型. 具体实现就可以看schedule的代码了. 注释比较详细, 不再额外解释.</p>
+<h4 id="part4"><a href="#part4" class="headerlink" title="part4"></a>part4</h4><p>part4 实际上等于对一些edge case做了一些处理, 任务失败后可以重新回滚并分配给新的worker执行.</p>
 ]]></content>
     
     <summary type="html">
@@ -73,7 +75,7 @@
     
     </summary>
     
-      <category term="Distributed System入口" scheme="http://flame4.github.io/categories/Distributed-System%E5%85%A5%E5%8F%A3/"/>
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
     
     
       <category term="Golang" scheme="http://flame4.github.io/tags/Golang/"/>
@@ -257,48 +259,29 @@
   </entry>
   
   <entry>
-    <title>Java线程安全与同步</title>
+    <title>多线程相关思考总结.</title>
     <link href="http://flame4.github.io/2016/08/07/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E5%90%8C%E6%AD%A5/"/>
     <id>http://flame4.github.io/2016/08/07/线程安全与同步/</id>
     <published>2016-08-07T15:26:19.000Z</published>
-    <updated>2016-08-13T15:51:28.000Z</updated>
+    <updated>2017-02-26T13:28:36.627Z</updated>
     
-    <content type="html"><![CDATA[<p style="text-align:right">last Modified: 2016-08-13</p>
-]]></content>
+    <content type="html"><![CDATA[<p></p><p style="text-align:right">last Modified: 2017-02-26</p><br>当时学Android的时候各种OnClick()挂回调函数开的坑, 结果一直也没添, 今天重新思考Go语言的协程的本质的时候, 发现自己的操作系统学成了一坨翔, 于是今天就顺便着到多线程部分整体都理顺一下.<p></p>
+<h2 id="协程-多线程"><a href="#协程-多线程" class="headerlink" title="协程, 多线程"></a>协程, 多线程</h2><p>顺着思考的思路, 今天在写go程序时候, 看到官方文档里写了这么一段样板:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> wg sync.WaitGroup</div><div class="line"><span class="keyword">var</span> urls = []<span class="keyword">string</span>&#123;</div><div class="line">    <span class="string">"http://www.golang.org/"</span>,</div><div class="line">    <span class="string">"http://www.google.com/"</span>,</div><div class="line">    <span class="string">"http://www.somestupidname.com/"</span>,</div><div class="line">&#125;</div><div class="line"><span class="keyword">for</span> _, url := <span class="keyword">range</span> urls &#123;</div><div class="line">    <span class="comment">// Increment the WaitGroup counter.</span></div><div class="line">    <span class="comment">// 递增 WaitGroup 计数器。</span></div><div class="line">    wg.Add(<span class="number">1</span>)</div><div class="line">    <span class="comment">// Launch a goroutine to fetch the URL.</span></div><div class="line">    <span class="comment">// 启动一个Go程来取回URL。</span></div><div class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(url <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">        <span class="comment">// Decrement the counter when the goroutine completes.</span></div><div class="line">        <span class="keyword">defer</span> wg.Done()</div><div class="line">        <span class="comment">// Fetch the URL.</span></div><div class="line">        <span class="comment">// 取回URL</span></div><div class="line">        http.Get(url)</div><div class="line">    &#125;(url)</div><div class="line">&#125;</div><div class="line"><span class="comment">// Wait for all HTTP fetches to complete.</span></div><div class="line"><span class="comment">// 等待所有的HTTP取回操作完成。</span></div><div class="line">wg.Wait()</div></pre></td></tr></table></figure></p>
+<p>WaitGroup作为一个底层应该是使用信号量实现的机制,这里的作用很明白,不做陈述.关键的问题是 为什么这里的go程可以直接使用外部的wg变量?<br>回忆写过的php程序, 需要进行函数回调的地方一般是这么写的:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">func a($callback) &#123;</div><div class="line">  <span class="comment">// do something</span></div><div class="line">  $a = <span class="number">1</span>;</div><div class="line">  $b = <span class="number">2</span>;</div><div class="line">  <span class="comment">// 第一种</span></div><div class="line">  $callback(<span class="number">1</span>,<span class="number">2</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line">func b() &#123;</div><div class="line">  $c = <span class="number">1</span>, $d = <span class="number">2</span>;</div><div class="line">  a(func($a, $b) <span class="keyword">use</span>($<span class="title">c</span>, $<span class="title">d</span>) &#123;</div><div class="line">    <span class="title">return</span> $<span class="title">a</span> + $<span class="title">b</span> + $<span class="title">c</span> + $<span class="title">d</span>;</div><div class="line">  &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这两种语言的function都是一等公民, 和int, short等享有相同的地位.但是php在使用全局变量的时候明显是要携带进去信息才可以使用的, 而go却可以直接使用运行时环境下的变量, 这让我对协程的概念产生思考: 为什么Golang可以这么做?</p>
+<p>关于协程的解释, 简单来说就是用户态的线程. 在 这里贴几篇我觉得有点干货的blog. <a href="https://www.zhihu.com/question/20511233" target="_blank" rel="external">阿猫的回答</a>, <a href="http://www.ruanyifeng.com/blog/2013/04/processes_and_threads.html" target="_blank" rel="external">进程和线程</a>. 比较核心的观点是, 在学操作系统课程的时候学过, 一个进程是一套虚拟地址空间的, 每个进程也有自己的TLB, 寄存器, 计数器指针等额外的信息. 进程切换的高代价催生了线程, 可以少切换很多东西, 使得全局变量, 地址空间等可以公用. 而线程一般会有两种实现方式, 第一种是内核态实现, 第二种是用户态实现. 现在普遍的内核态称为线程, 而用户态实现的东西, 则被称为协程.</p>
+<h2 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h2><h2 id="进程通讯-线程通讯"><a href="#进程通讯-线程通讯" class="headerlink" title="进程通讯, 线程通讯"></a>进程通讯, 线程通讯</h2><h2 id="coroutinue模型-异步IO模型-事件循环"><a href="#coroutinue模型-异步IO模型-事件循环" class="headerlink" title="coroutinue模型, 异步IO模型, 事件循环"></a>coroutinue模型, 异步IO模型, 事件循环</h2><h2 id="线程池-消息队列"><a href="#线程池-消息队列" class="headerlink" title="线程池, 消息队列."></a>线程池, 消息队列.</h2>]]></content>
     
     <summary type="html">
     
-      &lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-08-13&lt;/p&gt;
-
+      &lt;p&gt;&lt;/p&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2017-02-26&lt;/p&gt;&lt;br&gt;当时学Android的时候各种OnClick()挂回调函数开的坑, 结果一直也没添, 今天重新思考Go语言的协程的本质的时候, 发现自己的操作系
     
     </summary>
     
-      <category term="Java" scheme="http://flame4.github.io/categories/Java/"/>
+      <category term="OS" scheme="http://flame4.github.io/categories/OS/"/>
     
     
       <category term="多线程" scheme="http://flame4.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java基础库</title>
-    <link href="http://flame4.github.io/2016/08/04/Java-base/"/>
-    <id>http://flame4.github.io/2016/08/04/Java-base/</id>
-    <published>2016-08-04T15:26:19.000Z</published>
-    <updated>2016-08-13T15:51:32.000Z</updated>
-    
-    <content type="html"><![CDATA[<p style="text-align:right">last Modified: 2016-08-13</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-08-13&lt;/p&gt;
-
-    
-    </summary>
-    
-      <category term="Java" scheme="http://flame4.github.io/categories/Java/"/>
-    
     
   </entry>
   
@@ -670,7 +653,7 @@
     <link href="http://flame4.github.io/2016/07/14/Python-Senior/"/>
     <id>http://flame4.github.io/2016/07/14/Python-Senior/</id>
     <published>2016-07-14T15:26:19.000Z</published>
-    <updated>2017-02-24T06:20:56.547Z</updated>
+    <updated>2017-02-24T08:56:38.563Z</updated>
     
     <content type="html"><![CDATA[<h1 id="Python-高级特性"><a href="#Python-高级特性" class="headerlink" title="Python 高级特性"></a>Python 高级特性</h1><p style="text-align:right">last Modified: 2017-02-24</p>
 
@@ -686,21 +669,27 @@
 <p>在这个过程中,open表达式用于构建了一个上下文管理器，并把返回值赋给file. 可以猜想，对于文件，enter函数做的就是打开文件并处理异常，exit就是退出并处理异常。</p>
 <p>对于自定义的上下文管理器，大概像这样：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, <span class="string">"filename"</span>)</span>:</span></div><div class="line">    s = filename</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">      file = open(s)</div><div class="line">      <span class="keyword">return</span> self.file</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">      ...</div><div class="line">    <span class="keyword">finally</span>:</div><div class="line">      ...</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">      close(self.file)</div><div class="line">      ...</div><div class="line"></div><div class="line"><span class="keyword">with</span> A(<span class="string">"a.txt"</span>) <span class="keyword">as</span> a:</div><div class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> a.readline():</div><div class="line">    ...</div></pre></td></tr></table></figure></p>
 <h4 id="2-yield与生成器-迭代器"><a href="#2-yield与生成器-迭代器" class="headerlink" title="2. yield与生成器,迭代器"></a>2. yield与生成器,迭代器</h4><p><strong>迭代器</strong> 提供了一种统一的方法来访问一个集合元素.好处是统一,并且在很多情况下不需要把整体的代码全部生成,而是可以一个一个生成.<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>): <span class="keyword">print</span> i</div><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">1000</span>): <span class="keyword">print</span> i</div></pre></td></tr></table></figure></p>
-<p>在第一种情况下,生成了一个1000长度的数组,而第二种情况没有生成,而是一点点的计算出来的.<br>迭代器可以用iter()函数获得, 返回一个迭代器对象类, 该类应该有next()方法可以获取数据, 并且通过捕获StopIterator来进行停止.如下面的例子:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">lt = iter(A([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]))</div><div class="line"><span class="keyword">try</span>:</div><div class="line">  <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">    print(lt.next())</div><div class="line"><span class="keyword">except</span>:</div><div class="line">  <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, l)</span>:</span></div><div class="line">    self.list = l</div><div class="line">    self.index = <span class="number">0</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="keyword">return</span> self</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__next</span><span class="params">()</span><span class="title">__</span><span class="params">(self)</span>:</span></div><div class="line">     <span class="keyword">if</span>(len(self.list) &gt; self.index):</div><div class="line">       index += <span class="number">1</span></div><div class="line">       <span class="keyword">return</span> self.list[index<span class="number">-1</span>]</div><div class="line">      <span class="keyword">raise</span> StopIterator</div></pre></td></tr></table></figure></p>
+<p>在第一种情况下,生成了一个1000长度的数组,而第二种情况没有生成,而是一点点的计算出来的.<br>迭代器可以用iter()函数获得, 返回一个迭代器对象类, 该类应该有next()方法可以获取数据, 并且通过捕获StopIterator来进行停止.如下面的例子:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">lt = iter(A([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]))</div><div class="line"><span class="keyword">try</span>:</div><div class="line">  <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">    print(lt.next())</div><div class="line"><span class="keyword">except</span>:</div><div class="line">  <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, l)</span>:</span></div><div class="line">    self.list = l</div><div class="line">    self.index = <span class="number">0</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></div><div class="line">    <span class="keyword">return</span> self</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__next__</span><span class="params">(self)</span>:</span></div><div class="line">     <span class="keyword">if</span>(len(self.list) &gt; self.index):</div><div class="line">       self.index += <span class="number">1</span></div><div class="line">       <span class="keyword">return</span> self.list[index<span class="number">-1</span>]</div><div class="line">      <span class="keyword">raise</span> StopIteration</div></pre></td></tr></table></figure></p>
 <p>python的语法糖对list, tuple, set等做了for循环的封装, for循环其实本质上就是调用了迭代器的访问方法. 特别的, python的for循环还对generator类做了语法糖,这一点在接下来的生成器中特别重要.</p>
-<p><strong>生成器</strong> 本质上也是一种迭代器!首先生成器是函数级别的概念,不是类级别的概念,这点要明确. 既然是一种迭代器,那么他就是要对于一个已经存在的或者还没有全部生成的集合序列做一定的操作的过程. 一个函数如果内部有yield关键字, 那么对其的调用不再返回一个(期望的)列表,而是返回一个generator对象,该对象含有next()方法.对比下面两种写法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
+<p><strong>生成器</strong> 本质上也是一种迭代器!首先生成器是函数级别的概念,不是类级别的概念,这点要明确. 既然是一种迭代器,那么他就是要对于一个已经存在的或者还没有全部生成的集合序列做一定的操作的过程. 一个函数如果内部有yield关键字, 那么对其的调用不再返回一个(期望的)列表,而是返回一个generator对象,该对象含有next()方法.原理参见写法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span><span class="params">()</span>:</span></div><div class="line">    a = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> a:</div><div class="line">        <span class="keyword">yield</span> i</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    x = f()</div><div class="line">    <span class="keyword">print</span> x</div><div class="line">    <span class="keyword">print</span> x.next()</div><div class="line">    <span class="keyword">print</span> x.next()</div><div class="line"></div><div class="line">    xx = f()</div><div class="line"></div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> x:</div><div class="line">        <span class="keyword">print</span> i</div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xx:</div><div class="line">        <span class="keyword">print</span> i</div><div class="line">输出 <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span></div></pre></td></tr></table></figure></p>
+<p>一般情况下,使用for的语法糖,可以不关心迭代器和生成器的区别,而把其当作一个可以返回数组对象的函数即可.</p>
 <p>补充两篇博客: <a href="http://www.cnblogs.com/huxi/archive/2011/07/14/2106863.html" target="_blank" rel="external">生成器</a>, <a href="http://www.cnblogs.com/huxi/archive/2011/07/01/2095931.html" target="_blank" rel="external">迭代器</a></p>
 <h4 id="3-python的字符大坑"><a href="#3-python的字符大坑" class="headerlink" title="3. python的字符大坑"></a>3. python的字符大坑</h4><p>一般的字符编码有ascll码, MBCS和unicode(包括utf-16, utf-8)等方案,具体的来源和不同可以<a href="http://www.cnblogs.com/huxi/archive/2010/12/05/1897271.html" target="_blank" rel="external">看这里</a>.</p>
 <p>在python2中,处理字符的中文编码是一个很蛋疼的问题.比如下面的一段例子:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">'这个世界上'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s</div><div class="line"><span class="string">'\xe8\xbf\x99\xe4\xb8\xaa\xe4\xb8\x96\xe7\x95\x8c\xe4\xb8\x8a'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">u'这个世界上'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s</div><div class="line"><span class="string">u'\u8fd9\u4e2a\u4e16\u754c\u4e0a'</span></div></pre></td></tr></table></figure></p>
 <p>对于有的交互界面, print函数比较智能, 可以打出汉字, 但有的就不行了, 在windows的中文程序根本没法调试. 里面繁杂的问题, 总结起来可以分为两个纬度来搞清楚.</p>
 <ol>
-<li><p>Unicode &amp; str 数据类型</p>
-<p> 在python中, 默认的字符串类型都为str, str即为utf-8编码的类型.在上面的博客中, 我们可以知道, utf-8使用了一些手段实现了对传统的ascll码的兼容(具体就不关心了). 然后对于汉字来说, 一般的常用字都可以用三个字节表示.</p>
+<li><p>unicode &amp; str 数据类型</p>
+<p> python2中unicode和str是basestring的不同子类. unicode类型的对象就是unicode编码. 在python中, 默认的字符串类型都为str, str即为utf-8编码的类型, 也可以理解为bytes数组. 在上面的博客中, 我们可以知道, utf-8使用了一些手段实现了对传统的ascll码的兼容(具体就不关心了). 然后对于汉字来说, 一般的常用字都可以用三个字节表. 而对于unicode来说, 所有的文字公平的占据两个字节.</p>
+<p> 在python3中, 严格区分了str和bytes数组.所有字符串都用unicode进行编码, 类型为str. 而bytes数组就是一个新的类型. 对应关系为 unicode =&gt; str, str =&gt; bytes.</p>
 </li>
-<li><p>Encode 和 Decode 方法</p>
+<li><p>Encode 和 Decode 方法<br> 在python中，使用unicode类型作为编码的基础类型。即</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">    decode              encode</div><div class="line">str ---------&gt; unicode ---------&gt;str</div></pre></td></tr></table></figure>
 </li>
 </ol>
-<h4 id="4-python装饰器"><a href="#4-python装饰器" class="headerlink" title="4. python装饰器"></a>4. python装饰器</h4><h4 id="5-python自省"><a href="#5-python自省" class="headerlink" title="5. python自省"></a>5. python自省</h4><h4 id="6-python-lambda表达式与函数"><a href="#6-python-lambda表达式与函数" class="headerlink" title="6. python lambda表达式与函数"></a>6. python lambda表达式与函数</h4><h4 id="7-python-新式类和旧式类"><a href="#7-python-新式类和旧式类" class="headerlink" title="7. python 新式类和旧式类"></a>7. python 新式类和旧式类</h4><p>python新式类的设计是为了更好的弥补OO的语言思想. 在python 2.2中, 为了声明为新式类, 需要显式继承object类. 而在python 3中, 默认即是新式类.</p>
+<h4 id="4-python装饰器"><a href="#4-python装饰器" class="headerlink" title="4. python装饰器"></a>4. python装饰器</h4><p>装饰器就是面向切面编程的典型工具.在一个函数A的头部注册新的函数B, 在执行A时候, 会优先执行B.一般使用在日志记录, 文件的打开关闭, 互斥锁的使用等方式, 可以把业务逻辑和这些维护逻辑解偶.</p>
+<p>这两种写法之间的差别值得注意:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">def f(a):</div><div class="line">  something()</div><div class="line">  a()</div><div class="line">  something()</div><div class="line">def a():</div><div class="line">  print 1</div><div class="line">f(a)</div><div class="line">-----------------</div><div class="line">def f(a):</div><div class="line">  def b(a):</div><div class="line">    something()</div><div class="line">    a()</div><div class="line">    something()</div><div class="line">  return b()</div><div class="line">a = f(a)</div><div class="line">a()</div></pre></td></tr></table></figure></p>
+<p>如果使用上面这种, 那么下面所有的a()都要变为f(a), python中提供了@语法糖来封装装饰器.</p>
+<h4 id="5-python自省"><a href="#5-python自省" class="headerlink" title="5. python自省"></a>5. python自省</h4><h4 id="6-python-lambda表达式与函数式编程"><a href="#6-python-lambda表达式与函数式编程" class="headerlink" title="6. python lambda表达式与函数式编程"></a>6. python lambda表达式与函数式编程</h4><h4 id="7-python-新式类和旧式类"><a href="#7-python-新式类和旧式类" class="headerlink" title="7. python 新式类和旧式类"></a>7. python 新式类和旧式类</h4><p>python新式类的设计是为了更好的弥补OO的语言思想. 在python 2.2中, 为了声明为新式类, 需要显式继承object类. 而在python 3中, 默认即是新式类.</p>
 <p>新式类比旧式类的提升在于: 自省的支持, 新的属性, 多继承的搜索方式.<br>具体可以看下面几个blog.<br><a href="http://blog.csdn.net/u010066807/article/details/46896835" target="_blank" rel="external">blog1</a>, <a href="http://blog.csdn.net/u010576100/article/details/50593509" target="_blank" rel="external">blog2</a>,<br><a href="http://blog.csdn.net/xhw88398569/article/details/48663083" target="_blank" rel="external">super usage</a></p>
 <h4 id="8-python类内建函数和成员变量"><a href="#8-python类内建函数和成员变量" class="headerlink" title="8. python类内建函数和成员变量"></a>8. python类内建函数和成员变量</h4>]]></content>
     
@@ -788,6 +777,53 @@
       <category term="Paper" scheme="http://flame4.github.io/tags/Paper/"/>
     
       <category term="Disk" scheme="http://flame4.github.io/tags/Disk/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>一致性哈希</title>
+    <link href="http://flame4.github.io/2016/07/05/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/"/>
+    <id>http://flame4.github.io/2016/07/05/一致性哈希/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:18:40.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><p style="text-align:right">last Modified: 2016-09-05</p>
+
+
+<p>一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。</p>
+<h3 id="1-基本概念和场景"><a href="#1-基本概念和场景" class="headerlink" title="1.基本概念和场景"></a>1.基本概念和场景</h3><p>一致性哈希运用在分布式系统中的消息分发场景。</p>
+<p>无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单的hash函数就可以保证数据分布到不同的机器上，但当集群的机器加入或者离开，hash函数就会失效。此时为了使hash重新生效，只能够进行大量的数据迁移，使得hash可以使用，但这是显然不可以接受的。对于这样的情况，一致性哈希就可以比较好的派上用场。数据不可能在集群迁入和迁出时做到完全不移动，但是一致性哈希可以做到让尽量小的数据移动。</p>
+<h3 id="2-实现原理"><a href="#2-实现原理" class="headerlink" title="2. 实现原理"></a>2. 实现原理</h3><p>一致性哈希的核心思想是将原来节点固定，数据分发到节点上这样的思路改变为将节点也作为一个数据加入分发，并以一个数据环路为分发的载体。如下图所示.</p>
+<p><img src="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
+<p>对于数据，使用key作为hash的值，对于节点，使用唯一标识(ip, host等)作为hash值，并在环路上找到自己的位置。对于一条数据，顺时针找到后面一个节点，作为自己的归属。</p>
+<p>当一个新节点加入时，比如本来有Node1和3， 结果加入Node2后，Node1跟Node2之间的数据会从Node3转移到Node2。用这种方式保证了让比较少的数据进行移动。</p>
+<h3 id="3-数据倾斜问题"><a href="#3-数据倾斜问题" class="headerlink" title="3. 数据倾斜问题"></a>3. 数据倾斜问题</h3><p>在上图的实现过程中，可以看到，在节点数量较少的情况下，还是会存在很多数据迁移的情况，比如在三个节点时会移动0.2的数据，对于大数据的情况下，也不是一个可以接受的方案，在这种情况下，可以加入“虚拟节点的概念”，对于三个节点，可以均匀的产生300个节点，每100个实际上属于同一个物理节点，这三百个节点可以均匀分布在环上，数据迁移的时候按照实际的映射关系来进行迁移。</p>
+<p>但是虚拟节点也不是越多越好的。试想假设有10000条数据，有10000个虚拟节点，并且是由四个实际节点模拟的。为了均匀，分布规律为 1-2-3-4-1-2-3-4…… 这样在2失效后，会有1/4的数据需要移动，而且因为只有一条数据，但是这一条数据也要读取一个磁盘块，其实是一种很大的浪费。</p>
+<h3 id="4-数据扎堆问题"><a href="#4-数据扎堆问题" class="headerlink" title="4. 数据扎堆问题"></a>4. 数据扎堆问题</h3><p>假设所有的数据没有key, 而就是一个数字，会发生什么呢？ 我们依旧可以根据这个数字来计算key，但是如果有10000个数字，里面有9900个10，有100个其余数字，这种情况下，数据依旧会压到一个节点上，而这显然也不是我们想要的结果.</p>
+<p>这个问题的解决方案我没有找到比较合适的办法，回头再想想补上。但是这种场景一般不适用在分布式哈希算法的系统中，因为系统要做的事情并不是仅仅维护这么一大串数字，而是要提供必要的映射，从而满足用户的查询，从这个角度考虑，这样的问题事实上是没有考虑的必要的。</p>
+<h3 id="5-一致性哈希与数据一致性"><a href="#5-一致性哈希与数据一致性" class="headerlink" title="5. 一致性哈希与数据一致性"></a>5. 一致性哈希与数据一致性</h3><p>分布式存储在当前的应用，一方面是集群的信息存储，另一方面可以用于云存储。相比于集群存储，云存储更加灵活，可以动态扩容，并且也会提供相应的冗余等服务。除了基于一致性哈希的分布式系统，还有一类是基于元信息的，也就是存在key-&gt;node的元信息，由元信息直接查找得到映射关系。</p>
+<p>在现在的高可用云服务的情景下，一致性哈希存在以下几个缺点：</p>
+<ol>
+<li>在集群脱离时的数据迁移过程会与数据的读取操作冲突。为了保证服务，系统必须将源文件设置为只读，并提供服务，在此时迁移的速率不能过大沾满磁盘。如果这时发生宕机等情况，则使得复杂度会成倍上升，</li>
+<li>对应的副本在对应的机器上绑定本身会对集群不利，因为这样不能最大程度的平衡负载。</li>
+<li>在一致性上，需要对不同节点的数据进行对比，最终确定最新版本，这个事情在系统中的损耗不可接受。</li>
+</ol>
+<p>这两方面元数据的管理有着天然的优势，关于这些详细的优势可以参考<a href="http://blog.csdn.net/huanggang028/article/details/28891315" target="_blank" rel="external">这篇博客</a>.</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;一致性哈希&quot;&gt;&lt;a href=&quot;#一致性哈希&quot; class=&quot;headerlink&quot; title=&quot;一致性哈希&quot;&gt;&lt;/a&gt;一致性哈希&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-09-05&lt;/p&gt;
+
+
+&lt;
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
@@ -919,53 +955,6 @@
     
     
       <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
-    
-      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>一致性哈希</title>
-    <link href="http://flame4.github.io/2016/07/05/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/"/>
-    <id>http://flame4.github.io/2016/07/05/一致性哈希/</id>
-    <published>2016-07-05T15:26:19.000Z</published>
-    <updated>2016-09-06T17:18:40.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><p style="text-align:right">last Modified: 2016-09-05</p>
-
-
-<p>一致性哈希在1997年被提出，并在最近兴起的分布式系统分发中起到了很重要的作用。</p>
-<h3 id="1-基本概念和场景"><a href="#1-基本概念和场景" class="headerlink" title="1.基本概念和场景"></a>1.基本概念和场景</h3><p>一致性哈希运用在分布式系统中的消息分发场景。</p>
-<p>无论是任务的分发还是数据的分发，在分布式系统中最常见的一类操作就是根据数据或者任务id等，决定由哪台机器来完成这部分操作，并转发到该机器上。对于固定数量的机器，并假设数据均匀分布，利用简单的hash函数就可以保证数据分布到不同的机器上，但当集群的机器加入或者离开，hash函数就会失效。此时为了使hash重新生效，只能够进行大量的数据迁移，使得hash可以使用，但这是显然不可以接受的。对于这样的情况，一致性哈希就可以比较好的派上用场。数据不可能在集群迁入和迁出时做到完全不移动，但是一致性哈希可以做到让尽量小的数据移动。</p>
-<h3 id="2-实现原理"><a href="#2-实现原理" class="headerlink" title="2. 实现原理"></a>2. 实现原理</h3><p>一致性哈希的核心思想是将原来节点固定，数据分发到节点上这样的思路改变为将节点也作为一个数据加入分发，并以一个数据环路为分发的载体。如下图所示.</p>
-<p><img src="http://img.blog.csdn.net/20140411000853609?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p>
-<p>对于数据，使用key作为hash的值，对于节点，使用唯一标识(ip, host等)作为hash值，并在环路上找到自己的位置。对于一条数据，顺时针找到后面一个节点，作为自己的归属。</p>
-<p>当一个新节点加入时，比如本来有Node1和3， 结果加入Node2后，Node1跟Node2之间的数据会从Node3转移到Node2。用这种方式保证了让比较少的数据进行移动。</p>
-<h3 id="3-数据倾斜问题"><a href="#3-数据倾斜问题" class="headerlink" title="3. 数据倾斜问题"></a>3. 数据倾斜问题</h3><p>在上图的实现过程中，可以看到，在节点数量较少的情况下，还是会存在很多数据迁移的情况，比如在三个节点时会移动0.2的数据，对于大数据的情况下，也不是一个可以接受的方案，在这种情况下，可以加入“虚拟节点的概念”，对于三个节点，可以均匀的产生300个节点，每100个实际上属于同一个物理节点，这三百个节点可以均匀分布在环上，数据迁移的时候按照实际的映射关系来进行迁移。</p>
-<p>但是虚拟节点也不是越多越好的。试想假设有10000条数据，有10000个虚拟节点，并且是由四个实际节点模拟的。为了均匀，分布规律为 1-2-3-4-1-2-3-4…… 这样在2失效后，会有1/4的数据需要移动，而且因为只有一条数据，但是这一条数据也要读取一个磁盘块，其实是一种很大的浪费。</p>
-<h3 id="4-数据扎堆问题"><a href="#4-数据扎堆问题" class="headerlink" title="4. 数据扎堆问题"></a>4. 数据扎堆问题</h3><p>假设所有的数据没有key, 而就是一个数字，会发生什么呢？ 我们依旧可以根据这个数字来计算key，但是如果有10000个数字，里面有9900个10，有100个其余数字，这种情况下，数据依旧会压到一个节点上，而这显然也不是我们想要的结果.</p>
-<p>这个问题的解决方案我没有找到比较合适的办法，回头再想想补上。但是这种场景一般不适用在分布式哈希算法的系统中，因为系统要做的事情并不是仅仅维护这么一大串数字，而是要提供必要的映射，从而满足用户的查询，从这个角度考虑，这样的问题事实上是没有考虑的必要的。</p>
-<h3 id="5-一致性哈希与数据一致性"><a href="#5-一致性哈希与数据一致性" class="headerlink" title="5. 一致性哈希与数据一致性"></a>5. 一致性哈希与数据一致性</h3><p>分布式存储在当前的应用，一方面是集群的信息存储，另一方面可以用于云存储。相比于集群存储，云存储更加灵活，可以动态扩容，并且也会提供相应的冗余等服务。除了基于一致性哈希的分布式系统，还有一类是基于元信息的，也就是存在key-&gt;node的元信息，由元信息直接查找得到映射关系。</p>
-<p>在现在的高可用云服务的情景下，一致性哈希存在以下几个缺点：</p>
-<ol>
-<li>在集群脱离时的数据迁移过程会与数据的读取操作冲突。为了保证服务，系统必须将源文件设置为只读，并提供服务，在此时迁移的速率不能过大沾满磁盘。如果这时发生宕机等情况，则使得复杂度会成倍上升，</li>
-<li>对应的副本在对应的机器上绑定本身会对集群不利，因为这样不能最大程度的平衡负载。</li>
-<li>在一致性上，需要对不同节点的数据进行对比，最终确定最新版本，这个事情在系统中的损耗不可接受。</li>
-</ol>
-<p>这两方面元数据的管理有着天然的优势，关于这些详细的优势可以参考<a href="http://blog.csdn.net/huanggang028/article/details/28891315" target="_blank" rel="external">这篇博客</a>.</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;一致性哈希&quot;&gt;&lt;a href=&quot;#一致性哈希&quot; class=&quot;headerlink&quot; title=&quot;一致性哈希&quot;&gt;&lt;/a&gt;一致性哈希&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;last Modified: 2016-09-05&lt;/p&gt;
-
-
-&lt;
-    
-    </summary>
-    
-      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
-    
     
       <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
     

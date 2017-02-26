@@ -110,7 +110,7 @@ Distributed()
 
 master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
 标准mr12345Ma">
-<meta property="og:updated_time" content="2017-02-23T13:46:35.143Z">
+<meta property="og:updated_time" content="2017-02-26T13:15:04.931Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="6.824 - Lab1">
 <meta name="twitter:description" content="6.824 - lab1last Modified: 2017-02-23
@@ -321,8 +321,8 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Distributed-System入口/" itemprop="url" rel="index">
-                    <span itemprop="name">Distributed System入口</span>
+                  <a href="/categories/Distributed-System/" itemprop="url" rel="index">
+                    <span itemprop="name">Distributed System</span>
                   </a>
                 </span>
 
@@ -404,6 +404,8 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
 <li>监听通道,如果新的worker进来,分配job给worker.同时监听worker的回答,如果完成任务,要分配给新的任务.</li>
 <li>当所有任务完成后返回.</li>
 </ol>
+<p>看到这里, 其实实现了一个简单的线程池和任务队列模型. 具体实现就可以看schedule的代码了. 注释比较详细, 不再额外解释.</p>
+<h4 id="part4"><a href="#part4" class="headerlink" title="part4"></a>part4</h4><p>part4 实际上等于对一些edge case做了一些处理, 任务失败后可以重新回滚并分配给新的worker执行.</p>
 
       
     </div>
@@ -516,7 +518,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-count">14</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -580,7 +582,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part3"><span class="nav-text">part3</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part3"><span class="nav-text">part3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part4"><span class="nav-text">part4</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
