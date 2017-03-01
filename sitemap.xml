@@ -2,30 +2,51 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://flame4.github.io/2016/08/07/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E5%90%8C%E6%AD%A5/</loc>
-    
-    <lastmod>2017-02-26T13:28:36.627Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2017/02/03/6.824-lab1/</loc>
-    
-    <lastmod>2017-02-26T13:15:04.931Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://flame4.github.io/2016/07/14/Python-Senior/</loc>
     
-    <lastmod>2017-02-24T08:56:38.563Z</lastmod>
+    <lastmod>2017-02-28T13:47:56.656Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://flame4.github.io/2016/07/17/ES/</loc>
+    
+    <lastmod>2017-02-28T13:00:38.053Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://flame4.github.io/2016/08/07/thread-async/</loc>
+    
+    <lastmod>2017-02-28T12:59:53.464Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/</loc>
     
-    <lastmod>2017-02-23T13:46:37.002Z</lastmod>
+    <lastmod>2017-02-28T12:49:39.407Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://flame4.github.io/2017/02/28/6.824-lab2/</loc>
+    
+    <lastmod>2017-02-28T09:12:27.928Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://flame4.github.io/2016/07/05/raft/</loc>
+    
+    <lastmod>2017-02-28T07:50:17.329Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://flame4.github.io/2017/02/03/6.824-lab1/</loc>
+    
+    <lastmod>2017-02-28T07:20:26.566Z</lastmod>
     
   </url>
   
@@ -40,13 +61,6 @@
     <loc>http://flame4.github.io/2016/11/12/vagrant/</loc>
     
     <lastmod>2016-11-16T05:38:33.674Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2016/07/17/ES/</loc>
-    
-    <lastmod>2016-11-16T05:38:33.673Z</lastmod>
     
   </url>
   
@@ -72,13 +86,6 @@
   </url>
   
   <url>
-    <loc>http://flame4.github.io/2016/07/05/raft/</loc>
-    
-    <lastmod>2016-09-06T17:21:06.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://flame4.github.io/2016/07/22/Lucene/</loc>
     
     <lastmod>2016-09-06T17:20:14.000Z</lastmod>
@@ -100,7 +107,7 @@
   </url>
   
   <url>
-    <loc>http://flame4.github.io/2016/07/05/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/</loc>
+    <loc>http://flame4.github.io/2016/07/05/consistent-hash/</loc>
     
     <lastmod>2016-09-06T17:18:40.000Z</lastmod>
     

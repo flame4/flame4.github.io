@@ -110,7 +110,7 @@ Distributed()
 
 master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; send true to doneChannel.
 标准mr12345Ma">
-<meta property="og:updated_time" content="2017-02-26T13:15:04.931Z">
+<meta property="og:updated_time" content="2017-02-28T07:20:26.566Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="6.824 - Lab1">
 <meta name="twitter:description" content="6.824 - lab1last Modified: 2017-02-23
@@ -405,7 +405,12 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
 <li>当所有任务完成后返回.</li>
 </ol>
 <p>看到这里, 其实实现了一个简单的线程池和任务队列模型. 具体实现就可以看schedule的代码了. 注释比较详细, 不再额外解释.</p>
-<h4 id="part4"><a href="#part4" class="headerlink" title="part4"></a>part4</h4><p>part4 实际上等于对一些edge case做了一些处理, 任务失败后可以重新回滚并分配给新的worker执行.</p>
+<h6 id="Worker-DoTask-more-than-one-DoTask-sent-concurrently-to-a-single-worker"><a href="#Worker-DoTask-more-than-one-DoTask-sent-concurrently-to-a-single-worker" class="headerlink" title="Worker.DoTask: more than one DoTask sent concurrently to a single worker"></a>Worker.DoTask: more than one DoTask sent concurrently to a single worker</h6><p>在做任务的时候会遇到这个错误, 有时不会遇到.是最蛋疼的多线程协作问题. 代码见最底下.</p>
+<p>手贱的地方是觉得, 既然可以用判断channel length的办法来判断是否任务都已经完成,那么就不用WaitGroup了. 但是忽略了 是应该只有当所有任务都完成才可以返回map, 而不是所有任务都分发完毕.</p>
+<h4 id="part4"><a href="#part4" class="headerlink" title="part4"></a>part4</h4><p>part4 实际上等于对一些edge case做了一些处理, 任务失败后可以重新回滚并分配给新的worker执行. case3的任务队列不能关闭, 需要用len()检测, 如果任务失败, 将task num重新发给新的worker即可(这里只是很简单的假设一定会失败,并且不再将这个worker加入调度队列).</p>
+<p>这里有一个遗留问题没解决, 如果所有的worker都失败了, 那么应该是判定这个任务失败的. 现在的解决逻辑是会一直等待下去.</p>
+<h4 id="part5"><a href="#part5" class="headerlink" title="part5"></a>part5</h4><p>之前做过类似的东西, 这个坑就不填了.至此, Lab1结束.</p>
+<h4 id="附录-part3-错误版本"><a href="#附录-part3-错误版本" class="headerlink" title="附录: part3 错误版本"></a>附录: part3 错误版本</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">taskChan := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, ntasks)</div><div class="line"><span class="comment">// put all tasks into channel, and worker can get tasks from this channel.</span></div><div class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; ntasks; i++ &#123;</div><div class="line">  taskChan &lt;- i</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">// This channel is used to indicate all tasks is done.</span></div><div class="line">doneChan := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">bool</span>, <span class="number">1</span>)</div><div class="line"><span class="comment">/*</span></div><div class="line">go func() &#123;</div><div class="line">  waitListener.Wait()</div><div class="line">  doneChan &lt;- true</div><div class="line">&#125;()</div><div class="line">*/</div><div class="line">done := <span class="literal">false</span></div><div class="line"><span class="keyword">for</span> !done &#123;</div><div class="line">  <span class="keyword">select</span> &#123;</div><div class="line">  <span class="keyword">case</span> worker := &lt;-registerChan:</div><div class="line">    <span class="keyword">if</span>(<span class="built_in">len</span>(taskChan) == <span class="number">0</span>) &#123;</div><div class="line">      done = <span class="literal">true</span></div><div class="line">      <span class="keyword">break</span></div><div class="line">    &#125;</div><div class="line">    taskNum := &lt;-taskChan</div><div class="line">    file := <span class="string">""</span></div><div class="line">    <span class="keyword">if</span> phase == mapPhase &#123;</div><div class="line">      file = mapFiles[taskNum]</div><div class="line">    &#125;</div><div class="line">    args := DoTaskArgs&#123;jobName, file, phase, taskNum, n_other&#125;</div><div class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">      <span class="keyword">var</span> err error</div><div class="line">      call(worker, <span class="string">"Worker.DoTask"</span>, args, err)</div><div class="line">      <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        fmt.Println(<span class="string">"LALALA: func err"</span> + err.Error())</div><div class="line">        <span class="comment">//waitListener.Done()</span></div><div class="line">        <span class="comment">// dealing with error</span></div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// it means a task is done by a worker, so this worker can be reused.</span></div><div class="line">        <span class="comment">//fmt.Println("LOLOLO: i have done!")</span></div><div class="line">        <span class="comment">//waitListener.Done()</span></div><div class="line">        registerChan &lt;- worker</div><div class="line">      &#125;</div><div class="line">    &#125;()</div><div class="line">  <span class="keyword">case</span> &lt;-doneChan:</div><div class="line">    <span class="comment">// all task is done. Function return.</span></div><div class="line">    done = <span class="literal">true</span></div><div class="line">    <span class="keyword">break</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -447,6 +452,10 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/28/6.824-lab2/" rel="prev" title="6.824 - Lab1">
+                6.824 - Lab1 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -518,7 +527,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-count">15</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -582,7 +591,7 @@ master.run -&amp;gt; schedule() -&amp;gt; finish() -&amp;gt; merge() -&amp;gt; s
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part3"><span class="nav-text">part3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part4"><span class="nav-text">part4</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab1"><span class="nav-text">6.824 - lab1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part1"><span class="nav-text">part1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2"><span class="nav-text">part2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part3"><span class="nav-text">part3</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Worker-DoTask-more-than-one-DoTask-sent-concurrently-to-a-single-worker"><span class="nav-text">Worker.DoTask: more than one DoTask sent concurrently to a single worker</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part4"><span class="nav-text">part4</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part5"><span class="nav-text">part5</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#附录-part3-错误版本"><span class="nav-text">附录: part3 错误版本</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>

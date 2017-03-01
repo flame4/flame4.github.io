@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="多线程," />
 
 
 
@@ -86,22 +86,19 @@
 
 
 
-<meta name="description" content="Shell的一些主要应用方式last Modified: 2016-08-23
-
-1. 解析参数方法shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式12345678910111213141516171819202122232425262728293031323334353637while [ $# -gt 0 ]; do  case &amp;quot;$1&amp;quot;">
+<meta name="description" content="last Modified: 2017-02-26当时学Android的时候各种OnClick()挂回调函数开的坑, 结果一直也没添, 今天重新思考Go语言的协程的本质的时候, 发现自己的操作系统学成了一坨翔, 于是今天就顺便着到多线程部分整体都理顺一下.
+协程, 多线程顺着思考的思路, 今天在写go程序时候, 看到官方文档里写了这么一段样板:123456789101112131415161718">
 <meta property="og:type" content="article">
-<meta property="og:title" content="shell 用法简记">
-<meta property="og:url" content="http://flame4.github.io/2016/07/05/Shell-base/index.html">
+<meta property="og:title" content="多线程相关思考总结.">
+<meta property="og:url" content="http://flame4.github.io/2016/08/07/thread-async/index.html">
 <meta property="og:site_name" content="刘燚的个人空间">
-<meta property="og:description" content="Shell的一些主要应用方式last Modified: 2016-08-23
-
-1. 解析参数方法shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式12345678910111213141516171819202122232425262728293031323334353637while [ $# -gt 0 ]; do  case &amp;quot;$1&amp;quot;">
-<meta property="og:updated_time" content="2016-09-06T17:21:26.000Z">
+<meta property="og:description" content="last Modified: 2017-02-26当时学Android的时候各种OnClick()挂回调函数开的坑, 结果一直也没添, 今天重新思考Go语言的协程的本质的时候, 发现自己的操作系统学成了一坨翔, 于是今天就顺便着到多线程部分整体都理顺一下.
+协程, 多线程顺着思考的思路, 今天在写go程序时候, 看到官方文档里写了这么一段样板:123456789101112131415161718">
+<meta property="og:updated_time" content="2017-02-28T12:59:53.464Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="shell 用法简记">
-<meta name="twitter:description" content="Shell的一些主要应用方式last Modified: 2016-08-23
-
-1. 解析参数方法shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式12345678910111213141516171819202122232425262728293031323334353637while [ $# -gt 0 ]; do  case &amp;quot;$1&amp;quot;">
+<meta name="twitter:title" content="多线程相关思考总结.">
+<meta name="twitter:description" content="last Modified: 2017-02-26当时学Android的时候各种OnClick()挂回调函数开的坑, 结果一直也没添, 今天重新思考Go语言的协程的本质的时候, 发现自己的操作系统学成了一坨翔, 于是今天就顺便着到多线程部分整体都理顺一下.
+协程, 多线程顺着思考的思路, 今天在写go程序时候, 看到官方文档里写了这么一段样板:123456789101112131415161718">
 
 
 
@@ -122,9 +119,9 @@
 
 
 
-  <link rel="canonical" href="http://flame4.github.io/2016/07/05/Shell-base/"/>
+  <link rel="canonical" href="http://flame4.github.io/2016/08/07/thread-async/"/>
 
-  <title> shell 用法简记 | 刘燚的个人空间 </title>
+  <title> 多线程相关思考总结. | 刘燚的个人空间 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -274,7 +271,7 @@
             
             
               
-                shell 用法简记
+                多线程相关思考总结.
               
             
           </h1>
@@ -286,8 +283,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-05T23:26:19+08:00" content="2016-07-05">
-              2016-07-05
+            <time itemprop="dateCreated" datetime="2016-08-07T23:26:19+08:00" content="2016-08-07">
+              2016-08-07
             </time>
           </span>
 
@@ -300,8 +297,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Shell/" itemprop="url" rel="index">
-                    <span itemprop="name">Shell</span>
+                  <a href="/categories/OS/" itemprop="url" rel="index">
+                    <span itemprop="name">OS</span>
                   </a>
                 </span>
 
@@ -316,8 +313,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/07/05/Shell-base/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/05/Shell-base/" itemprop="commentsCount"></span>
+                <a href="/2016/08/07/thread-async/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/07/thread-async/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -340,14 +337,12 @@
       
 
       
-        <h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
-
-<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
-<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
-<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
-<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
-
+        <p></p><p style="text-align:right">last Modified: 2017-02-26</p><br>当时学Android的时候各种OnClick()挂回调函数开的坑, 结果一直也没添, 今天重新思考Go语言的协程的本质的时候, 发现自己的操作系统学成了一坨翔, 于是今天就顺便着到多线程部分整体都理顺一下.<p></p>
+<h2 id="协程-多线程"><a href="#协程-多线程" class="headerlink" title="协程, 多线程"></a>协程, 多线程</h2><p>顺着思考的思路, 今天在写go程序时候, 看到官方文档里写了这么一段样板:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> wg sync.WaitGroup</div><div class="line"><span class="keyword">var</span> urls = []<span class="keyword">string</span>&#123;</div><div class="line">    <span class="string">"http://www.golang.org/"</span>,</div><div class="line">    <span class="string">"http://www.google.com/"</span>,</div><div class="line">    <span class="string">"http://www.somestupidname.com/"</span>,</div><div class="line">&#125;</div><div class="line"><span class="keyword">for</span> _, url := <span class="keyword">range</span> urls &#123;</div><div class="line">    <span class="comment">// Increment the WaitGroup counter.</span></div><div class="line">    <span class="comment">// 递增 WaitGroup 计数器。</span></div><div class="line">    wg.Add(<span class="number">1</span>)</div><div class="line">    <span class="comment">// Launch a goroutine to fetch the URL.</span></div><div class="line">    <span class="comment">// 启动一个Go程来取回URL。</span></div><div class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(url <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">        <span class="comment">// Decrement the counter when the goroutine completes.</span></div><div class="line">        <span class="keyword">defer</span> wg.Done()</div><div class="line">        <span class="comment">// Fetch the URL.</span></div><div class="line">        <span class="comment">// 取回URL</span></div><div class="line">        http.Get(url)</div><div class="line">    &#125;(url)</div><div class="line">&#125;</div><div class="line"><span class="comment">// Wait for all HTTP fetches to complete.</span></div><div class="line"><span class="comment">// 等待所有的HTTP取回操作完成。</span></div><div class="line">wg.Wait()</div></pre></td></tr></table></figure></p>
+<p>WaitGroup作为一个底层应该是使用锁和计数器实现的机制,这里的作用很明白,不做陈述.关键的问题是 为什么这里的go程可以直接使用外部的wg变量?<br>回忆写过的php程序, 需要进行函数回调的地方一般是这么写的:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">func a($callback) &#123;</div><div class="line">  <span class="comment">// do something</span></div><div class="line">  $a = <span class="number">1</span>;</div><div class="line">  $b = <span class="number">2</span>;</div><div class="line">  <span class="comment">// 第一种</span></div><div class="line">  $callback(<span class="number">1</span>,<span class="number">2</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line">func b() &#123;</div><div class="line">  $c = <span class="number">1</span>, $d = <span class="number">2</span>;</div><div class="line">  a(func($a, $b) <span class="keyword">use</span>($<span class="title">c</span>, $<span class="title">d</span>) &#123;</div><div class="line">    <span class="title">return</span> $<span class="title">a</span> + $<span class="title">b</span> + $<span class="title">c</span> + $<span class="title">d</span>;</div><div class="line">  &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这两种语言的function都是<a href="http://www.tuicool.com/articles/i6rM3uU" target="_blank" rel="external">一等公民</a>, 和int, short等享有相同的地位.但是php在使用全局变量的时候明显是要携带进去信息才可以使用的, 而go却可以直接使用运行时环境下的变量, 这让我对协程的概念产生思考: 为什么Golang可以这么做?</p>
+<p>关于协程的解释, 简单来说就是用户态的线程. 在 这里贴几篇我觉得有点干货的blog. <a href="https://www.zhihu.com/question/20511233" target="_blank" rel="external">阿猫的回答</a>, <a href="http://www.ruanyifeng.com/blog/2013/04/processes_and_threads.html" target="_blank" rel="external">进程和线程</a>. 比较核心的观点是, 在学操作系统课程的时候学过, 一个进程是一套虚拟地址空间的, 每个进程也有自己的TLB, 寄存器, 计数器指针等额外的信息. 进程切换的高代价催生了线程(也避免了多进程不能共享文件造成的麻烦), 可以少切换很多东西, 使得全局变量, 地址空间等可以公用. 而线程一般会有两种实现方式, 第一种是内核态实现, 第二种是用户态实现. 现在普遍的内核态称为线程, 而用户态实现的东西, 则被称为协程.</p>
+<h2 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h2><h2 id="进程通讯-线程通讯"><a href="#进程通讯-线程通讯" class="headerlink" title="进程通讯, 线程通讯"></a>进程通讯, 线程通讯</h2><h2 id="coroutinue模型-异步IO模型-事件循环"><a href="#coroutinue模型-异步IO模型-事件循环" class="headerlink" title="coroutinue模型, 异步IO模型, 事件循环"></a>coroutinue模型, 异步IO模型, 事件循环</h2><h2 id="线程池-消息队列"><a href="#线程池-消息队列" class="headerlink" title="线程池, 消息队列."></a>线程池, 消息队列.</h2>
       
     </div>
 
@@ -366,17 +361,27 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/多线程/" rel="tag">#多线程</a>
+          
+        </div>
+      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/08/02/java-JVM/" rel="next" title="JVM">
+                <i class="fa fa-chevron-left"></i> JVM
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/05/raft/" rel="prev" title="raft Protocol">
-                raft Protocol <i class="fa fa-chevron-right"></i>
+              <a href="/2016/08/11/Serialize/" rel="prev" title="序列化与反序列化">
+                序列化与反序列化 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -403,8 +408,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/07/05/Shell-base/"
-           data-title="shell 用法简记" data-url="http://flame4.github.io/2016/07/05/Shell-base/">
+      <div class="ds-thread" data-thread-key="2016/08/07/thread-async/"
+           data-title="多线程相关思考总结." data-url="http://flame4.github.io/2016/08/07/thread-async/">
       </div>
     
   </div>
@@ -513,7 +518,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Shell的一些主要应用方式"><span class="nav-text">Shell的一些主要应用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-解析参数方法"><span class="nav-text">1. 解析参数方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-自动化部署脚本"><span class="nav-text">2. 自动化部署脚本</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#协程-多线程"><span class="nav-text">协程, 多线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回调函数"><span class="nav-text">回调函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程通讯-线程通讯"><span class="nav-text">进程通讯, 线程通讯</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#coroutinue模型-异步IO模型-事件循环"><span class="nav-text">coroutinue模型, 异步IO模型, 事件循环</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程池-消息队列"><span class="nav-text">线程池, 消息队列.</span></a></li></ol></div>
             
           </div>
         </section>
