@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://flame4.github.io/2017/02/28/6.824-lab2/</loc>
+    
+    <lastmod>2017-03-01T06:33:32.073Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://flame4.github.io/2016/07/14/Python-Senior/</loc>
     
     <lastmod>2017-02-28T13:47:56.656Z</lastmod>
@@ -26,13 +33,6 @@
     <loc>http://flame4.github.io/2017/02/03/6.824-Lab-recording-Overview/</loc>
     
     <lastmod>2017-02-28T12:49:39.407Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2017/02/28/6.824-lab2/</loc>
-    
-    <lastmod>2017-02-28T09:12:27.928Z</lastmod>
     
   </url>
   
