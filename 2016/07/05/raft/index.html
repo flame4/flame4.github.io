@@ -90,10 +90,9 @@
 
 
 
-1. Introduction
-RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
+1. IntroductionRAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
 
-一致性问题和一致性算法在分布">
+一致性问题和一致性算法在分布式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="raft Protocol">
 <meta property="og:url" content="http://flame4.github.io/2016/07/05/raft/index.html">
@@ -102,25 +101,23 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
 
 
 
-1. Introduction
-RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
+1. IntroductionRAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
 
-一致性问题和一致性算法在分布">
+一致性问题和一致性算法在分布式">
 <meta property="og:image" content="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
 <meta property="og:image" content="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
 <meta property="og:image" content="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
 <meta property="og:image" content="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67">
-<meta property="og:updated_time" content="2017-02-28T07:50:17.329Z">
+<meta property="og:updated_time" content="2017-03-01T09:10:53.875Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="raft Protocol">
 <meta name="twitter:description" content="RAFT Protocollast Modified: 2017-03-01
 
 
 
-1. Introduction
-RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
+1. IntroductionRAFT是一种一致性算法，用于解决分布式系统中的冗余备份之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。Paxos是另一种分布式系统的协议，在90年被提出，RAFT可以做到与Paxos一样的功能，却比其更好理解，这也是RAFT的设计初衷。
 
-一致性问题和一致性算法在分布">
+一致性问题和一致性算法在分布式">
 <meta name="twitter:image" content="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
 
 
@@ -363,9 +360,8 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
         <h1 id="RAFT-Protocol"><a href="#RAFT-Protocol" class="headerlink" title="RAFT Protocol"></a>RAFT Protocol</h1><p style="text-align:right">last Modified: 2017-03-01</p>
 
 
-<hr>
-<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><hr>
-<p><strong>RAFT</strong>是一种一致性算法，用于解决分布式系统中的<font color="red"><strong>冗余备份</strong></font>之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。<br><strong>Paxos</strong>是另一种分布式系统的协议，在90年被提出，<strong>RAFT</strong>可以做到与<strong>Paxos一样的功能</strong>，却比其更好理解，这也是<strong>RAFT</strong>的设计初衷。</p>
+
+<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p><strong>RAFT</strong>是一种一致性算法，用于解决分布式系统中的<font color="red"><strong>冗余备份</strong></font>之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。<br><strong>Paxos</strong>是另一种分布式系统的协议，在90年被提出，<strong>RAFT</strong>可以做到与<strong>Paxos一样的功能</strong>，却比其更好理解，这也是<strong>RAFT</strong>的设计初衷。</p>
 <blockquote>
 <h5 id="一致性问题和一致性算法"><a href="#一致性问题和一致性算法" class="headerlink" title="一致性问题和一致性算法"></a>一致性问题和一致性算法</h5><p>在分布式系统中，我们在使用时只有一台客户机(访问端)与整个分布式服务机组交互，而且在我们看来，整个服务机组的表现应该与一台电脑一样，比如像hdfs那样呈现出一个文件系统，所以这里面会产生一致性问题。<br>一致性问题的存在起源是因为要保证分布式系统的可靠性，那么文件就不能仅仅只存储在一台电脑上(我们认为分布式系统中电脑宕机是正常的)，而要以多备份的形式存储，那么在客户机与文件交互的过程中，就需要保证多备份之间的一致性，这就是一致性问题。<br>一致性问题可以分为弱一致性和强一致性，后者要求每一次操作多备份的一致性，而前者要求多次操作的最终一致性。为了保证并发性，一般现在的算法都针对的是弱一致性。</p>
 <p>通常解决这类问题的方法分为三种：两阶段提交方法，分布式锁服务，乐观锁服务(<a href="http://blog.chinaunix.net/uid-26111972-id-3759540.html" target="_blank" rel="external">详见这篇博客</a>)。 Paxos属于分布式锁服务的一种。</p>
@@ -376,9 +372,7 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
 <li>Leader election: 使用随机计时器，方便了设计和冲突管理。</li>
 <li>Membership changes: 使用一种新的<strong>Joint consensus</strong>方法。</li>
 </ul>
-<hr>
-<h3 id="2-Replicated-state-machines"><a href="#2-Replicated-state-machines" class="headerlink" title="2. Replicated state machines"></a>2. Replicated state machines</h3><hr>
-<p><strong>RAFT</strong>要解决的问题是一致性问题，首先需要对这个问题做一个形式化的表述来方便处理，RAFT使用Replicated state machines模型来抽象一致性问题。  模型如下图：<br><img src="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<h3 id="2-Replicated-state-machines"><a href="#2-Replicated-state-machines" class="headerlink" title="2. Replicated state machines"></a>2. Replicated state machines</h3><p><strong>RAFT</strong>要解决的问题是一致性问题，首先需要对这个问题做一个形式化的表述来方便处理，RAFT使用Replicated state machines模型来抽象一致性问题。  模型如下图：<br><img src="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
 <p>在每台servers上存在一个本地的state machines和一个Log表，存储的是本地的信息状态和client的操作序列。可以理解为状态机就像一张数据库表一样存放着当前数据信息，而log表放着指令集合。<br>在这个模型下，假设初始所有服务器的状态机都是一样的，那么只要可以保证指令序列Log在所有机器上保持一致性，那么自然最终的结果是可以一致性的。有两种方式可以实现这种一致性：Symmerty and Assymmetry. 前者是说一个client可以和所有的server进行通讯，而后者是说<font color="red">同一时刻</font>只能与一个server进行通讯，并由这个server向其他的server进行转发Log。 处于方便理解的考虑，RAFT选择了后者。所有的server之间的交互就通过Consensus module来完成，而一致性算法就是实现了这个Consensus module来保证所有的机器上的Log最终是相同的，并且可以满足高的并发性。</p>
 <blockquote>
 <h5 id="一致性算法的四个特征"><a href="#一致性算法的四个特征" class="headerlink" title="一致性算法的四个特征"></a>一致性算法的四个特征</h5><ol>
@@ -388,15 +382,11 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
 <li>在通常情况下，如果过半的服务器完成了一项工作，那么认为这个工作完成，而不需要等到所有机器都完成。</li>
 </ol>
 </blockquote>
-<hr>
-<h3 id="3-Paxo’s-Drawbacks"><a href="#3-Paxo’s-Drawbacks" class="headerlink" title="3. Paxo’s Drawbacks"></a>3. Paxo’s Drawbacks</h3><hr>
-<ol>
+<h3 id="3-Paxo’s-Drawbacks"><a href="#3-Paxo’s-Drawbacks" class="headerlink" title="3. Paxo’s Drawbacks"></a>3. Paxo’s Drawbacks</h3><ol>
 <li>难以理解</li>
 <li>很难实现</li>
 </ol>
-<hr>
-<h3 id="4-Designing-for-understandability"><a href="#4-Designing-for-understandability" class="headerlink" title="4. Designing for understandability"></a>4. Designing for understandability</h3><hr>
-<p><strong>设计原则</strong></p>
+<h3 id="4-Designing-for-understandability"><a href="#4-Designing-for-understandability" class="headerlink" title="4. Designing for understandability"></a>4. Designing for understandability</h3><p><strong>设计原则</strong></p>
 <ol>
 <li><font color="red">易于理解</font></li>
 <li>易于实现</li>
@@ -408,9 +398,7 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
 <li>尽可能使用问题分解手段来简化问题的粒度</li>
 <li>简化每台机器的状态空间，来简化思考</li>
 </ol>
-<hr>
-<h3 id="5-The-RAFT-consensus-algorithm"><a href="#5-The-RAFT-consensus-algorithm" class="headerlink" title="5. The RAFT consensus algorithm"></a>5. The RAFT consensus algorithm</h3><hr>
-<p>首先，RAFT把所有的server划分为三部分： <strong>Leader</strong>, <strong>candidate</strong>, <strong>follower</strong>.<br>首先集群选出一个Leader,由Leader与Client交互，并且向所有Server转发Log表，以及其他的管理。这样的话可以简化设计，并且让信息单向流动。如果一个Leader挂了，那么整个协议会支持产生一个新的Leader。<br>在这种设计下，设计实现的功能可以被进一步分解为三个问题： <strong>Leader election</strong>, <strong>Log replication</strong>, <strong>safety</strong>。下面分别看三个问题</p>
+<h3 id="5-The-RAFT-consensus-algorithm"><a href="#5-The-RAFT-consensus-algorithm" class="headerlink" title="5. The RAFT consensus algorithm"></a>5. The RAFT consensus algorithm</h3><p>首先，RAFT把所有的server划分为三部分： <strong>Leader</strong>, <strong>candidate</strong>, <strong>follower</strong>.<br>首先集群选出一个Leader,由Leader与Client交互，并且向所有Server转发Log表，以及其他的管理。这样的话可以简化设计，并且让信息单向流动。如果一个Leader挂了，那么整个协议会支持产生一个新的Leader。<br>在这种设计下，设计实现的功能可以被进一步分解为三个问题： <strong>Leader election</strong>, <strong>Log replication</strong>, <strong>safety</strong>。下面分别看三个问题</p>
 <h5 id="5-1-RAFT-Basic"><a href="#5-1-RAFT-Basic" class="headerlink" title="5.1 RAFT Basic"></a>5.1 RAFT Basic</h5><p>下图显示了一个服务器的状态转换图。<br><img src="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""><br>最开始所有的人都是Follower, 并且有一个<strong>随机的计时器到点</strong>，就会产生一次选举，产生Candidate，并有人最终获胜，成为一个Leader, 而其他人重新变为Follower。 一般的稳定状态下，就只有一个Leader和很多的Follower。至于其他情况，在后面的部分讨论。</p>
 <p><strong>Term</strong>： Raft把真实的时间分为一个个的连续的Term. Term可以理解为逻辑时间，也可以理解为一段稳定存在的时间，一般来说，一个新Term的产生是因为Leader挂了，而一个新Term的生存周期就是选举新Leader的过程，以及之后的稳定运行过程。所以每个Term的时间都是不相同的，参考下图(下图的Term3对应选举失败的情况，这时会再次进行选举)。<br><img src="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">注意：Term可以用来标记自己的处理阶段，所有的server不一定Term号都相同。每个Server都存有一个递增的Term号来表明自己的处理进程。所以如果一个Server收到一个来自其他Server的Log修改，但是Term如果比自己的小，则可以拒绝此服务。</div></pre></td></tr></table></figure>
@@ -440,9 +428,7 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
 <li>如果两个不同的Log中有相同的index和term，那么他们存的之前的指令也都是相同的。</li>
 </ol>
 <p>第一条的合理性在于，相同的term只能由一个领导人产生,并且Log的存储顺序不变。第二条的合理性被发送的AppendEntries  RPC一致性检查保证： 如果一个Leader想要发送一个想被commit的指令，其将本地Log中的上一条指令的index和Term Number附在AppendEntries RPC中，如果follower检查自己的前一个Log与这个上一条指令不相符，则其拒绝接受这个RPC。简答理解，就是一个递归的步骤。</p>
-<hr>
-<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><hr>
-<h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5>
+<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5>
       
     </div>
 
@@ -474,16 +460,16 @@ RAFT是一种一致性算法，用于解决分布式系统中的冗余备份之�
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/05/Shell-base/" rel="next" title="shell 用法简记">
-                <i class="fa fa-chevron-left"></i> shell 用法简记
+              <a href="/2016/07/05/consistent-hash/" rel="next" title="一致性哈希">
+                <i class="fa fa-chevron-left"></i> 一致性哈希
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/05/consistent-hash/" rel="prev" title="一致性哈希">
-                一致性哈希 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/07/10/LSM-Tree/" rel="prev" title="LSM Tree">
+                LSM Tree <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
