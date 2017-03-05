@@ -86,19 +86,28 @@
 
 
 
-<meta name="description" content="6.824 - lab2第二个坑, raft协议实现.
-part2A实现选举机制和心跳.">
+<meta name="description" content="6.824 - lab2第二个坑, raft协议实现. 基于labrpc库实现的小型网络, 对于每个server, 其也是一个RAFT对象(那三种角色之一).
+执行流程
+初始化config对象, config对象内其实模拟了一个小型的五脏俱全的通过socket通讯实现的多服务器网络. 工作包括初始化一个Network,
+
+labrpc包用于raft通讯的一些rpc结构体和方法的定义, Networ">
 <meta property="og:type" content="article">
 <meta property="og:title" content="6.824 - Lab2">
 <meta property="og:url" content="http://flame4.github.io/2017/02/28/6.824-lab2/index.html">
 <meta property="og:site_name" content="刘燚的个人空间">
-<meta property="og:description" content="6.824 - lab2第二个坑, raft协议实现.
-part2A实现选举机制和心跳.">
-<meta property="og:updated_time" content="2017-03-01T06:33:32.073Z">
+<meta property="og:description" content="6.824 - lab2第二个坑, raft协议实现. 基于labrpc库实现的小型网络, 对于每个server, 其也是一个RAFT对象(那三种角色之一).
+执行流程
+初始化config对象, config对象内其实模拟了一个小型的五脏俱全的通过socket通讯实现的多服务器网络. 工作包括初始化一个Network,
+
+labrpc包用于raft通讯的一些rpc结构体和方法的定义, Networ">
+<meta property="og:updated_time" content="2017-03-02T14:34:24.133Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="6.824 - Lab2">
-<meta name="twitter:description" content="6.824 - lab2第二个坑, raft协议实现.
-part2A实现选举机制和心跳.">
+<meta name="twitter:description" content="6.824 - lab2第二个坑, raft协议实现. 基于labrpc库实现的小型网络, 对于每个server, 其也是一个RAFT对象(那三种角色之一).
+执行流程
+初始化config对象, config对象内其实模拟了一个小型的五脏俱全的通过socket通讯实现的多服务器网络. 工作包括初始化一个Network,
+
+labrpc包用于raft通讯的一些rpc结构体和方法的定义, Networ">
 
 
 
@@ -337,7 +346,12 @@ part2A实现选举机制和心跳.">
       
 
       
-        <h1 id="6-824-lab2"><a href="#6-824-lab2" class="headerlink" title="6.824 - lab2"></a>6.824 - lab2</h1><p>第二个坑, raft协议实现.</p>
+        <h1 id="6-824-lab2"><a href="#6-824-lab2" class="headerlink" title="6.824 - lab2"></a>6.824 - lab2</h1><p>第二个坑, raft协议实现. 基于labrpc库实现的小型网络, 对于每个server, 其也是一个RAFT对象(那三种角色之一).</p>
+<h4 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h4><ol>
+<li>初始化config对象, config对象内其实模拟了一个小型的五脏俱全的通过socket通讯实现的多服务器网络. 工作包括初始化一个Network,</li>
+</ol>
+<h4 id="labrpc包"><a href="#labrpc包" class="headerlink" title="labrpc包"></a>labrpc包</h4><p>用于raft通讯的一些rpc结构体和方法的定义, Network 定义了一个虚拟网络.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">labrpc.go</div><div class="line">  | -- reqMsg struct&#123;&#125; 请求信息, 内部存在管道. 回复会放入管道中而不是使用reply参数指针(就是不知道这个真的跨端能不能实现喔? 因为感觉上管道还是要在一个进程中才可以实现的吧,对RPC的真正含义还不知道, 待做个测试尝试一下)</div><div class="line">  | -- replyMsg struct&#123;&#125; 回复</div><div class="line"></div><div class="line">  | -- ClientEnd struct&#123;&#125; 用户终端, 会启动的与server集群交互的客户端.</div><div class="line">    | -- Call() 发送RPC包, 基于管道</div><div class="line"></div><div class="line">  | -- NetWork struct &#123;&#125; 定义了一个模仿各种网络情况的网络. 包括了一个client列表, 一个server列表, client =&gt; server的链接网络, 以及定义各种网络情况的参数.</div><div class="line">    | -- Reliable()</div><div class="line">    | -- LongReordering()</div><div class="line">    | -- LongDelays()</div><div class="line">    | -- ReadEndnameInfo()</div><div class="line">    | -- IsServerDead()</div><div class="line">    | -- ProcessReq()</div><div class="line">    | -- MakeEnd()</div><div class="line">    | -- AddServer()</div><div class="line">    | -- DeleteServer()</div><div class="line">    | -- Connect()</div><div class="line">    | -- Enable()</div><div class="line">    | -- GetCount()</div><div class="line"></div><div class="line">  | -- Server struct &#123;&#125;</div><div class="line">    | -- AddService()</div><div class="line">    | -- dispatch()</div><div class="line">    | -- GetCount()</div><div class="line"></div><div class="line">  | -- Service struct &#123;&#125;</div><div class="line">    | -- dispatch()</div></pre></td></tr></table></figure></p>
+<h4 id="raft包"><a href="#raft包" class="headerlink" title="raft包"></a>raft包</h4><p>实现一个raft协议的可用服务, 基于golang的分布式协议的实现比较有名气的就是coreos的<a href="http://blog.csdn.net/longxibendi/article/details/43340469" target="_blank" rel="external">etcd</a>.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">config.go</div><div class="line">  | -- config struct&#123;&#125;</div><div class="line">raft.go</div><div class="line">  | -- ApplyMsg struct&#123;&#125;</div><div class="line"></div><div class="line">  | -- Raft struct&#123;&#125; 一个单独的raft peer.</div><div class="line">    | -- GetState() 返回一个server的状态码以及其是否认为自己是server</div><div class="line">    | -- persist()</div><div class="line">    | -- readPersist()</div><div class="line">    | -- RequestVote() 请求发起投票的函数</div><div class="line">    | -- sendRequestVote()</div><div class="line">    | -- Start()</div><div class="line">    | -- Kill()</div><div class="line"></div><div class="line">  | -- RequestVoteArgs struct &#123;&#125;</div><div class="line"></div><div class="line">  | -- RequestVoteReply struct &#123;&#125;</div><div class="line"></div><div class="line">  | -- Make()</div><div class="line"></div><div class="line">persister.go</div><div class="line">  | --</div></pre></td></tr></table></figure></p>
 <h4 id="part2A"><a href="#part2A" class="headerlink" title="part2A"></a>part2A</h4><p>实现选举机制和心跳.</p>
 
       
@@ -515,7 +529,7 @@ part2A实现选举机制和心跳.">
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab2"><span class="nav-text">6.824 - lab2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#part2A"><span class="nav-text">part2A</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#6-824-lab2"><span class="nav-text">6.824 - lab2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#执行流程"><span class="nav-text">执行流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#labrpc包"><span class="nav-text">labrpc包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#raft包"><span class="nav-text">raft包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#part2A"><span class="nav-text">part2A</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
