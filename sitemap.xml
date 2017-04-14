@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://flame4.github.io/2016/07/05/raft/</loc>
+    
+    <lastmod>2017-04-13T09:20:20.940Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://flame4.github.io/2017/02/28/6.824-lab2/</loc>
     
-    <lastmod>2017-03-02T14:34:24.133Z</lastmod>
+    <lastmod>2017-03-06T02:14:59.773Z</lastmod>
     
   </url>
   
@@ -40,13 +47,6 @@
     <loc>http://flame4.github.io/2016/07/22/Lucene/</loc>
     
     <lastmod>2017-03-01T09:13:34.192Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://flame4.github.io/2016/07/05/raft/</loc>
-    
-    <lastmod>2017-03-01T09:10:53.875Z</lastmod>
     
   </url>
   

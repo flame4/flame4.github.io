@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://flame4.github.io/"/>
-  <updated>2017-03-02T14:34:24.133Z</updated>
+  <updated>2017-03-06T02:14:59.773Z</updated>
   <id>http://flame4.github.io/</id>
   
   <author>
@@ -20,14 +20,14 @@
     <link href="http://flame4.github.io/2017/02/28/6.824-lab2/"/>
     <id>http://flame4.github.io/2017/02/28/6.824-lab2/</id>
     <published>2017-02-27T16:50:00.000Z</published>
-    <updated>2017-03-02T14:34:24.133Z</updated>
+    <updated>2017-03-06T02:14:59.773Z</updated>
     
     <content type="html"><![CDATA[<h1 id="6-824-lab2"><a href="#6-824-lab2" class="headerlink" title="6.824 - lab2"></a>6.824 - lab2</h1><p>第二个坑, raft协议实现. 基于labrpc库实现的小型网络, 对于每个server, 其也是一个RAFT对象(那三种角色之一).</p>
 <h4 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h4><ol>
 <li>初始化config对象, config对象内其实模拟了一个小型的五脏俱全的通过socket通讯实现的多服务器网络. 工作包括初始化一个Network,</li>
 </ol>
 <h4 id="labrpc包"><a href="#labrpc包" class="headerlink" title="labrpc包"></a>labrpc包</h4><p>用于raft通讯的一些rpc结构体和方法的定义, Network 定义了一个虚拟网络.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">labrpc.go</div><div class="line">  | -- reqMsg struct&#123;&#125; 请求信息, 内部存在管道. 回复会放入管道中而不是使用reply参数指针(就是不知道这个真的跨端能不能实现喔? 因为感觉上管道还是要在一个进程中才可以实现的吧,对RPC的真正含义还不知道, 待做个测试尝试一下)</div><div class="line">  | -- replyMsg struct&#123;&#125; 回复</div><div class="line"></div><div class="line">  | -- ClientEnd struct&#123;&#125; 用户终端, 会启动的与server集群交互的客户端.</div><div class="line">    | -- Call() 发送RPC包, 基于管道</div><div class="line"></div><div class="line">  | -- NetWork struct &#123;&#125; 定义了一个模仿各种网络情况的网络. 包括了一个client列表, 一个server列表, client =&gt; server的链接网络, 以及定义各种网络情况的参数.</div><div class="line">    | -- Reliable()</div><div class="line">    | -- LongReordering()</div><div class="line">    | -- LongDelays()</div><div class="line">    | -- ReadEndnameInfo()</div><div class="line">    | -- IsServerDead()</div><div class="line">    | -- ProcessReq()</div><div class="line">    | -- MakeEnd()</div><div class="line">    | -- AddServer()</div><div class="line">    | -- DeleteServer()</div><div class="line">    | -- Connect()</div><div class="line">    | -- Enable()</div><div class="line">    | -- GetCount()</div><div class="line"></div><div class="line">  | -- Server struct &#123;&#125;</div><div class="line">    | -- AddService()</div><div class="line">    | -- dispatch()</div><div class="line">    | -- GetCount()</div><div class="line"></div><div class="line">  | -- Service struct &#123;&#125;</div><div class="line">    | -- dispatch()</div></pre></td></tr></table></figure></p>
-<h4 id="raft包"><a href="#raft包" class="headerlink" title="raft包"></a>raft包</h4><p>实现一个raft协议的可用服务, 基于golang的分布式协议的实现比较有名气的就是coreos的<a href="http://blog.csdn.net/longxibendi/article/details/43340469" target="_blank" rel="external">etcd</a>.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">config.go</div><div class="line">  | -- config struct&#123;&#125;</div><div class="line">raft.go</div><div class="line">  | -- ApplyMsg struct&#123;&#125;</div><div class="line"></div><div class="line">  | -- Raft struct&#123;&#125; 一个单独的raft peer.</div><div class="line">    | -- GetState() 返回一个server的状态码以及其是否认为自己是server</div><div class="line">    | -- persist()</div><div class="line">    | -- readPersist()</div><div class="line">    | -- RequestVote() 请求发起投票的函数</div><div class="line">    | -- sendRequestVote()</div><div class="line">    | -- Start()</div><div class="line">    | -- Kill()</div><div class="line"></div><div class="line">  | -- RequestVoteArgs struct &#123;&#125;</div><div class="line"></div><div class="line">  | -- RequestVoteReply struct &#123;&#125;</div><div class="line"></div><div class="line">  | -- Make()</div><div class="line"></div><div class="line">persister.go</div><div class="line">  | --</div></pre></td></tr></table></figure></p>
+<h4 id="raft包"><a href="#raft包" class="headerlink" title="raft包"></a>raft包</h4><p>实现一个raft协议的可用服务, 基于golang的分布式协议的实现比较有名气的就是coreos的<a href="http://blog.csdn.net/longxibendi/article/details/43340469" target="_blank" rel="external">etcd</a>.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">config.go</div><div class="line">  | -- config struct&#123;&#125;</div><div class="line">    | --</div><div class="line">raft.go</div><div class="line">  | -- ApplyMsg struct&#123;&#125;</div><div class="line"></div><div class="line">  | -- Raft struct&#123;&#125; 一个单独的raft peer.</div><div class="line">    | -- GetState() 返回一个server的状态码以及其是否认为自己是server</div><div class="line">    | -- persist()</div><div class="line">    | -- readPersist()</div><div class="line">    | -- RequestVote() 请求发起投票的函数</div><div class="line">    | -- sendRequestVote()</div><div class="line">    | -- Start()</div><div class="line">    | -- Kill()</div><div class="line"></div><div class="line">  | -- RequestVoteArgs struct &#123;&#125;</div><div class="line"></div><div class="line">  | -- RequestVoteReply struct &#123;&#125;</div><div class="line"></div><div class="line">  | -- Make()</div><div class="line"></div><div class="line">persister.go</div><div class="line">  | --</div></pre></td></tr></table></figure></p>
 <h4 id="part2A"><a href="#part2A" class="headerlink" title="part2A"></a>part2A</h4><p>实现选举机制和心跳.</p>
 ]]></content>
     
@@ -871,6 +871,136 @@
   </entry>
   
   <entry>
+    <title>raft Protocol</title>
+    <link href="http://flame4.github.io/2016/07/05/raft/"/>
+    <id>http://flame4.github.io/2016/07/05/raft/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2017-04-13T09:20:20.940Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="RAFT-Protocol"><a href="#RAFT-Protocol" class="headerlink" title="RAFT Protocol"></a>RAFT Protocol</h1><p style="text-align:right">last Modified: 2017-04-13</p>
+
+<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p><strong>RAFT</strong> 是一种一致性算法，用于解决分布式系统中的<font color="red"><strong>冗余备份</strong></font>之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。<br><strong>Paxos</strong> 是另一种分布式系统的协议，在90年被提出，<strong>RAFT</strong>可以做到与<strong>Paxos一样的功能</strong>，却比其更好理解，这也是<strong>RAFT</strong>的设计初衷。</p>
+<blockquote>
+<h5 id="一致性问题和一致性算法"><a href="#一致性问题和一致性算法" class="headerlink" title="一致性问题和一致性算法"></a>一致性问题和一致性算法</h5><p>在分布式系统中，我们在使用时只有一台客户机(访问端)与整个分布式服务机组交互，而且在我们看来，整个服务机组的表现应该与一台电脑一样，比如像hdfs那样呈现出一个文件系统，所以这里面会产生一致性问题。<br>一致性问题的存在起源是因为要保证分布式系统的可靠性，那么文件就不能仅仅只存储在一台电脑上(我们认为分布式系统中电脑宕机是正常的)，而要以多备份的形式存储，那么在客户机与文件交互的过程中，就需要保证多备份之间的一致性，这就是一致性问题。<br>一致性问题可以分为弱一致性和强一致性，后者要求每一次操作多备份的一致性，而前者要求多次操作的最终一致性。为了保证并发性，一般现在的算法都针对的是弱一致性。</p>
+<p>通常解决这类问题的方法分为三种：两阶段提交方法，分布式锁服务，乐观锁服务(<a href="http://blog.chinaunix.net/uid-26111972-id-3759540.html" target="_blank" rel="external">详见这篇博客</a>)。 Paxos属于分布式锁服务的一种。</p>
+</blockquote>
+<p><strong>RAFT</strong> 相比其他的一致性算法，有以下几个特点：</p>
+<ul>
+<li>Strong Leader: 信息只能单向传递，这样做更容易理解</li>
+<li>Leader election: 使用随机计时器，方便了设计和冲突管理。</li>
+<li>Membership changes: 使用一种新的<strong>Joint consensus</strong>方法。</li>
+</ul>
+<h3 id="2-Replicated-state-machines"><a href="#2-Replicated-state-machines" class="headerlink" title="2. Replicated state machines"></a>2. Replicated state machines</h3><p><strong>RAFT</strong> 要解决的问题是一致性问题，首先需要对这个问题做一个形式化的表述来方便处理，RAFT使用Replicated state machines模型来抽象一致性问题。  模型如下图：<br><img src="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<p>在每台servers上存在一个本地的state machines和一个Log表，存储的是本地的信息状态和client的操作序列。可以理解为状态机就像一张数据库表一样存放着当前数据信息，而log表放着指令集合。<br>在这个模型下，假设初始所有服务器的状态机都是一样的，那么只要可以保证指令序列Log在所有机器上保持一致性，那么自然最终的结果是可以一致性的。有两种方式可以实现这种一致性：Symmerty and Assymmetry. 前者是说一个client可以和所有的server进行通讯，而后者是说<font color="red">同一时刻</font>只能与一个server进行通讯，并由这个server向其他的server进行转发Log。 处于方便理解的考虑，RAFT选择了后者。所有的server之间的交互就通过Consensus module来完成，而一致性算法就是实现了这个Consensus module来保证所有的机器上的Log最终是相同的，并且可以满足高的并发性。</p>
+<blockquote>
+<h5 id="一致性算法的四个特征"><a href="#一致性算法的四个特征" class="headerlink" title="一致性算法的四个特征"></a>一致性算法的四个特征</h5><ol>
+<li>Safety: 首先要保证结果的正确性，要克服网络延迟，丢包等现象。</li>
+<li>fully available: 可以允许宕机。只要系统中还有过半的服务器能够正常运行，那么整个集群可以正常运行。宕机的服务器可能会在稍后的时间内恢复并重新加入。</li>
+<li>No timing dependency: 不依赖时间实现同步，允许不同机器的时钟不同。</li>
+<li>在通常情况下，如果过半的服务器完成了一项工作，那么认为这个工作完成，而不需要等到所有机器都完成。</li>
+</ol>
+</blockquote>
+<h3 id="3-Paxo’s-Drawbacks"><a href="#3-Paxo’s-Drawbacks" class="headerlink" title="3. Paxo’s Drawbacks"></a>3. Paxo’s Drawbacks</h3><ol>
+<li>难以理解</li>
+<li>很难实现</li>
+</ol>
+<h3 id="4-Designing-for-understandability"><a href="#4-Designing-for-understandability" class="headerlink" title="4. Designing for understandability"></a>4. Designing for understandability</h3><p><strong>设计原则</strong></p>
+<ol>
+<li><font color="red">易于理解</font></li>
+<li>易于实现</li>
+<li>一般操作的高效率</li>
+<li>任何情况下的安全性和一致性</li>
+</ol>
+<p>设计中使用了两种技术来提高<strong>understandibility</strong></p>
+<ol>
+<li>尽可能使用问题分解手段来简化问题的粒度</li>
+<li>简化每台机器的状态空间，来简化思考</li>
+</ol>
+<h3 id="5-The-RAFT-consensus-algorithm"><a href="#5-The-RAFT-consensus-algorithm" class="headerlink" title="5. The RAFT consensus algorithm"></a>5. The RAFT consensus algorithm</h3><p>首先，RAFT把所有的server划分为三部分： <strong>Leader</strong>, <strong>candidate</strong>, <strong>follower</strong>.<br>首先集群选出一个Leader,由Leader与Client交互，并且向所有Server转发Log表，以及其他的管理。这样的话可以简化设计，并且让信息单向流动。如果一个Leader挂了，那么整个协议会支持产生一个新的Leader。<br>在这种设计下，设计实现的功能可以被进一步分解为三个问题： <strong>Leader election</strong>, <strong>Log replication</strong>, <strong>safety</strong>。下面分别看三个问题</p>
+<h5 id="5-1-RAFT-Basic"><a href="#5-1-RAFT-Basic" class="headerlink" title="5.1 RAFT Basic"></a>5.1 RAFT Basic</h5><p>下图显示了一个服务器的状态转换图。<br><img src="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""><br>最开始所有的人都是Follower, 并且有一个<strong>随机的计时器到点</strong>，就会产生一次选举，产生Candidate，并有人最终获胜，成为一个Leader, 而其他人重新变为Follower。 一般的稳定状态下，就只有一个Leader和很多的Follower。至于其他情况，在后面的部分讨论。</p>
+<p><strong>Term</strong>： Raft把真实的时间分为一个个的连续的Term. Term可以理解为逻辑时间，也可以理解为一段稳定存在的时间，一般来说，一个新Term的产生是因为Leader挂了，而一个新Term的生存周期就是选举新Leader的过程，以及之后的稳定运行过程。所以每个Term的时间都是不相同的，参考下图(下图的Term3对应选举失败的情况，这时会再次进行选举)。<br><img src="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">注意：Term可以用来标记自己的处理阶段，所有的server不一定Term号都相同。每个Server都存有一个递增的Term号来表明自己的处理进程。所以如果一个Server收到一个来自其他Server的Log修改，但是Term如果比自己的小，则可以拒绝此服务。</div></pre></td></tr></table></figure>
+<p><strong>RPC</strong> : remote proceudre calls, 服务器间用来通讯的协议文件。在主要的功能实现中只需要两种RPC，第三种RPC用于提供server之间的快照，详细的见后面的讲述。</p>
+<h5 id="5-2-Leader-Election"><a href="#5-2-Leader-Election" class="headerlink" title="5.2 Leader Election"></a>5.2 Leader Election</h5><p>RAFT采取定期心跳包的形式来产生Leader。对于一个server来说，其生命周期的流程可以用以下几条来概括：</p>
+<ol>
+<li>如果一个Server进入了一个集群，其进入follower状态，并设置一个初始化的Term值，以及一个随机的Timer计时器。</li>
+<li>如果server处于follower状态，并在timer计时结束之间接受到一个有效的来自leader或者是candidate的<strong>RPCs</strong>(AppendEntries or RequestVote)，则其重置计时器，继续保持follower状态，<font color="red">并更新自己的term number为Leader的term number</font>。</li>
+<li>一个server如果处于Leader状态，其以一个远低于其他server Timer的时间间隔发送心跳包(AppendEntries RPC)，以维持自己Leader状态。</li>
+<li>如果一个follower发生election timeout， 则认为Leader已经挂掉，则其<font color="red">自增自己的Term number</font>, 然后转换为candidate状态。</li>
+<li>如果一个server处于candidate状态，则其<font color="red">对自己投票</font>，并向其他的server并行发送RequestVote RPC，直到以下三种情况出现：<ul>
+<li><strong>candidate win</strong> 胜出条件是一个candidate对于其给定的term number获得半数以上的选票, 对于任意一个Term，其他server只能投一次票，根据先到先服务的原则。胜出的candidate成为leader并立即发送心跳包防止选举过程。</li>
+<li><strong>Another Candidate Win</strong> 如果在等待选票的过程中其接受到其他的AppendEntries RPC，如果其Term number至少和其一样大，那么其认同这个Leader并退回follower阶段，否则拒绝这个RPC并继续进行选举。</li>
+<li><strong>No Winner for A Period</strong> 如果有很多follower同时成为candidate，那么票型就会分散，这时所有的candidate都会有time out，然后其自增自己的term number再进行下一轮。</li>
+</ul>
+</li>
+<li>如果一个server处于Leader的情况下收到了比自己大的 RequestVote RPC，那么可能是遇到了很多网络情况, 比如自己这里的网络不好. 那么原则如下: 投票和日志复制是两个独立的工作,即使是leader, 对每个termID也要投票,并且每个id只有一次. 然后一般会进入another candidate win的逻辑中去, 自己不再成为leader.</li>
+</ol>
+<blockquote>
+<p>在初始化随机计时器和没有candidate胜出的情况下，都采用了CSMA/CD中的随机回退思想来减少冲突。在每次进入candidate状态时也会设置一个随时的timeout值。</p>
+</blockquote>
+<h5 id="5-3-Log-Replication"><a href="#5-3-Log-Replication" class="headerlink" title="5.3 Log Replication"></a>5.3 Log Replication</h5><p>当一个Leader形成后，就开始接受Client的指令集合。其根据指令不断生成一个个的Log Entry，然后附在AppendEntries RPC中发送。如果多数server确认了这个RPC，则Leader <em>Commit</em> 这些操作并可以发送执行结果给Client。 对于那些没有回复的server， Leader会持续发送直到回复。Log Entries的示意图如下所示：<br><img src="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67" alt=""></p>
+<p>每个Log Entries有一个方格内的Term Number和一个Index Number。因为有多数的Log Entry后才执行，可以保证<em>Commit</em>的指令是冗余的。同时，领导人的日志中之前的所有日志条目也都会被提交，包括由其他领导人创建的条目。5.4 节会讨论某些当在领导人改变之后应用这条规则的隐晦内容，同时它也展示了这种提交的定义是安全的。领导人跟踪了最大的将会被提交的日志项的索引，并且索引值会被包含在未来的所有附加日志 RPCs （包括心跳包），这样其他的服务器才能最终知道领导人的提交位置。一旦跟随者知道一条日志条目已经被提交，那么它也会将这个日志条目应用到本地的状态机中（按照日志的顺序）。</p>
+<p><strong>日志机制</strong>： 作者设计了日志机制来保证一致性和安全性。就类似于数据库设计中的范式，日志机制其实就是两条原则：</p>
+<ol>
+<li>如果两个不同的Log中有相同的index和term，那么他们存的指令是相同的。</li>
+<li>如果两个不同的Log中有相同的index和term，那么他们存的之前的指令也都是相同的。</li>
+</ol>
+<p>第一条的合理性在于，相同的term只能由一个领导人产生,并且Log的存储顺序不变。第二条的合理性被发送的AppendEntries  RPC一致性检查保证： 如果一个Leader想要发送一个想被commit的指令，其将本地Log中的上一条指令的index和Term Number附在AppendEntries RPC中，如果follower检查自己的前一个Log与这个上一条指令不相符，则其拒绝接受这个RPC。简单理解，就是一个归纳的步骤。</p>
+<p>如上图所示, 其实每个server本地的log记录都是很混乱很不一致的, 在leader更替的过程中, 必须妥善处理好这些矛盾. 已经收到的log记录会被存在leader的本地, 但是这些log操作一开始还不会被持久化到本地的虚拟机中去, 而是要经过一致性算法的决策后才可以最终应用. 对于每个新的leader, 会维护两个数组 nextIndex 和 matchIndex, 代表下一个需要发送给跟随者的日志条目的索引地址和这个server已经跟leader一样的数组.</p>
+<p>要使得跟随者的日志进入和自己一致的状态，领导人必须找到最后两者达成一致的地方，然后删除从那个点之后的所有日志条目，发送自己的日志给跟随者。所有的这些操作都在进行附加日志 RPCs 的一致性检查时完成。领导人针对每一个跟随者维护了一个 nextIndex，这表示下一个需要发送给跟随者的日志条目的索引地址。当一个领导人刚获得权力的时候，他初始化所有的 nextIndex 值为自己的最后一条日志的index加1。如果一个跟随者的日志和领导人不一致，那么在下一次的附加日志 RPC 时的一致性检查就会失败。在被跟随者拒绝之后，领导人就会减小 nextIndex 值并进行重试。最终 nextIndex 会在某个位置使得领导人和跟随者的日志达成一致。当这种情况发生，附加日志 RPC 就会成功，这时就会把跟随者冲突的日志条目全部删除并且加上领导人的日志。一旦附加日志 RPC 成功，那么跟随者的日志就会和领导人保持一致，并且在接下来的任期里一直继续保持。通过这种机制，领导人在获得权力的时候就不需要任何特殊的操作来恢复一致性。他只需要进行正常的操作，然后日志就能自动的在回复附加日志 RPC 的一致性检查失败的时候自动趋于一致。领导人从来不会覆盖或者删除自己的日志。</p>
+<h5 id="5-4-安全性问题"><a href="#5-4-安全性问题" class="headerlink" title="5.4 安全性问题"></a>5.4 安全性问题</h5><p>前面针对选举和日志的复制可能存在不一致的问题, 比如脑裂问题中出现的, 两个server组走上了不同的命令分支. 为了对规则更加明确, 加入了以下限制.</p>
+<h6 id="5-4-1-选举限制"><a href="#5-4-1-选举限制" class="headerlink" title="5.4.1 选举限制"></a>5.4.1 选举限制</h6><p>已提交的命令在使用的过程中我们可以将其理解为已经计算完并且将结果返回给用户的部分, 那既然这部分已经返回给了用户, 就要对这些已经提交的结果负责. 那么如果这个leader挂掉, 必须有一些手段来保证新的leader中的log都要包含这个leader中已经提交的log才可以.</p>
+<p>前面写到, 对于leader来说, 他提交一个log的标准是发现超过一半的follower已经有了这条log, 这意味着每一个已经提交的日志条目肯定在这些服务器节点中至少存在一半上面, 如果候选人的日志至少和大多数的服务器节点一样新（这个新的定义会在下面讨论），那么他一定持有了所有已经提交的日志条目。请求投票 RPC 实现了这样的限制： RPC 中包含了候选人的日志信息，然后投票人会拒绝掉那些日志没有自己新的投票请求。Raft 通过比较两份日志中最后一条日志条目的索引值和任期号定义谁的日志比较新。如果两份日志最后的条目的任期号不同，那么任期号大的日志更加新。如果两份日志最后的条目任期号相同，那么日志比较长的那个就更加新。</p>
+<p>从5.3可以知道, 因为leader维护了最大的那个提交并且会附在APPENDRPC中, 所以follower也会知道Leader的提交位置.</p>
+<h6 id="5-4-2-提交之前任期内限制"><a href="#5-4-2-提交之前任期内限制" class="headerlink" title="5.4.2 提交之前任期内限制"></a>5.4.2 提交之前任期内限制</h6><p><img src="https://camo.githubusercontent.com/14df99e543c71ee75cafd614e1c55c25ac580ec8/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245382e706e67" alt=""></p>
+<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><p>如果成为leader, 那么其至少有所有已经提交的log信息.</p>
+<h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><p>选举的term没有稳定之前, 可以阻塞client的请求, 直到稳定.</p>
+<h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5><p>极端情况下可能出现组网故障, 这样的话一个集群可能直接分裂为2个集群, 那么面临的问题就很尴尬了…</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;RAFT-Protocol&quot;&gt;&lt;a href=&quot;#RAFT-Protocol&quot; class=&quot;headerlink&quot; title=&quot;RAFT Protocol&quot;&gt;&lt;/a&gt;RAFT Protocol&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;l
+    
+    </summary>
+    
+      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
+    
+    
+      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
+    
+      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>shell 用法简记</title>
+    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
+    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
+    <published>2016-07-05T15:26:19.000Z</published>
+    <updated>2016-09-06T17:21:26.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
+
+<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
+<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
+<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
+<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
+    
+    </summary>
+    
+      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>一致性哈希</title>
     <link href="http://flame4.github.io/2016/07/05/consistent-hash/"/>
     <id>http://flame4.github.io/2016/07/05/consistent-hash/</id>
@@ -914,128 +1044,6 @@
     
     
       <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>raft Protocol</title>
-    <link href="http://flame4.github.io/2016/07/05/raft/"/>
-    <id>http://flame4.github.io/2016/07/05/raft/</id>
-    <published>2016-07-05T15:26:19.000Z</published>
-    <updated>2017-03-01T09:10:53.875Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="RAFT-Protocol"><a href="#RAFT-Protocol" class="headerlink" title="RAFT Protocol"></a>RAFT Protocol</h1><p style="text-align:right">last Modified: 2017-03-01</p>
-
-
-
-<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p><strong>RAFT</strong>是一种一致性算法，用于解决分布式系统中的<font color="red"><strong>冗余备份</strong></font>之间的同步性问题，是建立高可靠性分布式系统的很重要的组成部分。<br><strong>Paxos</strong>是另一种分布式系统的协议，在90年被提出，<strong>RAFT</strong>可以做到与<strong>Paxos一样的功能</strong>，却比其更好理解，这也是<strong>RAFT</strong>的设计初衷。</p>
-<blockquote>
-<h5 id="一致性问题和一致性算法"><a href="#一致性问题和一致性算法" class="headerlink" title="一致性问题和一致性算法"></a>一致性问题和一致性算法</h5><p>在分布式系统中，我们在使用时只有一台客户机(访问端)与整个分布式服务机组交互，而且在我们看来，整个服务机组的表现应该与一台电脑一样，比如像hdfs那样呈现出一个文件系统，所以这里面会产生一致性问题。<br>一致性问题的存在起源是因为要保证分布式系统的可靠性，那么文件就不能仅仅只存储在一台电脑上(我们认为分布式系统中电脑宕机是正常的)，而要以多备份的形式存储，那么在客户机与文件交互的过程中，就需要保证多备份之间的一致性，这就是一致性问题。<br>一致性问题可以分为弱一致性和强一致性，后者要求每一次操作多备份的一致性，而前者要求多次操作的最终一致性。为了保证并发性，一般现在的算法都针对的是弱一致性。</p>
-<p>通常解决这类问题的方法分为三种：两阶段提交方法，分布式锁服务，乐观锁服务(<a href="http://blog.chinaunix.net/uid-26111972-id-3759540.html" target="_blank" rel="external">详见这篇博客</a>)。 Paxos属于分布式锁服务的一种。</p>
-</blockquote>
-<p><strong>RAFT</strong>相比其他的一致性算法，有以下几个特点：</p>
-<ul>
-<li>Strong Leader: 信息只能单向传递，这样做更容易理解</li>
-<li>Leader election: 使用随机计时器，方便了设计和冲突管理。</li>
-<li>Membership changes: 使用一种新的<strong>Joint consensus</strong>方法。</li>
-</ul>
-<h3 id="2-Replicated-state-machines"><a href="#2-Replicated-state-machines" class="headerlink" title="2. Replicated state machines"></a>2. Replicated state machines</h3><p><strong>RAFT</strong>要解决的问题是一致性问题，首先需要对这个问题做一个形式化的表述来方便处理，RAFT使用Replicated state machines模型来抽象一致性问题。  模型如下图：<br><img src="http://img.blog.csdn.net/20140804203840619?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
-<p>在每台servers上存在一个本地的state machines和一个Log表，存储的是本地的信息状态和client的操作序列。可以理解为状态机就像一张数据库表一样存放着当前数据信息，而log表放着指令集合。<br>在这个模型下，假设初始所有服务器的状态机都是一样的，那么只要可以保证指令序列Log在所有机器上保持一致性，那么自然最终的结果是可以一致性的。有两种方式可以实现这种一致性：Symmerty and Assymmetry. 前者是说一个client可以和所有的server进行通讯，而后者是说<font color="red">同一时刻</font>只能与一个server进行通讯，并由这个server向其他的server进行转发Log。 处于方便理解的考虑，RAFT选择了后者。所有的server之间的交互就通过Consensus module来完成，而一致性算法就是实现了这个Consensus module来保证所有的机器上的Log最终是相同的，并且可以满足高的并发性。</p>
-<blockquote>
-<h5 id="一致性算法的四个特征"><a href="#一致性算法的四个特征" class="headerlink" title="一致性算法的四个特征"></a>一致性算法的四个特征</h5><ol>
-<li>Safety: 首先要保证结果的正确性，要克服网络延迟，丢包等现象。</li>
-<li>fully available: 可以允许宕机。只要系统中还有过半的服务器能够正常运行，那么整个集群可以正常运行。宕机的服务器可能会在稍后的时间内恢复并重新加入。</li>
-<li>No timing dependency: 不依赖时间实现同步，允许不同机器的时钟不同。</li>
-<li>在通常情况下，如果过半的服务器完成了一项工作，那么认为这个工作完成，而不需要等到所有机器都完成。</li>
-</ol>
-</blockquote>
-<h3 id="3-Paxo’s-Drawbacks"><a href="#3-Paxo’s-Drawbacks" class="headerlink" title="3. Paxo’s Drawbacks"></a>3. Paxo’s Drawbacks</h3><ol>
-<li>难以理解</li>
-<li>很难实现</li>
-</ol>
-<h3 id="4-Designing-for-understandability"><a href="#4-Designing-for-understandability" class="headerlink" title="4. Designing for understandability"></a>4. Designing for understandability</h3><p><strong>设计原则</strong></p>
-<ol>
-<li><font color="red">易于理解</font></li>
-<li>易于实现</li>
-<li>一般操作的高效率</li>
-<li>任何情况下的安全性和一致性</li>
-</ol>
-<p>设计中使用了两种技术来提高<strong>understandibility</strong></p>
-<ol>
-<li>尽可能使用问题分解手段来简化问题的粒度</li>
-<li>简化每台机器的状态空间，来简化思考</li>
-</ol>
-<h3 id="5-The-RAFT-consensus-algorithm"><a href="#5-The-RAFT-consensus-algorithm" class="headerlink" title="5. The RAFT consensus algorithm"></a>5. The RAFT consensus algorithm</h3><p>首先，RAFT把所有的server划分为三部分： <strong>Leader</strong>, <strong>candidate</strong>, <strong>follower</strong>.<br>首先集群选出一个Leader,由Leader与Client交互，并且向所有Server转发Log表，以及其他的管理。这样的话可以简化设计，并且让信息单向流动。如果一个Leader挂了，那么整个协议会支持产生一个新的Leader。<br>在这种设计下，设计实现的功能可以被进一步分解为三个问题： <strong>Leader election</strong>, <strong>Log replication</strong>, <strong>safety</strong>。下面分别看三个问题</p>
-<h5 id="5-1-RAFT-Basic"><a href="#5-1-RAFT-Basic" class="headerlink" title="5.1 RAFT Basic"></a>5.1 RAFT Basic</h5><p>下图显示了一个服务器的状态转换图。<br><img src="http://img.blog.csdn.net/20140804203847296?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""><br>最开始所有的人都是Follower, 并且有一个<strong>随机的计时器到点</strong>，就会产生一次选举，产生Candidate，并有人最终获胜，成为一个Leader, 而其他人重新变为Follower。 一般的稳定状态下，就只有一个Leader和很多的Follower。至于其他情况，在后面的部分讨论。</p>
-<p><strong>Term</strong>： Raft把真实的时间分为一个个的连续的Term. Term可以理解为逻辑时间，也可以理解为一段稳定存在的时间，一般来说，一个新Term的产生是因为Leader挂了，而一个新Term的生存周期就是选举新Leader的过程，以及之后的稳定运行过程。所以每个Term的时间都是不相同的，参考下图(下图的Term3对应选举失败的情况，这时会再次进行选举)。<br><img src="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">注意：Term可以用来标记自己的处理阶段，所有的server不一定Term号都相同。每个Server都存有一个递增的Term号来表明自己的处理进程。所以如果一个Server收到一个来自其他Server的Log修改，但是Term如果比自己的小，则可以拒绝此服务。</div></pre></td></tr></table></figure>
-<p><strong>RPC</strong> : remote proceudre calls, 服务器间用来通讯的协议文件。在主要的功能实现中只需要两种RPC，第三种RPC用于提供server之间的快照，详细的见后面的讲述。</p>
-<h5 id="5-2-Leader-Election"><a href="#5-2-Leader-Election" class="headerlink" title="5.2 Leader Election"></a>5.2 Leader Election</h5><p>RAFT采取定期心跳包的形式来产生Leader。对于一个server来说，其生命周期的流程可以用以下几条来概括：</p>
-<ol>
-<li>如果一个Server进入了一个集群，其进入follower状态，并设置一个初始化的Term值，以及一个随机的Timer计时器。</li>
-<li>如果server处于follower状态，并在timer计时结束之间接受到一个有效的来自leader或者是candidate的<strong>RPCs</strong>(AppendEntries or RequestVote)，则其重置计时器，继续保持follower状态，<font color="red">并更新自己的term number为Leader的term number</font>。</li>
-<li>一个server如果处于Leader状态，其以一个远低于其他server Timer的时间间隔发送心跳包(AppendEntries RPC)，以维持自己Leader状态。</li>
-<li>如果一个follower发生election timeout， 则认为Leader已经挂掉，则其<font color="red">自增自己的Term number</font>, 然后转换为candidate状态。</li>
-<li>如果一个server处于candidate状态，则其<font color="red">对自己投票</font>，并向其他的server并行发送RequestVote RPC，直到以下三种情况出现：<ul>
-<li><strong>candidate win</strong> 胜出条件是一个candidate对于其给定的term number获得半数以上的选票, 对于任意一个Term，其他server只能投一次票，根据先到先服务的原则。胜出的candidate成为leader并立即发送心跳包防止选举过程。</li>
-<li><strong>Another Candidate Win</strong> 如果在等待选票的过程中其接受到其他的AppendEntries RPC，如果其Term number至少和其一样大，那么其认同这个Leader并退回follower阶段，否则拒绝这个RPC并继续进行选举。</li>
-<li><strong>No Winner for A Period</strong> 如果有很多follower同时成为candidate，那么票型就会分散，这时所有的candidate都会有time out，然后其自增自己的term number再进行下一轮。</li>
-</ul>
-</li>
-<li>如果一个server处于Leader的情况下收到了比自己大的 RequestVote RPC，那么? <strong>论文中没有提及</strong>。</li>
-</ol>
-<blockquote>
-<p>在初始化随机计时器和没有candidate胜出的情况下，都采用了CSMA/CD中的随机回退思想来减少冲突。在每次进入candidate状态时也会设置一个随时的timeout值。</p>
-</blockquote>
-<h5 id="5-3-Log-Replication"><a href="#5-3-Log-Replication" class="headerlink" title="5.3 Log Replication"></a>5.3 Log Replication</h5><p>当一个Leader形成后，就开始接受Client的指令集合。其根据指令不断生成一个个的Log Entry，然后附在AppendEntries RPC中发送。如果多数server确认了这个RPC(<strong>意味着回复报文？</strong>)，则Leader <em>Commit</em>这些操作并可以发送执行结果给Client。 对于那些没有回复的server， Leader会持续发送直到回复。Log Entries的示意图如下所示：<br><img src="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67" alt=""><br>(图片找不到完整的了 =。=)</p>
-<p>每个Log Entries有一个方格内的Term Number和一个Index Number。因为有多数的Log Entry后才执行，可以保证<em>Commit</em>的指令是冗余的。同时，领导人的日志中之前的所有日志条目也都会被提交，包括由其他领导人创建的条目。5.4 节会讨论某些当在领导人改变之后应用这条规则的隐晦内容，同时它也展示了这种提交的定义是安全的。领导人跟踪了最大的将会被提交的日志项的索引，并且索引值会被包含在未来的所有附加日志 RPCs （包括心跳包），这样其他的服务器才能最终知道领导人的提交位置。一旦跟随者知道一条日志条目已经被提交，那么它也会将这个日志条目应用到本地的状态机中（按照日志的顺序）。</p>
-<p><strong>日志机制</strong>： 作者设计了日志机制来保证一致性和安全性。就类似于数据库设计中的范式，日志机制其实就是两条原则：</p>
-<ol>
-<li>如果两个不同的Log中有相同的index和term，那么他们存的指令是相同的。</li>
-<li>如果两个不同的Log中有相同的index和term，那么他们存的之前的指令也都是相同的。</li>
-</ol>
-<p>第一条的合理性在于，相同的term只能由一个领导人产生,并且Log的存储顺序不变。第二条的合理性被发送的AppendEntries  RPC一致性检查保证： 如果一个Leader想要发送一个想被commit的指令，其将本地Log中的上一条指令的index和Term Number附在AppendEntries RPC中，如果follower检查自己的前一个Log与这个上一条指令不相符，则其拒绝接受这个RPC。简答理解，就是一个递归的步骤。</p>
-<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5>]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;RAFT-Protocol&quot;&gt;&lt;a href=&quot;#RAFT-Protocol&quot; class=&quot;headerlink&quot; title=&quot;RAFT Protocol&quot;&gt;&lt;/a&gt;RAFT Protocol&lt;/h1&gt;&lt;p style=&quot;text-align:right&quot;&gt;l
-    
-    </summary>
-    
-      <category term="Distributed System" scheme="http://flame4.github.io/categories/Distributed-System/"/>
-    
-    
-      <category term="分布式协议" scheme="http://flame4.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AE/"/>
-    
-      <category term="一致性算法" scheme="http://flame4.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>shell 用法简记</title>
-    <link href="http://flame4.github.io/2016/07/05/Shell-base/"/>
-    <id>http://flame4.github.io/2016/07/05/Shell-base/</id>
-    <published>2016-07-05T15:26:19.000Z</published>
-    <updated>2016-09-06T17:21:26.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Shell的一些主要应用方式"><a href="#Shell的一些主要应用方式" class="headerlink" title="Shell的一些主要应用方式"></a>Shell的一些主要应用方式</h1><p style="text-align:right">last Modified: 2016-08-23</p>
-
-<h2 id="1-解析参数方法"><a href="#1-解析参数方法" class="headerlink" title="1. 解析参数方法"></a>1. 解析参数方法</h2><p>shell脚本在用作启动脚本的时候一般会解析很多参数，下面是一种比较典型的使用模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">while [ $# -gt 0 ]; do</div><div class="line">  case &quot;$1&quot; in</div><div class="line">    -s | --scale)</div><div class="line">      shift</div><div class="line">      TPCDS_SCALE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -d | --delete)</div><div class="line">      shift</div><div class="line">      DELETE_MODE=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -f | --format)</div><div class="line">      shift</div><div class="line">      TBL_FORMAT=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -l | --location)</div><div class="line">      shift</div><div class="line">      LOCATION_HDFS=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    -h | --host)</div><div class="line">      shift</div><div class="line">      TRANS_HOST=$1</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    --help)</div><div class="line">      HELP=true</div><div class="line">      shift</div><div class="line">      ;;</div><div class="line">    *)</div><div class="line">      echo &quot;Invalid args: $1&quot;</div><div class="line">      exit 1</div><div class="line">      ;;</div><div class="line">  esac</div><div class="line">done</div></pre></td></tr></table></figure></p>
-<p>$# 表示参数个数，shift表示参数列表向左移动，也就是去掉最前面的一个参数, ;;类似break</p>
-<h2 id="2-自动化部署脚本"><a href="#2-自动化部署脚本" class="headerlink" title="2. 自动化部署脚本"></a>2. 自动化部署脚本</h2><p>一般的使用分为安装和执行两种，这里主要使用的方法是sshpass方法，其可以使带密码登陆到远程主机并直接执行后面的执行。 下面是例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node=(&quot;n1&quot;, &quot;n2&quot;, &quot;n3&quot;, &quot;n4&quot;) #已经配了host</div><div class="line">username=root</div><div class="line">password=123456</div><div class="line"></div><div class="line"></div><div class="line">for i in $&#123;node[@]&#125; do</div><div class="line">  sshpass -p $password scp -r $1 $&#123;username&#125;@$&#123;i&#125;:$2 # 一键部署</div><div class="line">  sshpass -p $password -o StrictHostKeyChecking=no $1 $2 $3 $4 $5 $6 $7 $8 $9&amp;  # 一键运行并且防止第一次的公钥检查(回答yes/no)</div><div class="line">done</div></pre></td></tr></table></figure>
-<p>这里再放两个比较全的Blog查阅。<br><a href="http://blog.itpub.net/10522540/viewspace-212846/" target="_blank" rel="external">特殊符号查阅</a><br><a href="http://www.runoob.com/linux/linux-shell.html" target="_blank" rel="external">菜鸟教程</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;Shell的一些主要应用方式&quot;&gt;&lt;a href=&quot;#Shell的一些主要应用方式&quot; class=&quot;headerlink&quot; title=&quot;Shell的一些主要应用方式&quot;&gt;&lt;/a&gt;Shell的一些主要应用方式&lt;/h1&gt;&lt;p style=&quot;text-align:righ
-    
-    </summary>
-    
-      <category term="Shell" scheme="http://flame4.github.io/categories/Shell/"/>
-    
     
   </entry>
   
