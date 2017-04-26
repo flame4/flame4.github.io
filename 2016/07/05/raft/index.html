@@ -105,7 +105,7 @@
 <meta property="og:image" content="http://img.blog.csdn.net/20140804203911429?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3N6aG91d2Vp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
 <meta property="og:image" content="https://camo.githubusercontent.com/a82fb45bde23f6b51ccca37f9dde7d5c5c547e90/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245372e706e67">
 <meta property="og:image" content="https://camo.githubusercontent.com/14df99e543c71ee75cafd614e1c55c25ac580ec8/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245382e706e67">
-<meta property="og:updated_time" content="2017-04-13T09:20:20.940Z">
+<meta property="og:updated_time" content="2017-04-14T05:50:56.087Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="raft Protocol">
 <meta name="twitter:description" content="RAFT Protocollast Modified: 2017-04-13
@@ -427,10 +427,15 @@
 <h6 id="5-4-1-选举限制"><a href="#5-4-1-选举限制" class="headerlink" title="5.4.1 选举限制"></a>5.4.1 选举限制</h6><p>已提交的命令在使用的过程中我们可以将其理解为已经计算完并且将结果返回给用户的部分, 那既然这部分已经返回给了用户, 就要对这些已经提交的结果负责. 那么如果这个leader挂掉, 必须有一些手段来保证新的leader中的log都要包含这个leader中已经提交的log才可以.</p>
 <p>前面写到, 对于leader来说, 他提交一个log的标准是发现超过一半的follower已经有了这条log, 这意味着每一个已经提交的日志条目肯定在这些服务器节点中至少存在一半上面, 如果候选人的日志至少和大多数的服务器节点一样新（这个新的定义会在下面讨论），那么他一定持有了所有已经提交的日志条目。请求投票 RPC 实现了这样的限制： RPC 中包含了候选人的日志信息，然后投票人会拒绝掉那些日志没有自己新的投票请求。Raft 通过比较两份日志中最后一条日志条目的索引值和任期号定义谁的日志比较新。如果两份日志最后的条目的任期号不同，那么任期号大的日志更加新。如果两份日志最后的条目任期号相同，那么日志比较长的那个就更加新。</p>
 <p>从5.3可以知道, 因为leader维护了最大的那个提交并且会附在APPENDRPC中, 所以follower也会知道Leader的提交位置.</p>
-<h6 id="5-4-2-提交之前任期内限制"><a href="#5-4-2-提交之前任期内限制" class="headerlink" title="5.4.2 提交之前任期内限制"></a>5.4.2 提交之前任期内限制</h6><p><img src="https://camo.githubusercontent.com/14df99e543c71ee75cafd614e1c55c25ac580ec8/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245382e706e67" alt=""></p>
+<h6 id="5-4-2-提交之前任期内限制"><a href="#5-4-2-提交之前任期内限制" class="headerlink" title="5.4.2 提交之前任期内限制"></a>5.4.2 提交之前任期内限制</h6><p>一个领导人不能断定一个之前任期里的日志条目被保存到大多数服务器上的时候就一定已经提交了, 如下图.</p>
+<p><img src="https://camo.githubusercontent.com/14df99e543c71ee75cafd614e1c55c25ac580ec8/68747470733a2f2f646e2d307830312d696f2e71626f782e6d652f726166742d254535253942254245382e706e67" alt=""></p>
+<p>通过获得大多数选票再提交的手段,可以保证, 详细参考原文吧.</p>
+<h3 id="6-集群成员变化"><a href="#6-集群成员变化" class="headerlink" title="6. 集群成员变化"></a>6. 集群成员变化</h3><p>在集群成员变化时候, 直接进行配置的切换可能会导致脑裂的出现, 没有直接转过去的办法, 必须通过两阶段的算法等情况.</p>
+<h3 id="7-日志压缩"><a href="#7-日志压缩" class="headerlink" title="7. 日志压缩"></a>7. 日志压缩</h3><p>TODO</p>
 <h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><h5 id="1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><a href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？" class="headerlink" title="1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"></a>1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</h5><p>如果成为leader, 那么其至少有所有已经提交的log信息.</p>
 <h5 id="2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><a href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？" class="headerlink" title="2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？"></a>2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</h5><p>选举的term没有稳定之前, 可以阻塞client的请求, 直到稳定.</p>
 <h5 id="3-这种设计中是否会出现脑裂问题？"><a href="#3-这种设计中是否会出现脑裂问题？" class="headerlink" title="3. 这种设计中是否会出现脑裂问题？"></a>3. 这种设计中是否会出现脑裂问题？</h5><p>极端情况下可能出现组网故障, 这样的话一个集群可能直接分裂为2个集群, 那么面临的问题就很尴尬了…</p>
+<h5 id="4-选举安全性的极端情况"><a href="#4-选举安全性的极端情况" class="headerlink" title="4. 选举安全性的极端情况"></a>4. 选举安全性的极端情况</h5><p>在一个leader确认大部分的人已经有了自己的日志条目后, 它会提交并且告知别人, 那万一它一提交,还没来得及告诉别人就崩溃了, 那会不会只有它一台机器的log被提交了, 从而在后面造成混乱?</p>
 
       
     </div>
@@ -463,16 +468,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/05/Shell-base/" rel="next" title="shell 用法简记">
-                <i class="fa fa-chevron-left"></i> shell 用法简记
+              <a href="/2016/07/05/consistent-hash/" rel="next" title="一致性哈希">
+                <i class="fa fa-chevron-left"></i> 一致性哈希
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/10/LSM-Tree/" rel="prev" title="LSM Tree">
-                LSM Tree <i class="fa fa-chevron-right"></i>
+              <a href="/2016/07/05/Shell-base/" rel="prev" title="shell 用法简记">
+                shell 用法简记 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -609,7 +614,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RAFT-Protocol"><span class="nav-text">RAFT Protocol</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Introduction"><span class="nav-text">1. Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一致性问题和一致性算法"><span class="nav-text">一致性问题和一致性算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Replicated-state-machines"><span class="nav-text">2. Replicated state machines</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一致性算法的四个特征"><span class="nav-text">一致性算法的四个特征</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Paxo’s-Drawbacks"><span class="nav-text">3. Paxo’s Drawbacks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Designing-for-understandability"><span class="nav-text">4. Designing for understandability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-The-RAFT-consensus-algorithm"><span class="nav-text">5. The RAFT consensus algorithm</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-1-RAFT-Basic"><span class="nav-text">5.1 RAFT Basic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-2-Leader-Election"><span class="nav-text">5.2 Leader Election</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-3-Log-Replication"><span class="nav-text">5.3 Log Replication</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-4-安全性问题"><span class="nav-text">5.4 安全性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#5-4-1-选举限制"><span class="nav-text">5.4.1 选举限制</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#5-4-2-提交之前任期内限制"><span class="nav-text">5.4.2 提交之前任期内限制</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Q-amp-A"><span class="nav-text">Q&A</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><span class="nav-text">1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><span class="nav-text">2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-这种设计中是否会出现脑裂问题？"><span class="nav-text">3. 这种设计中是否会出现脑裂问题？</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RAFT-Protocol"><span class="nav-text">RAFT Protocol</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Introduction"><span class="nav-text">1. Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一致性问题和一致性算法"><span class="nav-text">一致性问题和一致性算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Replicated-state-machines"><span class="nav-text">2. Replicated state machines</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一致性算法的四个特征"><span class="nav-text">一致性算法的四个特征</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Paxo’s-Drawbacks"><span class="nav-text">3. Paxo’s Drawbacks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Designing-for-understandability"><span class="nav-text">4. Designing for understandability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-The-RAFT-consensus-algorithm"><span class="nav-text">5. The RAFT consensus algorithm</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-1-RAFT-Basic"><span class="nav-text">5.1 RAFT Basic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-2-Leader-Election"><span class="nav-text">5.2 Leader Election</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-3-Log-Replication"><span class="nav-text">5.3 Log Replication</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-4-安全性问题"><span class="nav-text">5.4 安全性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#5-4-1-选举限制"><span class="nav-text">5.4.1 选举限制</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#5-4-2-提交之前任期内限制"><span class="nav-text">5.4.2 提交之前任期内限制</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-集群成员变化"><span class="nav-text">6. 集群成员变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-日志压缩"><span class="nav-text">7. 日志压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Q-amp-A"><span class="nav-text">Q&A</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？"><span class="nav-text">1. 既然只能有一个Leader，那就意味着这个Leader的状态表应该包含整个数据集合的所有情况？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term-number小的AppendEntries-RPC会拒绝并继续要选票，此时如果client发送请求该如何？"><span class="nav-text">2. 论文中少描述了一种情况，那就是如果自己是candidate的情况下如果接到了比自己term number小的AppendEntries RPC会拒绝并继续要选票，此时如果client发送请求该如何？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-这种设计中是否会出现脑裂问题？"><span class="nav-text">3. 这种设计中是否会出现脑裂问题？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-选举安全性的极端情况"><span class="nav-text">4. 选举安全性的极端情况</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
