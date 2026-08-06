@@ -3,9 +3,9 @@ import { defineAstroPaperConfig } from "./src/types/config";
 export default defineAstroPaperConfig({
   site: {
     url: "https://flame4.github.io/",
-    title: "flame4",
+    title: "lewis",
     description: "Personal blog — notes, code, and writing.",
-    author: "flame4",
+    author: "lewis",
     profile: "https://github.com/flame4",
     ogImage: "default-og.jpg",
     lang: "en",
