@@ -111,7 +111,10 @@ const ogImage = ogImageUrl
 
   <main
     id="main-content"
-    class:list={["app-layout", { "mt-8": !config.features.showBackButton }]}
+    class:list={[
+      "app-layout-wide",
+      { "mt-8": !config.features.showBackButton },
+    ]}
     data-pagefind-body
   >
     <h1
@@ -135,34 +138,45 @@ const ogImage = ogImageUrl
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
 
-    <TableOfContents {headings} />
-
-    <article
-      id="article"
-      class:list={[
-        "mt-8 w-full",
-        "app-prose max-w-app",
-        "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
-      ]}
+    <div
+      data-post-content-layout="true"
+      class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start"
     >
-      <Content />
-    </article>
+      <div class="min-w-0">
+        <article
+          id="article"
+          class:list={[
+            "w-full",
+            "app-prose max-w-app",
+            "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
+          ]}
+        >
+          <Content />
+        </article>
 
-    <hr class="my-8 border-dashed" />
+        <hr class="my-8 border-dashed" />
 
-    <EditPost class="sm:hidden" {hideEditPost} {post} />
+        <EditPost class="sm:hidden" {hideEditPost} {post} />
 
-    <BackToTopButton />
+        <BackToTopButton />
 
-    <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />)}
-    </ul>
+        <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
+          {
+            tags.map(tag => (
+              <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
+            ))
+          }
+        </ul>
 
-    <ShareLinks />
+        <ShareLinks />
 
-    <hr class="my-8 border-dashed" />
+        <hr class="my-8 border-dashed" />
 
-    <AdjacentPostNav {prevPost} {nextPost} />
+        <AdjacentPostNav {prevPost} {nextPost} />
+      </div>
+
+      <TableOfContents {headings} />
+    </div>
   </main>
   <Footer />
 </PostLayout>

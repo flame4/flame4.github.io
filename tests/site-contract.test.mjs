@@ -16,6 +16,17 @@ test('production build exposes the AstroPaper public surface only', async () => 
   assert.match(deepCodeReader, /ABC Loop/);
   assert.match(deepCodeReader, /aria-labelledby="table-of-contents-title"/);
   assert.match(deepCodeReader, /href="#核心方法abc-三个角色互相校验"/);
+  assert.match(deepCodeReader, /data-post-content-layout="true"/);
+  assert.match(
+    deepCodeReader,
+    /lg:grid-cols-\[minmax\(0,1fr\)_16rem\]/
+  );
+  const tocSidebar = deepCodeReader.match(
+    /<aside\b[^>]*data-table-of-contents="true"[^>]*>/
+  )?.[0];
+  assert.ok(tocSidebar, "article TOC should be rendered in a sidebar");
+  assert.match(tocSidebar, /lg:sticky/);
+  assert.match(tocSidebar, /lg:top-8/);
 
   await assert.rejects(readFile('dist/posts/publishing-workflow/index.html', 'utf8'), {
     code: 'ENOENT',
