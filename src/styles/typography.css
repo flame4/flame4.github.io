@@ -4,7 +4,7 @@
   /* ===== Override default Tailwind Typography styles ===== */
   .app-prose {
     @apply prose;
-    font-size: 0.5rem;
+    font-size: var(--text-base);
 
     h1,
     h2,
