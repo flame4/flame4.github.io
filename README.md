@@ -1,29 +1,21 @@
 # flame4.github.io
 
-Personal blog: Markdown in, static site out. Hosted on GitHub Pages.
+Public Astro site generated from the private `flame4/Blog` writing repository and hosted on GitHub Pages.
 
 - Site: https://flame4.github.io/
 - RSS: https://flame4.github.io/rss.xml
 
-## Write a post
+## Content boundary
 
-Add a Markdown file under `src/content/blog/`:
-
-```md
----
-title: 'Hello'
-description: 'A short note'
-pubDate: 'Aug 03 2026'
----
-
-Your content here.
-```
-
-Then:
+Published Markdown is generated into `src/content/blog/` by the private source repository. Write, preview, and release posts from the sibling `raw_blog` checkout:
 
 ```sh
-git add . && git commit -m "Add post" && git push
+cd ../raw_blog
+npm run dev
+npm run release -- "Publish article title"
 ```
+
+Production builds exclude entries marked `draft: true`.
 
 ## Local commands
 
