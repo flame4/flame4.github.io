@@ -8,11 +8,18 @@ test('production build exposes the AstroPaper public surface only', async () => 
   assert.equal(build.status, 0, `${build.stdout}\n${build.stderr}`);
 
   const home = await readFile('dist/index.html', 'utf8');
+  assert.match(home, /\/posts\/deep-code-reader\//);
   assert.match(home, /data-layout="index"/);
-  assert.match(home, /\/posts\/publishing-workflow\//);
 
-  const post = await readFile('dist/posts/publishing-workflow/index.html', 'utf8');
-  assert.match(post, /我的博客发布流程/);
+  const deepCodeReader = await readFile('dist/posts/deep-code-reader/index.html', 'utf8');
+  assert.match(deepCodeReader, /让 AI 一劳永逸地读懂代码/);
+  assert.match(deepCodeReader, /ABC Loop/);
+  assert.match(deepCodeReader, /aria-labelledby="table-of-contents-title"/);
+  assert.match(deepCodeReader, /href="#核心方法abc-三个角色互相校验"/);
+
+  await assert.rejects(readFile('dist/posts/publishing-workflow/index.html', 'utf8'), {
+    code: 'ENOENT',
+  });
 
   const aboutSource = await readFile('src/content/pages/about.md', 'utf8');
   assert.equal(aboutSource, '---\ntitle: "About"\n---\n');
