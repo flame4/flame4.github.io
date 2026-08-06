@@ -29,7 +29,7 @@ export default defineAstroPaperConfig({
   // Twitter uses the existing X icon; Zhihu needs a matching zhihu.svg icon.
   socials: [
     { name: "github", url: "https://github.com/flame4" },
-    { name: "x", url: "https://x.com/home", linkTitle: "Twitter" },
+    { name: "x", url: "https://x.com/arknights60", linkTitle: "Twitter" },
     {
       name: "zhihu",
       url: "https://www.zhihu.com/people/chu-shi-ma-huang",
