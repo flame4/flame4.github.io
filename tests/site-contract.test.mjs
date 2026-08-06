@@ -17,5 +17,8 @@ test('production build exposes the AstroPaper public surface only', async () => 
   const aboutSource = await readFile('src/content/pages/about.md', 'utf8');
   assert.equal(aboutSource, '---\ntitle: "About"\n---\n');
 
+  const workflow = await readFile('.github/workflows/deploy.yml', 'utf8');
+  assert.match(workflow, /concurrency:\n  group: pages\n  cancel-in-progress: true/);
+
   await assert.rejects(readFile('dist/posts/draft-preview/index.html', 'utf8'), { code: 'ENOENT' });
 });
