@@ -25,7 +25,18 @@ export default defineAstroPaperConfig({
     editPost: { enabled: false },
     search: "pagefind",
   },
-  socials: [{ name: "github", url: "https://github.com/flame4" }],
+  // Fill in the URLs below and uncomment the entries you want to show.
+  // Twitter uses the existing X icon; Zhihu needs a matching zhihu.svg icon.
+  socials: [
+    { name: "github", url: "https://github.com/flame4" },
+    { name: "x", url: "https://x.com/home", linkTitle: "Twitter" },
+    {
+      name: "zhihu",
+      url: "https://www.zhihu.com/people/chu-shi-ma-huang",
+      linkTitle: "知乎",
+    },
+    { name: "mail", url: "mailto:flame0743@gmail.com", linkTitle: "Email" },
+  ],
   shareLinks: [
     { name: "x",        url: "https://x.com/intent/post?url=" },
     { name: "telegram", url: "https://t.me/share/url?url=" },
