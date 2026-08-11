@@ -12,14 +12,16 @@ import LinkButton from "@/components/LinkButton.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
+import { normalizeLocale } from "@/i18n/locales";
+import { getPostsByLocale } from "@/utils/getPostsByLocale";
 
 const { socials, posts: postsConfig } = config;
 
-const locale = Astro.currentLocale ?? config.site.lang;
+const locale = normalizeLocale(Astro.currentLocale ?? config.site.lang);
 const t = useTranslations(locale);
 
 const posts = await getCollection("posts");
-const sortedPosts = getSortedPosts(posts);
+const sortedPosts = getSortedPosts(getPostsByLocale(posts, locale));
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 const homePath = getRelativeLocaleUrl(locale, "");
@@ -52,7 +54,7 @@ const homePath = getRelativeLocaleUrl(locale, "");
         <span class="sr-only">RSS Feed</span>
       </a>
 
-      <p>Personal blog — notes, code, and writing.</p>
+      <p>{t.site.description}</p>
       {
         socials.length > 0 && (
           <div class="mt-4 flex max-sm:flex-col sm:items-center">

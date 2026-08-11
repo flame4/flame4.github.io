@@ -1,4 +1,5 @@
 import type { UIStrings } from "./types";
+import { defaultLocale } from "./locales";
 
 export { tplStr } from "./format";
 
@@ -12,7 +13,7 @@ for (const [path, mod] of Object.entries(modules)) {
   translations[locale] = mod.default;
 }
 
-/** Returns UI strings for the given locale, falling back to English. */
-export function useTranslations(locale: string = "en"): UIStrings {
-  return translations[locale] ?? translations["en"];
+/** Returns UI strings for the given locale, falling back to Chinese. */
+export function useTranslations(locale: string = defaultLocale): UIStrings {
+  return translations[locale] ?? translations[defaultLocale];
 }

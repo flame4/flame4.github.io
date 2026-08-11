@@ -1,5 +1,5 @@
 import { createRss } from "@/utils/createRss";
 
 export async function GET() {
-  return createRss("zh");
+  return createRss("en");
 }

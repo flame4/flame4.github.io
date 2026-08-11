@@ -1,0 +1,45 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import config from "@/config";
+import { normalizeLocale, type Locale } from "@/i18n/locales";
+import { useTranslations } from "@/i18n";
+import { stripBase, stripLocale } from "@/utils/withBase";
+
+type Props = {
+  alternates?: Partial<Record<Locale, string>>;
+};
+
+const { alternates } = Astro.props;
+const locale = normalizeLocale(Astro.currentLocale ?? config.site.lang);
+const targetLocale: Locale = locale === "zh" ? "en" : "zh";
+const logicalPath = stripLocale(stripBase(Astro.url.pathname), locale)
+  .replace(/^\/+/, "")
+  .replace(/\/+$/, "");
+const target =
+  alternates?.[targetLocale] ??
+  (alternates === undefined
+    ? getRelativeLocaleUrl(targetLocale, logicalPath)
+    : undefined);
+const t = useTranslations(locale);
+const label = locale === "en" ? "EN" : "中";
+const title =
+  targetLocale === "en"
+    ? t.language.switchToEnglish
+    : t.language.switchToChinese;
+---
+
+{
+  target && (
+    <a
+      href={target}
+      hreflang={targetLocale}
+      lang={locale}
+      aria-label={title}
+      title={title}
+      data-language-switch
+      class="focus-outline hover:text-accent flex size-12 items-center justify-center text-sm font-semibold sm:size-8"
+    >
+      {label}
+    </a>
+  )
+}

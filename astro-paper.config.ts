@@ -4,11 +4,11 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://flame4.github.io/",
     title: "lewis",
-    description: "Personal blog — notes, code, and writing.",
+    description: "个人博客——记录、代码与写作。",
     author: "lewis",
     profile: "https://github.com/flame4",
     ogImage: "default-og.jpg",
-    lang: "en",
+    lang: "zh",
     timezone: "Asia/Shanghai",
     dir: "ltr",
   },

@@ -13,9 +13,14 @@ import { getSortedPosts } from "@/utils/getSortedPosts";
 import { slugifyAll } from "@/utils/slugify";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
+import { normalizeLocale } from "@/i18n/locales";
+import { getPostsByLocale } from "@/utils/getPostsByLocale";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = await getCollection("posts");
+  const posts = getPostsByLocale(
+    await getCollection("posts"),
+    normalizeLocale(config.site.lang)
+  );
   const tags = getUniqueTags(posts);
 
   return tags.flatMap(({ tag, tagName }) => {
@@ -33,7 +38,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
 const { page, tagName } = Astro.props;
 
-const locale = Astro.currentLocale ?? config.site.lang;
+const locale = normalizeLocale(Astro.currentLocale ?? config.site.lang);
 const t = useTranslations(locale);
 ---
 

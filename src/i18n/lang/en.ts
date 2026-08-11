@@ -1,6 +1,9 @@
 import type { UIStrings } from "../types";
 
 export default {
+  site: {
+    description: "Personal blog — notes, code, and writing.",
+  },
   nav: {
     home: "Home",
     posts: "Posts",
@@ -8,6 +11,10 @@ export default {
     about: "About",
     archives: "Archives",
     search: "Search",
+  },
+  language: {
+    switchToEnglish: "Switch to English",
+    switchToChinese: "Switch to Chinese",
   },
   post: {
     publishedAt: "Published at",

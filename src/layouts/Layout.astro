@@ -4,6 +4,9 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import { resolveDefaultOgImagePath } from "@/utils/resolveDefaultOgImagePath";
 import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
+import { useTranslations } from "@/i18n";
+import { locales, normalizeLocale, type Locale } from "@/i18n/locales";
+import { stripBase, stripLocale } from "@/utils/withBase";
 import "@/styles/global.css";
 
 type Props = {
@@ -11,28 +14,43 @@ type Props = {
   description?: string;
   ogImage?: string;
   canonicalURL?: string;
+  languageAlternates?: Partial<Record<Locale, string>>;
 };
 
 const { site } = config;
+const locale = normalizeLocale(Astro.currentLocale ?? site.lang);
+const t = useTranslations(locale);
 
 const {
   title = site.title,
-  description = site.description,
+  description = t.site.description,
   ogImage = resolveDefaultOgImagePath(config),
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
+  languageAlternates,
 } = Astro.props;
 
+const logicalPath = stripLocale(stripBase(Astro.url.pathname), locale)
+  .replace(/^\/+/, "")
+  .replace(/\/+$/, "");
+const resolvedAlternates = Object.fromEntries(
+  locales.flatMap(targetLocale => {
+    const href =
+      languageAlternates?.[targetLocale] ??
+      (languageAlternates === undefined
+        ? getRelativeLocaleUrl(targetLocale, logicalPath)
+        : undefined);
+    return href ? [[targetLocale, new URL(href, Astro.site).href]] : [];
+  })
+) as Partial<Record<Locale, string>>;
+
 const socialImageURL = new URL(ogImage, Astro.site ?? Astro.url);
-const rssHref = getRelativeLocaleUrl(
-  Astro.currentLocale ?? config.site.lang,
-  "rss.xml"
-);
+const rssHref = getRelativeLocaleUrl(locale, "rss.xml").replace(/\/$/, "");
 ---
 
 <!doctype html>
 <html
   dir={site.dir ?? "ltr"}
-  lang={Astro.currentLocale ?? site.lang}
+  lang={locale}
   class="overflow-y-scroll scroll-smooth"
 >
   <head>
@@ -41,6 +59,20 @@ const rssHref = getRelativeLocaleUrl(
     <link rel="icon" type="image/svg+xml" href={getAssetPath("favicon.svg")} />
     <link rel="icon" href={getAssetPath("favicon.ico")} />
     <link rel="canonical" href={canonicalURL} />
+    {
+      Object.entries(resolvedAlternates).map(([alternateLocale, href]) => (
+        <link rel="alternate" hreflang={alternateLocale} href={href} />
+      ))
+    }
+    {
+      resolvedAlternates.zh && (
+        <link
+          rel="alternate"
+          hreflang="x-default"
+          href={resolvedAlternates.zh}
+        />
+      )
+    }
     <meta name="generator" content={Astro.generator} />
 
     <!-- Primary meta -->

@@ -11,6 +11,14 @@ import LinkButton from "./LinkButton.astro";
 import { stripBase, stripLocale } from "@/utils/withBase";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
+import LanguageSwitch from "./LanguageSwitch.astro";
+import type { Locale } from "@/i18n/locales";
+
+type Props = {
+  languageAlternates?: Partial<Record<Locale, string>>;
+};
+
+const { languageAlternates } = Astro.props;
 
 const { site, features } = config;
 
@@ -159,6 +167,9 @@ const isActive = (path: string) => {
             </li>
           )
         }
+        <li class="col-span-1 flex items-center justify-center">
+          <LanguageSwitch alternates={languageAlternates} />
+        </li>
       </ul>
     </nav>
   </div>

@@ -1,9 +1,10 @@
 import { getRelativeLocaleUrl } from "astro:i18n";
 import { slugifyStr } from "./slugify";
 import config from "@/config";
+import { getTranslationKey } from "@/i18n/locales";
 
 function getPostPathSegments(id: string): string[] {
-  return id
+  return getTranslationKey(id)
     .split("/")
     .filter(path => path !== "")
     .filter(path => !path.startsWith("_"))
@@ -12,7 +13,7 @@ function getPostPathSegments(id: string): string[] {
 }
 
 function getIdSlug(id: string): string {
-  const postId = id.split("/");
+  const postId = getTranslationKey(id).split("/");
   return postId.length > 0 ? String(postId[postId.length - 1]) : id;
 }
 

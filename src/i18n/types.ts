@@ -1,4 +1,7 @@
 export interface UIStrings {
+  site: {
+    description: string;
+  };
   nav: {
     home: string;
     posts: string;
@@ -6,6 +9,10 @@ export interface UIStrings {
     about: string;
     archives: string;
     search: string;
+  };
+  language: {
+    switchToEnglish: string;
+    switchToChinese: string;
   };
   post: {
     publishedAt: string;

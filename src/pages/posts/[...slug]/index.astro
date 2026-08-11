@@ -16,10 +16,18 @@ import BackButton from "./_components/BackButton.astro";
 import BackToTopButton from "./_components/BackToTopButton.astro";
 import AdjacentPostNav from "./_components/AdjacentPostNav.astro";
 import config from "@/config";
+import {
+  getTranslationKey,
+  normalizeLocale,
+  type Locale,
+} from "@/i18n/locales";
+import { getPostsByLocale } from "@/utils/getPostsByLocale";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  const sortedPosts = getSortedPosts(posts);
+  const sortedPosts = getSortedPosts(
+    getPostsByLocale(posts, normalizeLocale(config.site.lang))
+  );
 
   return sortedPosts.map((post, index) => ({
     params: { slug: getPostSlug(post.id, post.filePath) },
@@ -59,8 +67,20 @@ type Props = {
   nextPost: AdjacentPost;
 };
 
-const { post, prevPost, nextPost } = Astro.props;
-const locale = Astro.currentLocale ?? config.site.lang;
+const { post, prevPost, nextPost } = Astro.props as Props;
+const locale = normalizeLocale(Astro.currentLocale ?? config.site.lang);
+const allPosts = await getCollection("posts");
+const translationKey = getTranslationKey(post.id);
+const languageAlternates = Object.fromEntries(
+  allPosts
+    .filter(entry => getTranslationKey(entry.id) === translationKey)
+    .map(entry => {
+      const entryLocale = normalizeLocale(
+        entry.id.startsWith("en/") ? "en" : "zh"
+      );
+      return [entryLocale, getPostUrl(entry.id, entry.filePath, entryLocale)];
+    })
+) as Partial<Record<Locale, string>>;
 
 const {
   title,
@@ -104,8 +124,9 @@ const ogImage = ogImageUrl
   canonicalURL={canonicalURL}
   pubDatetime={pubDatetime}
   modDatetime={modDatetime}
+  {languageAlternates}
 >
-  <Header />
+  <Header {languageAlternates} />
 
   <BackButton />
 

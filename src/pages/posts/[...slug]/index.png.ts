@@ -7,6 +7,8 @@ import { getFontPathByWeight } from "@/utils/getFontPathByWeight";
 import { getPostSlug } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import config from "@/config";
+import { normalizeLocale } from "@/i18n/locales";
+import { getPostsByLocale } from "@/utils/getPostsByLocale";
 
 export async function getStaticPaths() {
   if (!config.features.dynamicOgImage) {
@@ -14,7 +16,9 @@ export async function getStaticPaths() {
   }
 
   const posts = await getCollection("posts").then(p =>
-    p.filter(postFilter).filter(({ data }) => !data.ogImage)
+    getPostsByLocale(p, normalizeLocale(config.site.lang))
+      .filter(postFilter)
+      .filter(({ data }) => !data.ogImage)
   );
 
   return posts.map(post => ({
